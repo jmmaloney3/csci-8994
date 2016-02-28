@@ -1,0 +1,6 @@
+**/.DS_Store
+**/*.pyc
+**/*.m~
+**/*.class
+**/~$*.xlsx
+project/lib/*
