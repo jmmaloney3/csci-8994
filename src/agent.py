@@ -13,13 +13,12 @@ def randbool():
     return bool(RNGEN.randint(0,1));
 
 class Agent:
-    rep = rep.GOOD;
-    payout = 0;
-    actm = None;
-    num_games = 0;
     
     def __init__(self):
         self.actm = ActionModule();
+        self.rep = rep.GOOD;
+        self.payout = 0;
+        self.num_games = 0;
 
     '''
     Reset the agent's internal state to prepare for participation in the

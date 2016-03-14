@@ -13,12 +13,10 @@ def randbool():
     return bool(RNGEN.randint(0,1));
 
 class Tribe:
-    rngen = random.SystemRandom();
-    agents = [];
-    total_payouts = 0;
     
     def __init__(self, num_agents):
         self.agents = [agent.Agent() for j in xrange(num_agents)];
+        self.total_payouts = 0;
 
     '''
     Reset the tribe's agents to prepare for participation in the next generation.

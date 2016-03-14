@@ -11,11 +11,10 @@ import random;
 RNGEN = random.SystemRandom();
 
 class SimEngine:
-    tribes = [];
-    total_payouts = 0;
     
     def __init__(self, num_tribes, num_agents_per_tribe):
         self.tribes = [ tribe.Tribe(num_agents_per_tribe) for i in xrange(num_tribes)];
+        self.total_payouts = 0;
 
     '''
     Reset the simulations to prepare for participation in the next generation.
