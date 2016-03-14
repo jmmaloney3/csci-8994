@@ -15,6 +15,7 @@ Created on Sun Mar 13 16:00:53 2016
 
 import argparse
 import simengine
+import time
 
 def main():
     desc = 'Run the indirect reciprocity simulation.'
@@ -58,6 +59,8 @@ def main():
 # end main
 
 def run_script(tribes, agents, cost, benefit, gens):
+    start = time.clock()
+
     # create the simulation
     sim = simengine.SimEngine(tribes, agents)
     
@@ -67,6 +70,10 @@ def run_script(tribes, agents, cost, benefit, gens):
         print sim.total_payouts
         sim.create_next_gen()
         sim.reset()
+
+    end = time.clock()
+
+    print 'completed in %6.2f seconds\n' % (end - start)
 # end run_script
 
 # run main method when this file is run from command line
