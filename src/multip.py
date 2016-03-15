@@ -6,7 +6,6 @@ Created on Sun Mar 13 17:39:33 2016
 """
 
 import multiprocessing;
-import tribe
 import simengine
 import itertools
 
@@ -85,8 +84,19 @@ def tribe_poolit(args):
         Q = args[3]
     else:
         Q = None
+    if (len(args) > 4):
+        V = args[4]
+    else:
+        V = None
+    if (len(args) > 5):
+        L = args[5]
+    else:
+        L = None
+
+    tribe_queueit(t, cost, benefit, Q)
     
-    return tribe_queueit(t, cost, benefit, Q)
+    with L:
+        V.value += t.total_payouts
 
 def testtribe():
     sim = simengine.SimEngine(10,5)
@@ -125,20 +135,35 @@ def testpool():
     # create a manager to manage the queue
     mgr = multiprocessing.Manager()
     Q = mgr.Queue()
+    V = mgr.Value('i', 0)
+    L = mgr.Lock()
     
     pool = multiprocessing.Pool()
     
     cost = itertools.repeat(1)
     benefit = itertools.repeat(3)
     queue = itertools.repeat(Q)
+    value = itertools.repeat(V)
+    lock = itertools.repeat(L)
     
-    args = itertools.izip(sim.tribes, cost, benefit, queue)
+    args = itertools.izip(sim.tribes, cost, benefit, queue, value, lock)
     
     pool.map(tribe_poolit, args)
 
+    new_tribes = []
     while (not Q.empty()):
         t = Q.get()
+        new_tribes.append(t)
         print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
         for a in t.agents:
             print "  agent payout: %d" % a.payout
+    
+    sim.tribes = new_tribes
+
+    for t in sim.tribes:
+        print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
+        for a in t.agents:
+            print "  agent payout: %d" % a.payout
+    
+    print 'total payout: %d' % V.value
  
