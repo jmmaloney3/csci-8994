@@ -8,6 +8,7 @@ Created on Sun Mar 13 17:39:33 2016
 import multiprocessing;
 import tribe
 import simengine
+import itertools
 
 pool = multiprocessing.Pool(2);
 
@@ -71,10 +72,21 @@ def tribe_doit(t, cost, benefit, conn=None):
         conn.send(t)
         conn.close()
 
-def tribe_queueit(t, cost, benefit, Q):
+def tribe_queueit(t, cost, benefit, Q=None):
     t.playrounds(cost, benefit)
     if (Q != None):
         Q.put(t)
+
+def tribe_poolit(args):
+    t = args[0]
+    cost = args[1]
+    benefit = args[2]
+    if (len(args) > 3):
+        Q = args[3]
+    else:
+        Q = None
+    
+    return tribe_queueit(t, cost, benefit, Q)
 
 def testtribe():
     sim = simengine.SimEngine(10,5)
@@ -101,3 +113,32 @@ def testtribe():
         print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
         for a in t.agents:
             print "  agent payout: %d" % a.payout
+
+def testpool():
+    sim = simengine.SimEngine(2,2)
+    
+    for t in sim.tribes:
+        print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
+        for a in t.agents:
+            print "  agent payout: %d" % a.payout
+
+    # create a manager to manage the queue
+    mgr = multiprocessing.Manager()
+    Q = mgr.Queue()
+    
+    pool = multiprocessing.Pool()
+    
+    cost = itertools.repeat(1)
+    benefit = itertools.repeat(3)
+    queue = itertools.repeat(Q)
+    
+    args = itertools.izip(sim.tribes, cost, benefit, queue)
+    
+    pool.map(tribe_poolit, args)
+
+    while (not Q.empty()):
+        t = Q.get()
+        print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
+        for a in t.agents:
+            print "  agent payout: %d" % a.payout
+ 
