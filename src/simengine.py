@@ -7,8 +7,11 @@ Created on Sat Mar 12 12:17:25 2016
 
 import tribe;
 import random;
+import simengine_mp;
 
 RNGEN = random.SystemRandom();
+
+USE_MP = False;
 
 class SimEngine:
     
@@ -28,8 +31,13 @@ class SimEngine:
     Play the required rounds of the IR game to complete the current generation.
     '''
     def playrounds(self, cost, benefit):
-        for t in self.tribes:
-            self.total_payouts += t.playrounds(cost, benefit);
+        if (USE_MP):
+            simengine_mp.playrounds_mp(self, cost, benefit);
+        else:
+            for t in self.tribes:
+                self.total_payouts += t.playrounds(cost, benefit);
+
+        return self.total_payouts;
     
     '''
     Create the next generation by propagating action modules to the next
