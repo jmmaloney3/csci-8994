@@ -14,8 +14,10 @@ def randbool():
 
 class Tribe:
     
-    def __init__(self, num_agents):
-        self.agents = [agent.Agent() for j in xrange(num_agents)];
+    def __init__(self, tid, num_agents):
+        self.id = tid;
+        self.agents = [agent.Agent(self.id, j) for j in xrange(num_agents)];
+        self.agents_dict = {j : agent.Agent(self.id,j) for j in xrange(num_agents)};
         self.total_payouts = 0;
 
     '''

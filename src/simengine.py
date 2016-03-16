@@ -11,12 +11,11 @@ import simengine_mp;
 
 RNGEN = random.SystemRandom();
 
-USE_MP = False;
-
 class SimEngine:
     
     def __init__(self, num_tribes, num_agents_per_tribe):
-        self.tribes = [ tribe.Tribe(num_agents_per_tribe) for i in xrange(num_tribes)];
+        self.tribes = [ tribe.Tribe(i, num_agents_per_tribe) for i in xrange(num_tribes)];
+        self.tribes_dict = {i : tribe.Tribe(i, num_agents_per_tribe) for i in xrange(num_tribes)};
         self.total_payouts = 0;
 
     '''
@@ -30,7 +29,7 @@ class SimEngine:
     '''
     Play the required rounds of the IR game to complete the current generation.
     '''
-    def playrounds(self, cost, benefit):
+    def playrounds(self, cost, benefit, USE_MP=False):
         if (USE_MP):
             simengine_mp.playrounds_mp(self, cost, benefit);
         else:

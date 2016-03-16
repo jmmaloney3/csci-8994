@@ -14,7 +14,9 @@ def randbool():
 
 class Agent:
     
-    def __init__(self):
+    def __init__(self, tid, aid):
+        self.tribe_id = tid;
+        self.id = aid;
         self.actm = ActionModule();
         self.rep = rep.GOOD;
         self.payout = 0;
