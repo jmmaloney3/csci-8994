@@ -10,13 +10,6 @@ Created on Mon Mar 14 22:07:27 2016
 import itertools
 import multiprocessing
 
-# create a process pool, managed queue, shared int and a lock
-POOL = multiprocessing.Pool();
-MGR = multiprocessing.Manager();
-QUEUE = MGR.Queue();
-PAYOUTS = MGR.Value('i',0);
-PAYOUTS_LOCK = MGR.Lock();
-
 '''
 Worker function used to play rounds using multiprocessing.
 - arg[0]: tribe
@@ -42,6 +35,13 @@ def playrounds_worker(args):
     with lock:
         payouts.value += p;
     
+# create a process pool, managed queue, shared int and a lock
+POOL = multiprocessing.Pool(multiprocessing.cpu_count());
+MGR = multiprocessing.Manager();
+QUEUE = MGR.Queue();
+PAYOUTS = MGR.Value('i',0);
+PAYOUTS_LOCK = MGR.Lock();
+
 '''
 Play the required rounds of the IR game to complete the current generation.
 
@@ -62,8 +62,9 @@ def playrounds_mp(sim, cost, benefit):
     while (not QUEUE.empty()):
         new_tribes.append(QUEUE.get())
     sim.tribes = new_tribes
-    # update total_payout from all tribes
+    # update total_payout from all tribes and reset PAYOUTS to zero
     with PAYOUTS_LOCK:
         sim.total_payouts = PAYOUTS.value;
+        PAYOUTS.value = 0
     # return total_payouts
     return sim.total_payouts;
