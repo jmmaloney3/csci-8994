@@ -59,8 +59,9 @@ def main():
 # end main
 
 def run_script(tribes, agents, cost, benefit, gens):
-    start = time.clock()
-
+    start = time.time()
+    start_cpu = time.clock()
+    
     # create the simulation
     sim = simengine.SimEngine(tribes, agents)
     
@@ -71,9 +72,11 @@ def run_script(tribes, agents, cost, benefit, gens):
         sim.create_next_gen()
         sim.reset()
 
-    end = time.clock()
+    end_cpu = time.clock()
+    end = time.time()
 
-    print 'completed in %6.2f seconds\n' % (end - start)
+    print 'completed in %6.2f seconds' % (end - start)
+    print 'used %6.2f seconds of CPU time\n' % (end_cpu - start_cpu)
 # end run_script
 
 # run main method when this file is run from command line
