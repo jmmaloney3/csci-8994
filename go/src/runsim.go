@@ -3,6 +3,7 @@ package main
 import "sim"
 import "fmt"
 import "flag"
+import "time"
 
 /*
 Run the simulation with the specified arguments.
@@ -25,9 +26,14 @@ func main() {
   flag.Parse()
 
   // run simulation
+  start := time.Now()
   var s sim.SimEngine = sim.MakeSimEngine(*numTribes,*numAgents)
   for g := 0; g < *gens; g++ {
     var p = s.PlayRounds(int32(*cost),int32(*benefit))
     fmt.Println("total payout for generation", g, ": ", p)
   }
+  end := time.Now()
+
+  totalTime := end.Sub(start)
+  fmt.Println("completed in ", totalTime)
 }
