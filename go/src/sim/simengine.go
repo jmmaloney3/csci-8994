@@ -1,31 +1,43 @@
 package sim
 
-import "fmt"
-
+// A simulation engine for simulating the indirect reciprocity game
+// played among agents divided into tribes.
 type SimEngine struct {
-  tribes []Tribe
+  tribes []*Tribe
   numTribes int
   totalPayouts int32
 }
 
-func MakeSimEngine(numTribes int, numAgents int) SimEngine {
-  tribes := make([]Tribe, numTribes)
+// Make a new simulation engine.
+func NewSimEngine(numTribes int, numAgents int) *SimEngine {
+  tribes := make([]*Tribe, numTribes)
   // create tribes
   for i := 0; i < numTribes; i++ {
-    fmt.Println("  make tribe ", i)
-    tribes[i] = MakeTribe(numAgents)
+    tribes[i] = NewTribe(numAgents)
   }
-  return SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0 }
+  return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0 }
 }
 
-func (self SimEngine) PlayRounds(cost int32, benefit int32) int32 {
-  var total_payout int32 = 0
+// Reset the simulations to prepare for participation in the next generation.
+func (self *SimEngine) Reset() {
+  self.totalPayouts = 0
   for i := 0; i < self.numTribes; i++ {
-    for j := 0; j < self.tribes[i].numAgents; j++ {
-      for k := j; k < self.tribes[i].numAgents; k++ {
-        total_payout += self.tribes[i].agents[j].PlayRound(self.tribes[i].agents[k], 1, 3)
-      }
-    }
+    self.tribes[i].Reset()
   }
-  return total_payout
+}
+
+// Play the required rounds of the IR game to complete the current generation.
+func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
+  for i := 0; i < self.numTribes; i++ {
+    self.totalPayouts += self.tribes[i].PlayRounds(cost, benefit)
+  }
+  return self.totalPayouts
+}
+
+// Create the next generation by propagating action modules to the next
+// generation based on the fitness those modules achieved.
+func (self *SimEngine) CreateNextGen() {
+  for i := 0; i < self.numTribes; i++ {
+    self.tribes[i].CreateNextGen()
+  }
 }
