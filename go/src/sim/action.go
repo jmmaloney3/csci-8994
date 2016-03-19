@@ -4,9 +4,8 @@ type ActionModule struct {
   bits [4]bool
 }
 
-func NewActionModule() *ActionModule {
-  // return &ActionModule { bits: [4]bool{true, false, true, false} }
-  return &ActionModule { bits: [4]bool{RandBool(), RandBool(), RandBool(), RandBool()} }
+func NewActionModule(b1 bool, b2 bool, b3 bool, b4 bool) *ActionModule {
+  return &ActionModule { bits: [4]bool{b1, b2, b3, b4} }
 }
 
 func (self *ActionModule) ChooseDonate(donor *Agent, recipient *Agent) bool {

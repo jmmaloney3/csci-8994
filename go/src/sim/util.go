@@ -4,10 +4,15 @@ import "crypto/rand"
 import "math/big"
 
 type Rep int
-
 const (
   GOOD Rep = iota
   BAD Rep = iota
+)
+
+type Act int
+const (
+  DONATE Act = iota
+  REFUSE Act = iota
 )
 
 // Generate a random boolean

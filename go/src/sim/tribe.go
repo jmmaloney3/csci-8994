@@ -4,18 +4,25 @@ package sim
 // to agents.
 type Tribe struct {
   agents []*Agent
+  assessMod *AssessModule
   numAgents int
   totalPayouts int32
 }
 
 // Create a new tribe.
 func NewTribe(numAgents int) *Tribe {
-  agents := make([]*Agent, numAgents)
+  // create the tribe
+  var assm = NewAssessModule(RandBool(), RandBool(), RandBool(), RandBool(),
+                             RandBool(), RandBool(), RandBool(), RandBool())
+  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0 }
+  // create the tribe's agents
+  t.agents = make([]*Agent, numAgents)
   // create agents
   for i := 0; i < numAgents; i++ {
-    agents[i] = NewAgent()
+    t.agents[i] = NewAgent(t)
   }
-  return &Tribe { agents: agents, numAgents: numAgents, totalPayouts: 0 }
+
+  return t
 }
 
 // Reset the tribe's agents to prepare for participation in the next generation.

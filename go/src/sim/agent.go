@@ -2,6 +2,7 @@ package sim
 
 // An agent that use an action module to decide how to act
 type Agent struct {
+  tribe *Tribe
   rep Rep
   actMod *ActionModule
   payout int32
@@ -9,9 +10,9 @@ type Agent struct {
 }
 
 // Create a new agent.  By default the agent has a GOOD reputation.
-func NewAgent() *Agent {
-  var actm = NewActionModule()
-  return &Agent { rep: GOOD, payout: 0, numGames: 0, actMod: actm }
+func NewAgent(t *Tribe) *Agent {
+  var actm = NewActionModule(RandBool(), RandBool(), RandBool(), RandBool())
+  return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
 }
 
 // Reset the agent's internal state to prepare for participation in the
@@ -46,6 +47,8 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32) int32 
     self.payout -= cost
     // update total payout
     totalPayout += (benefit - cost)
+    // update donor's reputation
+
   }
 
   // to prevent negative payout, each agent receives cost
