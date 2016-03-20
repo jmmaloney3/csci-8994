@@ -1,6 +1,7 @@
 package sim
 
 import "math"
+//import "fmt"
 
 // A simulation engine for simulating the indirect reciprocity game
 // played among agents divided into tribes.
@@ -11,6 +12,7 @@ type SimEngine struct {
   pConflict float64
   beta float64 // selection strength
   eta float64
+  pMigration float64
 }
 
 // Make a new simulation engine.
@@ -22,7 +24,7 @@ func NewSimEngine(numTribes int, numAgents int) *SimEngine {
   }
   // configure pConflict to 0.01
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      pConflict: 001, beta: 1.2, eta: 0.15 }
+                      pConflict: 0.01, beta: 1.2, eta: 0.15, pMigration: 0.005 }
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -55,18 +57,41 @@ func (self *SimEngine) EvolveTribes() {
   // iterate over the tribes and select pairs for confict
   for i := 0; i < self.numTribes; i++ {
     for j := i+1; j < self.numTribes; j++ {
-      if (RandPercent() > self.pConflict) {
+      if (RandPercent() < self.pConflict) {
         winner, loser := self.Conflict(self.tribes[i], self.tribes[j])
         self.ShiftAssessMod(winner, loser)
+        self.MigrateAgents(winner, loser)
       }
     }
   }
 }
 
+// Migrate some agents from the first tribe to the second tribe
+func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe) {
+  for i := 0; i < to.numAgents; i++ {
+    if (RandPercent() < self.pMigration) {
+      to.agents[i].actMod = from.agents[i].actMod
+    }
+  }
+}
+
+// Collect statistics for the most recently completed generation
+/*
+func (self *SimEngine) CollectStats() {
+  var stats [8]int
+  for i := 0; i < self.numTribes; i++ {
+    for j := 0; j < 8; j++ {
+      stats[j] +=
+    }
+
+    }
+}
+*/
+
 // Determine the tribe that wins the conflict
 func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe) (winner, loser *Tribe) {
   diff := tribeB.AvgPayout() - tribeA.AvgPayout()
-  p := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
+  p  := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
   if (RandPercent() > p) {
     return tribeB, tribeA
   } else {
@@ -81,10 +106,19 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe) {
   // get average payouts
   poW := winner.AvgPayout()
   poL := loser.AvgPayout()
-  p := (self.eta*poW)/(self.eta*poW + (1-self.eta)*poL)
+  p  := (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
+  //bits := loser.assessMod.GetBits()
+  //wBits := winner.assessMod.GetBits()
+  //fmt.Printf("before: %8b (%4d) => %8b (%4d)\n", bits, bits, wBits, wBits)
   for i := 0; i < 8; i++ {
-    if (RandPercent() > p) {
-      loser.assessMod.bits[i] = winner.assessMod.bits[i]
+    if (loser.assessMod.bits[i] != winner.assessMod.bits[i]) {
+      if (RandPercent() < p) {
+        loser.assessMod.bits[i] = winner.assessMod.bits[i]
+      }
+    } else {
+      // mutation
     }
   }
+  //bits = loser.assessMod.GetBits()
+  //fmt.Printf("after:  %8b (%4d)\n", bits, bits)
 }
