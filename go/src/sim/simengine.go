@@ -3,6 +3,8 @@ package sim
 import "math"
 //import "fmt"
 
+const USEMP bool = true
+
 // A simulation engine for simulating the indirect reciprocity game
 // played among agents divided into tribes.
 type SimEngine struct {
@@ -35,22 +37,40 @@ func (self *SimEngine) Reset() {
   }
 }
 
-// Play the required rounds of the IR game to complete the current generation.
+// Play the required rounds of the IR game to complete the current generation
+// and then create the next generation.
 func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
-  for i := 0; i < self.numTribes; i++ {
-    self.totalPayouts += self.tribes[i].PlayRounds(cost, benefit)
+  if (USEMP) {
+    payouts := make(chan int32, self.numTribes)
+    for i := 0; i < self.numTribes; i++ {
+      go func (i int) {
+        po := self.tribes[i].PlayRounds(cost, benefit)
+        self.tribes[i].CreateNextGen()
+        payouts <- po
+      } (i)
+    }
+    // wait for goroutines to finish
+    for i := 0; i < self.numTribes; i++ {
+      self.totalPayouts += (<-payouts)
+    }
+  } else {
+    for i := 0; i < self.numTribes; i++ {
+      self.totalPayouts += self.tribes[i].PlayRounds(cost, benefit)
+      self.tribes[i].CreateNextGen()
+    }
   }
   return self.totalPayouts
 }
 
 // Create the next generation by propagating action modules to the next
 // generation based on the fitness those modules achieved.
+/*
 func (self *SimEngine) CreateNextGen() {
   for i := 0; i < self.numTribes; i++ {
     self.tribes[i].CreateNextGen()
   }
 }
-
+*/
 // Evolve the tribal assessment modules based on the average payouts
 // earned by each tribe during the last generation
 func (self *SimEngine) EvolveTribes() {
@@ -76,17 +96,15 @@ func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe) {
 }
 
 // Collect statistics for the most recently completed generation
-/*
-func (self *SimEngine) CollectStats() {
+func (self *SimEngine) GetStats() [8]int {
   var stats [8]int
   for i := 0; i < self.numTribes; i++ {
     for j := 0; j < 8; j++ {
-      stats[j] +=
+      stats[j] += self.tribes[i].assessMod.GetBit(j)
     }
-
-    }
+  }
+  return stats
 }
-*/
 
 // Determine the tribe that wins the conflict
 func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe) (winner, loser *Tribe) {
