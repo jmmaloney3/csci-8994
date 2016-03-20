@@ -35,6 +35,7 @@ func main() {
   if (err != nil) { panic (err) }
   defer ofile.Close()
   writer := bufio.NewWriter(ofile)
+  WriteHeader(writer)
 
   // run simulation
   start := time.Now()
@@ -62,6 +63,9 @@ func PrintStats(s [8]int) {
              s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7])
 }
 
+func WriteHeader(w io.Writer) {
+  fmt.Fprintf(w, "gen, b0, b1, b2, b3, b4, b5, b6, b7, payout\n")
+}
 func WriteStats(w io.Writer, gen int, s [8]int, p int32) {
   fmt.Fprintf(w, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
                  gen, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], p)
