@@ -27,6 +27,7 @@ func main() {
   benefit := flag.Int("b", 3, "benefit b received from donation")
   gens := flag.Int("g", 10, "number of generations to simulate")
   fname := flag.String("f", "stats.csv", "file to collect stats")
+  useMP := flag.Bool("mp", false, "whether to use multiprocessing")
   flag.Parse()
 
   // set up the output file
@@ -37,7 +38,10 @@ func main() {
 
   // run simulation
   start := time.Now()
-  var s *sim.SimEngine = sim.NewSimEngine(*numTribes,*numAgents)
+  var s *sim.SimEngine = sim.NewSimEngine(*numTribes,*numAgents, *useMP)
+  if (*useMP) {
+    fmt.Println("using multiprocessing...")
+  }
   for g := 0; g < *gens; g++ {
     var p = s.PlayRounds(int32(*cost),int32(*benefit))
     // fmt.Printf("total payout for generation %5d: %7d\n", g, p)

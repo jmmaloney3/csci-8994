@@ -3,14 +3,13 @@ package sim
 import "math"
 //import "fmt"
 
-const USEMP bool = true
-
 // A simulation engine for simulating the indirect reciprocity game
 // played among agents divided into tribes.
 type SimEngine struct {
   tribes []*Tribe
   numTribes int
   totalPayouts int32
+  useMP bool
   pConflict float64
   beta float64 // selection strength
   eta float64
@@ -18,7 +17,7 @@ type SimEngine struct {
 }
 
 // Make a new simulation engine.
-func NewSimEngine(numTribes int, numAgents int) *SimEngine {
+func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
   tribes := make([]*Tribe, numTribes)
   // create tribes
   for i := 0; i < numTribes; i++ {
@@ -26,7 +25,8 @@ func NewSimEngine(numTribes int, numAgents int) *SimEngine {
   }
   // configure pConflict to 0.01
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      pConflict: 0.01, beta: 1.2, eta: 0.15, pMigration: 0.005 }
+                      pConflict: 0.01, beta: 1.2, eta: 0.15, pMigration: 0.005,
+                      useMP: useMP }
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -40,7 +40,7 @@ func (self *SimEngine) Reset() {
 // Play the required rounds of the IR game to complete the current generation
 // and then create the next generation.
 func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
-  if (USEMP) {
+  if (self.useMP) {
     payouts := make(chan int32, self.numTribes)
     for i := 0; i < self.numTribes; i++ {
       go func (i int) {
