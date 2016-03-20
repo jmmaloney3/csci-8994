@@ -12,8 +12,8 @@ type Tribe struct {
 // Create a new tribe.
 func NewTribe(numAgents int) *Tribe {
   // create the tribe
-  var assm = NewAssessModule(RandBool(), RandBool(), RandBool(), RandBool(),
-                             RandBool(), RandBool(), RandBool(), RandBool())
+  var assm = NewAssessModule(RandRep(), RandRep(), RandRep(), RandRep(),
+                             RandRep(), RandRep(), RandRep(), RandRep())
   t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0 }
   // create the tribe's agents
   t.agents = make([]*Agent, numAgents)
@@ -82,4 +82,9 @@ func (self *Tribe) CreateNextGen() {
     parent := self.SelectParent()
     self.agents[i].actMod = parent.actMod;
   }
+}
+
+// Return the average payout for an agent in this tribe
+func (self *Tribe) AvgPayout() float64 {
+  return float64(self.totalPayouts)/float64(self.numAgents)
 }

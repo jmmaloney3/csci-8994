@@ -36,3 +36,18 @@ func RandInt(max int64) int64 {
   }
   return num.Int64()
 }
+
+// Generate a random number between zero and 1
+func RandPercent() float64 {
+  i := RandInt(int64(100001))
+  return float64(i)/float64(100000)
+}
+
+// Generate a randon Rep
+func RandRep() Rep {
+  if (RandBool()) {
+    return GOOD
+  } else {
+    return BAD
+  }
+}

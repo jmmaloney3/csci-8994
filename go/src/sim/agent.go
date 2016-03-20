@@ -25,7 +25,7 @@ func (self *Agent) Reset() {
 // Ask the agent to choose whether it will donate to the recipient agent.
 // Returns true if the agent chooses to donate and false otherwise.
 func (self *Agent) ChooseDonate(recipient *Agent) bool {
-  return self.actMod.ChooseDonate(self, recipient)
+  return self.actMod.ChooseDonate(self.rep, recipient.rep)
 }
 
 // Play a round of the IR game with this agent playing the role of the
@@ -38,18 +38,23 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32) int32 
   // keep track of total payment earned by agents
   var totalPayout int32 = 0
 
+  // set default action
+  action := REFUSE
+
   // play round
   if (self.ChooseDonate(recipient)) {
     // donor donates
+    action = DONATE
     // -- recipient receives benefit
     recipient.payout += benefit
     // -- donor pays cost
     self.payout -= cost
     // update total payout
     totalPayout += (benefit - cost)
-    // update donor's reputation
-
   }
+
+  // update donor's reputation
+  self.rep = self.tribe.assessMod.AssignRep(self.rep, recipient.rep, action)
 
   // to prevent negative payout, each agent receives cost
   self.payout += cost

@@ -1,18 +1,23 @@
 package sim
 
 type AssessModule struct {
-  bits [8]bool
+  bits [8]Rep
 }
 
-func NewAssessModule(b1 bool, b2 bool, b3 bool, b4 bool,
-  b5 bool, b6 bool, b7 bool, b8 bool) *AssessModule {
-  // return &ActionModule { bits: [4]bool{true, false, true, false} }
-  return &AssessModule { bits: [8]bool{b1, b2, b3, b4, b5, b6, b7, b8} }
+func NewAssessModule(r1 Rep, r2 Rep, r3 Rep, r4 Rep, r5 Rep,
+                     r6 Rep, r7 Rep, r8 Rep) *AssessModule {
+  return &AssessModule { bits: [8]Rep{r1, r2, r3, r4, r5, r6, r7, r8} }
 }
 
-func (self *AssessModule) AssignRep(donor *Agent, recip *Agent, act Act) bool {
-  if (donor.rep == GOOD) {
-    if (recip.rep == GOOD) {
+func CopyAssessModule(am AssessModule) *AssessModule {
+    copiedBits := [8]Rep{am.bits[0], am.bits[1], am.bits[2], am.bits[3],
+                        am.bits[4], am.bits[5], am.bits[6], am.bits[7]}
+    return &AssessModule { bits: copiedBits }
+}
+
+func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act) Rep {
+  if (donor == GOOD) {
+    if (recip == GOOD) {
       if (act == DONATE) {
         return self.bits[0]
       } else { // action is REFUSE
@@ -26,7 +31,7 @@ func (self *AssessModule) AssignRep(donor *Agent, recip *Agent, act Act) bool {
       }
     }
   } else { // donor rep is BAD
-    if (recip.rep == GOOD) {
+    if (recip == GOOD) {
       if (act == DONATE) {
         return self.bits[4]
       } else { // action is REFUSE

@@ -13,6 +13,7 @@ func TestPlayRounds(u * testing.T) {
   benefit := int32(3)
 
   t := NewTribe(3)
+  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
 
   // all agents use CO action model
   co := NewActionModule(true, false, true, false)
@@ -42,15 +43,38 @@ func TestPlayRounds(u * testing.T) {
     t.agents[i].rep = BAD
   }
 
-  // three rounds will be played
-  // total payout will be 0
+  // Agent 0 refuses to donate to agent 1 because [BAD, BAD] => REFUSE
   AssertFalse(u, t.agents[0].ChooseDonate(t.agents[1]))
+  AssertInt32Equal(u, t.agents[0].PlayRound(t.agents[1], cost, benefit), int32(2))
+  // Agent 0 is now good because [BAD, BAD, REFUSE] => GOOD
+  AssertRepEqual(u, t.agents[0].rep, GOOD)
+  // Agent 0 refuses to donate to agent 2 because [GOOD, BAD] => REFUSE
   AssertFalse(u, t.agents[0].ChooseDonate(t.agents[2]))
-  AssertFalse(u, t.agents[1].ChooseDonate(t.agents[0]))
+  AssertInt32Equal(u, t.agents[0].PlayRound(t.agents[2], cost, benefit), int32(2))
+  // Agent 0 is still good because [GOOD, BAD, REFUSE] => GOOD
+  AssertRepEqual(u, t.agents[0].rep, GOOD)
+  // Agent 1 donates to agent 0 because [BAD, GOOD] => DONATE
+  AssertTrue(u, t.agents[1].ChooseDonate(t.agents[0]))
+  AssertInt32Equal(u, t.agents[1].PlayRound(t.agents[0], cost, benefit), int32(4))
+  // Agent 1 is now good because [BAD, GOOD, DONATE] => GOOD
+  AssertRepEqual(u, t.agents[1].rep, GOOD)
+  // Agent 1 refuses to donate to agent 2 because [GOOD, BAD] => REFUSE
   AssertFalse(u, t.agents[1].ChooseDonate(t.agents[2]))
-  AssertFalse(u, t.agents[2].ChooseDonate(t.agents[0]))
-  AssertFalse(u, t.agents[2].ChooseDonate(t.agents[1]))
-  AssertInt32Equal(u, t.PlayRounds(cost, benefit), 6)
+  AssertInt32Equal(u, t.agents[1].PlayRound(t.agents[2], cost, benefit), int32(2))
+  // Agent 1 is still good because [GOOD, BAD, REFUSE] => GOOD
+  AssertRepEqual(u, t.agents[1].rep, GOOD)
+  // Agent 2 donates to agent 0 because [BAD, GOOD] => DONATE
+  AssertTrue(u, t.agents[2].ChooseDonate(t.agents[0]))
+  AssertInt32Equal(u, t.agents[2].PlayRound(t.agents[0], cost, benefit), int32(4))
+  // Agent 2 is now good because [BAD, GOOD, DONATE] => GOOD
+  AssertRepEqual(u, t.agents[2].rep, GOOD)
+  // Agent 2 donates to agent 0 because [GOOD, GOOD] => DONATE
+  AssertTrue(u, t.agents[2].ChooseDonate(t.agents[1]))
+  AssertInt32Equal(u, t.agents[2].PlayRound(t.agents[1], cost, benefit), int32(4))
+  // Agent 2 is still good because [GOOD, GOOD, DONATE] => GOOD
+  AssertRepEqual(u, t.agents[2].rep, GOOD)
+  // ALl agents are good, so each round resuls in a donation
+  AssertInt32Equal(u, t.PlayRounds(cost, benefit), 12)
 }
 
 func TestSelectParent(u *testing.T) {
