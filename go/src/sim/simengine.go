@@ -57,7 +57,7 @@ func (self *SimEngine) EvolveTribes() {
     for j := i+1; j < self.numTribes; j++ {
       if (RandPercent() > self.pConflict) {
         winner, loser := self.Conflict(self.tribes[i], self.tribes[j])
-        self.ShiftAssessMod(loser, winner)
+        self.ShiftAssessMod(winner, loser)
       }
     }
   }
