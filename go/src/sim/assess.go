@@ -4,11 +4,13 @@ import "math"
 
 type AssessModule struct {
   bits [8]Rep
+  errP float32 // mu_a - assessment error - assing wrong reputation
 }
 
 func NewAssessModule(r1 Rep, r2 Rep, r3 Rep, r4 Rep, r5 Rep,
                      r6 Rep, r7 Rep, r8 Rep) *AssessModule {
-  return &AssessModule { bits: [8]Rep{r1, r2, r3, r4, r5, r6, r7, r8} }
+  return &AssessModule { bits: [8]Rep{r1, r2, r3, r4, r5, r6, r7, r8},
+                         errP: 0.001 }
 }
 
 func CopyAssessModule(am AssessModule) *AssessModule {
@@ -44,33 +46,44 @@ func (self *AssessModule) GetBit(i int) int {
 }
 
 func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act) Rep {
+  var rval Rep
   if (donor == GOOD) {
     if (recip == GOOD) {
       if (act == DONATE) {
-        return self.bits[0]
+        rval = self.bits[0]
       } else { // action is REFUSE
-        return self.bits[1]
+        rval = self.bits[1]
       }
     } else { // recipient rep is BAD
       if (act == DONATE) {
-        return self.bits[2]
+        rval = self.bits[2]
       } else { // action is REFUSE
-        return self.bits[3]
+        rval = self.bits[3]
       }
     }
   } else { // donor rep is BAD
     if (recip == GOOD) {
       if (act == DONATE) {
-        return self.bits[4]
+        rval = self.bits[4]
       } else { // action is REFUSE
-        return self.bits[5]
+        rval = self.bits[5]
       }
     } else { // recipient rep is BAD
       if (act == DONATE) {
-        return self.bits[6]
+        rval = self.bits[6]
       } else { // action is REFUSE
-        return self.bits[7]
+        rval = self.bits[7]
       }
     }
   }
+  // check assessment error
+  if (RandPercent() < float64(self.errP)) {
+    if (rval == GOOD) {
+      rval = BAD
+    } else {
+      rval = GOOD
+    }
+  }
+  // return the reputation
+  return rval
 }
