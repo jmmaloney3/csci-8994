@@ -10,10 +10,11 @@ type SimEngine struct {
   numTribes int
   totalPayouts int32
   useMP bool
-  pConflict float64
-  beta float64 // selection strength
-  eta float64
-  pMigration float64
+  conP float32 // prob of tribal conflict: recommended 0.01
+  beta float64 // selection strength varies from 10^0 to 10^5
+  eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
+  migP float32 // prob of migration: recommended 0.005
+  mutP float32 // prob of assess module bit mutation: recommended 0.0001
 }
 
 // Make a new simulation engine.
@@ -25,8 +26,8 @@ func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
   }
   // configure pConflict to 0.01
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      pConflict: 0.01, beta: 1.2, eta: 0.15, pMigration: 0.005,
-                      useMP: useMP }
+                      conP: 0.01, beta: 1.2, eta: 0.1, migP: 0.005,
+                      useMP: useMP, mutP: 0.0001 }
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -77,7 +78,7 @@ func (self *SimEngine) EvolveTribes() {
   // iterate over the tribes and select pairs for confict
   for i := 0; i < self.numTribes; i++ {
     for j := i+1; j < self.numTribes; j++ {
-      if (RandPercent() < self.pConflict) {
+      if (RandPercent() < float64(self.conP)) {
         winner, loser := self.Conflict(self.tribes[i], self.tribes[j])
         self.ShiftAssessMod(winner, loser)
         self.MigrateAgents(winner, loser)
@@ -89,7 +90,7 @@ func (self *SimEngine) EvolveTribes() {
 // Migrate some agents from the first tribe to the second tribe
 func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe) {
   for i := 0; i < to.numAgents; i++ {
-    if (RandPercent() < self.pMigration) {
+    if (RandPercent() < float64(self.migP)) {
       to.agents[i].actMod = from.agents[i].actMod
     }
   }
@@ -134,6 +135,13 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe) {
         loser.assessMod.bits[i] = winner.assessMod.bits[i]
       }
     } else {
+      if (RandPercent() < float64(self.mutP)) {
+        if (loser.assessMod.bits[i] == GOOD) {
+          loser.assessMod.bits[i] = BAD
+        } else {
+          loser.assessMod.bits[i] = GOOD
+        }
+      }
       // mutation
     }
   }
