@@ -7,6 +7,7 @@ type Tribe struct {
   assessMod *AssessModule
   numAgents int
   totalPayouts int32
+  mutP float32 // mu_s - mutation probability
 }
 
 // Create a new tribe.
@@ -14,7 +15,7 @@ func NewTribe(numAgents int) *Tribe {
   // create the tribe
   var assm = NewAssessModule(RandRep(), RandRep(), RandRep(), RandRep(),
                              RandRep(), RandRep(), RandRep(), RandRep())
-  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0 }
+  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0, mutP: 0.01 }
   // create the tribe's agents
   t.agents = make([]*Agent, numAgents)
   // create agents
@@ -75,11 +76,26 @@ func (self *Tribe) SelectParent() *Agent {
   return parent
 }
 
+// Randomly select an agent from the local population.  Each agent has an equal
+// chance of being selected.
+func (self *Tribe) SelectMutationParent() *Agent {
+  // select the index of the agent
+  i := RandInt(int64(self.numAgents))
+  return self.agents[i]
+}
+
 // Create the next generation by propagating action modules to the next
 // generation based on the fitness those modules achieved.
 func (self *Tribe) CreateNextGen() {
+  var parent *Agent
   for i := 0; i < self.numAgents; i++ {
-    parent := self.SelectParent()
+    // select parent
+    if (RandPercent() < float64(self.mutP)) {
+      parent = self.SelectMutationParent()
+    } else {
+      parent = self.SelectParent()
+    }
+    // inherit parent's action module
     self.agents[i].actMod = parent.actMod;
   }
 }
