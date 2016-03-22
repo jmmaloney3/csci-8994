@@ -45,12 +45,15 @@ func main() {
   if (*useMP) {
     fmt.Println("using multiprocessing...")
   }
+  // calculate max possible payout per generation
+  max := s.MaxPayouts(int32(*cost),int32(*benefit))
+  // execute simulation
   for g := 0; g < *gens; g++ {
     var p = s.PlayRounds(int32(*cost),int32(*benefit))
     // fmt.Printf("total payout for generation %5d: %7d\n", g, p)
     s.EvolveTribes()
     s.Reset()
-    WriteStats(writer, g, s.GetStats(), p)
+    WriteStats(writer, g, s.GetStats(), p, max)
   }
   end := time.Now()
 
@@ -66,9 +69,10 @@ func PrintStats(s [8]int) {
 }
 
 func WriteHeader(w io.Writer) {
-  fmt.Fprintf(w, "gen, b0, b1, b2, b3, b4, b5, b6, b7, payout\n")
+  fmt.Fprintf(w, "gen, b0, b1, b2, b3, b4, b5, b6, b7, payout, max, %%max\n")
 }
-func WriteStats(w io.Writer, gen int, s [8]int, p int32) {
-  fmt.Fprintf(w, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
-                 gen, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], p)
+func WriteStats(w io.Writer, gen int, s [8]int, p int32, max int32) {
+  perc := float64(p)/float64(max)
+  fmt.Fprintf(w, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %5.3f\n",
+                 gen, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], p, max, perc)
 }
