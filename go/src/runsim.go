@@ -28,6 +28,7 @@ func main() {
   gens := flag.Int("g", 10, "number of generations to simulate")
   fname := flag.String("f", "stats.csv", "file to collect stats")
   useMP := flag.Bool("mp", false, "whether to use multiprocessing")
+  beta := flag.Float64("beta", 1.2, "selection strength")
   flag.Parse()
 
   // set up the output file
@@ -40,6 +41,7 @@ func main() {
   // run simulation
   start := time.Now()
   var s *sim.SimEngine = sim.NewSimEngine(*numTribes,*numAgents, *useMP)
+  s.Beta = *beta
   if (*useMP) {
     fmt.Println("using multiprocessing...")
   }
