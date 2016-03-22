@@ -11,7 +11,7 @@ type SimEngine struct {
   totalPayouts int32
   useMP bool
   conP float32 // prob of tribal conflict: recommended 0.01
-  beta float64 // selection strength varies from 10^0 to 10^5
+  Beta float64 // selection strength varies from 10^0 to 10^5
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
   migP float32 // prob of migration: recommended 0.005
   mutP float32 // prob of assess module bit mutation: recommended 0.0001
@@ -26,7 +26,7 @@ func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
   }
   // configure pConflict to 0.01
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      conP: 0.01, beta: 1.2, eta: 0.1, migP: 0.005,
+                      conP: 0.01, Beta: 1.2, eta: 0.1, migP: 0.005,
                       useMP: useMP, mutP: 0.0001 }
 }
 
@@ -109,12 +109,22 @@ func (self *SimEngine) GetStats() [8]int {
 
 // Determine the tribe that wins the conflict
 func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe) (winner, loser *Tribe) {
-  diff := tribeB.AvgPayout() - tribeA.AvgPayout()
-  p  := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
-  if (RandPercent() > p) {
-    return tribeB, tribeA
+  if (math.IsInf(self.Beta, int(1))) {
+    // if Beta is infinite then tribe with higher payout always wins
+    if (tribeB.AvgPayout() > tribeA.AvgPayout()) {
+      return tribeB, tribeA
+    } else {
+      // if A payout is greater than B payout or payouts are equal
+      return tribeA, tribeB
+    }
   } else {
-    return tribeA, tribeB
+    diff := tribeB.AvgPayout() - tribeA.AvgPayout()
+    p  := math.Pow(float64(1) + math.Exp(diff*(-self.Beta)), float64(-1))
+    if (RandPercent() > p) {
+      return tribeB, tribeA
+    } else {
+      return tribeA, tribeB
+    }
   }
 }
 
