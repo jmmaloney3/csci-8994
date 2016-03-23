@@ -55,8 +55,8 @@ def run_script(csvfile, periods, gap):
 
     # the matrix is structured as follows:
     # -- the first row contains the column headers
-    # -- the first column contains the round numbers
-    # -- each additional column contains the data for one strategy
+    # -- the first column contains the generation numbers
+    # -- the next eight columns contain data for the assessment module bits
 
     # set the font for the legend
     matplotlib.rcParams.update({'font.size': 8})
@@ -67,22 +67,13 @@ def run_script(csvfile, periods, gap):
     plt.figure(figsize=(8,3))
     plt.clf()
     
-    #colors = {'b0' : 'b', 'b1': 'r',
-    #          'NonParticipant' : 'y', 'Punisher' : 'g',
-    #          'L8JudgingAgent': 'c',
-    #          'L8BBGAgent' : 'c',
-    #          'L8BGBAgent' : 'c',
-    #          'L8BGGAgent' : 'c',
-    #          'L8GBBAgent' : 'c',
-    #          'L8GBGAgent' : 'c',
-    #          'L8StandingAgent' : 'c',
-    #          'L8GGGAgent' : 'c'
-    #          }
-    for i in range(1,matrix.shape[1]-1):
+    colors = {'b0':'b','b1':'g','b2':'r','b3':'c',
+              'b4':'m','b5':'y','b6':'k','b7':'0.75',
+              'payout':'b','max':'g','%max':'r'}
+    for i in range(1,matrix.shape[1]-3):
         indices = np.arange(0,periods)
         indices = indices[::gap]
-        #plt.plot(indices, matrix[indices,i], linewidth=0.5, color=colors[headers[i].strip()], aa=True)
-        plt.plot(indices, matrix[indices,i], linewidth=0.5, aa=True)
+        plt.plot(indices, matrix[indices,i], linewidth=0.5, color=colors[headers[i].strip()], aa=True)
 
     # label the axes
     #if (csvfile.find('scounts') >=0):
