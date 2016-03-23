@@ -53,26 +53,24 @@ func main() {
     // fmt.Printf("total payout for generation %5d: %7d\n", g, p)
     s.EvolveTribes()
     s.Reset()
-    WriteStats(writer, g, s.GetStats(), p, max)
+    n, a := s.GetStats()
+    WriteStats(writer, g, *numTribes, *numAgents, n, a, p, max)
   }
   end := time.Now()
 
   writer.Flush()
-  PrintStats(s.GetStats())
 
   fmt.Println("completed in ", end.Sub(start))
 }
 
-func PrintStats(s [8]int) {
-  fmt.Printf("%d %d %d %d %d %d %d %d\n",
-             s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7])
-}
-
 func WriteHeader(w io.Writer) {
-  fmt.Fprintf(w, "gen, b0, b1, b2, b3, b4, b5, b6, b7, payout, max, %%max\n")
+  fmt.Fprintf(w, "gen,t,a,n0,n1,n2,n3,n4,n5,n6,n7,a0,a1,a2,a3,po,maxpo\n")
 }
-func WriteStats(w io.Writer, gen int, s [8]int, p int32, max int32) {
-  perc := float64(p)/float64(max)
-  fmt.Fprintf(w, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %5.3f\n",
-                 gen, s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], p, max, perc)
+func WriteStats(w io.Writer, gen int, numTribes int, numAgents int,
+                n [8]int, a [4]int, p int32, max int32) {
+  fmt.Fprintf(w, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                 gen, numTribes, numAgents,
+                 n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
+                 a[0], a[1], a[2], a[3],
+                 p, max)
 }
