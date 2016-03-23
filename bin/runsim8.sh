@@ -23,7 +23,7 @@ cd $BASE
 for i in `seq -f "%03g" 1 $2`;
 do
   echo "  executing run $i..."
-  $GO/runsim -g 10000 -t 64 -a 64 -f $i.csv &> ./$i.log
+  $GO/runsim -g $3 -t 64 -a 64 -b 5 -beta 3 -f $i.csv &> ./$i.log
 done
 cd ..
 # python $PYT/runsim.py "$@"
