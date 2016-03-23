@@ -19,7 +19,6 @@ def main():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('csvfile', help='file that holds the data to be plotted')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation')
-    parser.add_argument('-t', type=int, help='number of tribes in simulation')
     
     args = parser.parse_args()
     #print args.csvfile
@@ -30,12 +29,7 @@ def main():
     else:
         periods = args.p
 
-    if (not args.t):
-        tribes = 64
-    else:
-        tribes = args.t
-
-    run_script(args.csvfile, periods, tribes)
+    run_script(args.csvfile, periods)
 # end main
 
 def get_result(percent):
@@ -47,9 +41,9 @@ def get_result(percent):
         return 'X'
 # end get_result
 
-def run_script(csvfile, periods, tribes):
+def run_script(csvfile, periods):
     # load CSV data
-    print 'Loading data from %s...' % csvfile
+    sys.stderr.write('Loading data from %s...\n' % csvfile)
     data = pd.read_csv(csvfile)
     
     # bit columns
@@ -60,9 +54,9 @@ def run_script(csvfile, periods, tribes):
     
     # negative periods argument means plot all the data
     if (periods < 0):
-        print '  calculate statistics using data for all periods...'
+        sys.stderr.write('  calculate statistics using data for all periods...\n')
     else:
-        print '  calculate statistics using data for last %d periods...' % periods
+        sys.stderr.write('  calculate statistics using data for last %d periods...\n' % periods)
         start_idx = data.shape[0] - periods
         assess_data = assess_data[start_idx:]
         action_data = action_data[start_idx:]
