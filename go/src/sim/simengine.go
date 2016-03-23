@@ -111,14 +111,20 @@ func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe) {
 }
 
 // Collect statistics for the most recently completed generation
-func (self *SimEngine) GetStats() [8]int {
-  var stats [8]int
+func (self *SimEngine) GetStats() (assess_stats [8]int, action_stats [4]int) {
   for i := 0; i < self.numTribes; i++ {
+    // collect statistics on the tribe's assess module
     for j := 0; j < 8; j++ {
-      stats[j] += self.tribes[i].assessMod.GetBit(j)
+      assess_stats[j] += self.tribes[i].assessMod.GetBit(j)
+    }
+    // collect statistics on the agent's action modules
+    for k := 0; k < self.tribes[i].numAgents; k++ {
+      for m := 0; m < 4; m++ {
+        action_stats[m] += self.tribes[i].agents[k].actMod.GetBit(m)
+      }
     }
   }
-  return stats
+  return assess_stats, action_stats
 }
 
 // Determine the tribe that wins the conflict
