@@ -32,3 +32,11 @@ func (self *ActionModule) ChooseDonate(donor Rep, recip Rep) bool {
   // return the action
   return rval
 }
+
+func (self *ActionModule) GetBit(i int) int {
+  if (self.bits[i]) {
+    return 1
+  } else {
+    return 0
+  }
+}
