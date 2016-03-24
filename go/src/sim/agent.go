@@ -1,5 +1,7 @@
 package sim
 
+import "math/rand"
+
 // An agent that use an action module to decide how to act
 type Agent struct {
   tribe *Tribe
@@ -10,8 +12,9 @@ type Agent struct {
 }
 
 // Create a new agent.  By default the agent has a GOOD reputation.
-func NewAgent(t *Tribe) *Agent {
-  var actm = NewActionModule(RandBool(), RandBool(), RandBool(), RandBool())
+func NewAgent(t *Tribe, rnGen *rand.Rand) *Agent {
+  var actm = NewActionModule(RandBool(rnGen), RandBool(rnGen),
+                             RandBool(rnGen), RandBool(rnGen))
   return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
 }
 
@@ -24,13 +27,13 @@ func (self *Agent) Reset() {
 
 // Ask the agent to choose whether it will donate to the recipient agent.
 // Returns true if the agent chooses to donate and false otherwise.
-func (self *Agent) ChooseDonate(recipient *Agent) bool {
-  return self.actMod.ChooseDonate(self.rep, recipient.rep)
+func (self *Agent) ChooseDonate(recipient *Agent, rnGen *rand.Rand) bool {
+  return self.actMod.ChooseDonate(self.rep, recipient.rep, rnGen)
 }
 
 // Play a round of the IR game with this agent playing the role of the
 // donor agent.  The total payout earned by both agents is returned.
-func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32) int32 {
+func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32, rnGen *rand.Rand) int32 {
   // increase number of games played
   self.numGames += 1
   recipient.numGames += 1
@@ -42,7 +45,7 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32) int32 
   action := REFUSE
 
   // play round
-  if (self.ChooseDonate(recipient)) {
+  if (self.ChooseDonate(recipient, rnGen)) {
     // donor donates
     action = DONATE
     // -- recipient receives benefit
@@ -54,7 +57,7 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32) int32 
   }
 
   // update donor's reputation
-  self.rep = self.tribe.assessMod.AssignRep(self.rep, recipient.rep, action)
+  self.rep = self.tribe.assessMod.AssignRep(self.rep, recipient.rep, action, rnGen)
 
   // to prevent negative payout, each agent receives cost
   self.payout += cost

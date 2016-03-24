@@ -1,7 +1,8 @@
 package sim
 
-import "crypto/rand"
-import "math/big"
+//import "crypto/rand"
+//import "math/big"
+import "math/rand"
 
 type Rep int
 const (
@@ -15,8 +16,38 @@ const (
   REFUSE Act = iota
 )
 
-// Generate a random boolean
-func RandBool() bool {
+// Generate a random boolean from the provided source
+func RandBool(source *rand.Rand) bool {
+  num := source.Intn(2)
+  if (num == 0) {
+    return false
+  } else {
+    return true
+  }
+}
+
+// Generate a random integer in the range [0, max] from the provided source
+func RandInt(source *rand.Rand, max int64) int64 {
+  return source.Int63n(max)
+}
+
+// Generate a random number between zero and 1 from the provided source
+func RandPercent(source *rand.Rand) float64 {
+  return source.Float64()
+}
+
+// Generate a random Rep from the provided source
+func RandRep(source *rand.Rand) Rep {
+  if (RandBool(source)) {
+    return GOOD
+  } else {
+    return BAD
+  }
+}
+
+/*
+// Generate a random boolean from the secure source
+func CryptoRandBool() bool {
   num, err := rand.Int(rand.Reader, big.NewInt(2))
   if (err != nil) {
     panic("sim.RandBool(): " + err.Error())
@@ -28,8 +59,8 @@ func RandBool() bool {
   }
 }
 
-// Generate a random integer in the range [0, max].
-func RandInt(max int64) int64 {
+// Generate a random integer in the range [0, max] from the secure source
+func CryptoRandInt(max int64) int64 {
   num, err := rand.Int(rand.Reader, big.NewInt(max))
   if (err != nil) {
     panic("sim.RandInt(): " + err.Error())
@@ -37,17 +68,18 @@ func RandInt(max int64) int64 {
   return num.Int64()
 }
 
-// Generate a random number between zero and 1
-func RandPercent() float64 {
-  i := RandInt(int64(100001))
+// Generate a random number between zero and 1 from the secure source
+func CryptoRandPercent() float64 {
+  i := CryptoRandInt(int64(100001))
   return float64(i)/float64(100000)
 }
 
-// Generate a randon Rep
-func RandRep() Rep {
-  if (RandBool()) {
+// Generate a random Rep from the secure source
+func CryptoRandRep() Rep {
+  if (CryptoRandBool()) {
     return GOOD
   } else {
     return BAD
   }
 }
+*/

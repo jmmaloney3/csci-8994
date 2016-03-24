@@ -1,6 +1,7 @@
 package sim
 
 import "math"
+import "math/rand"
 
 type AssessModule struct {
   bits [8]Rep
@@ -45,7 +46,7 @@ func (self *AssessModule) GetBit(i int) int {
   }
 }
 
-func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act) Rep {
+func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act, rnGen *rand.Rand) Rep {
   var rval Rep
   if (donor == GOOD) {
     if (recip == GOOD) {
@@ -77,7 +78,7 @@ func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act) Rep {
     }
   }
   // check assessment error
-  if (RandPercent() < float64(self.errP)) {
+  if (RandPercent(rnGen) < float64(self.errP)) {
     if (rval == GOOD) {
       rval = BAD
     } else {

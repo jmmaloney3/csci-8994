@@ -1,5 +1,7 @@
 package sim
 
+import "math/rand"
+
 // A tribe of agents that uses an assessment module to assign reputations
 // to agents.
 type Tribe struct {
@@ -11,16 +13,16 @@ type Tribe struct {
 }
 
 // Create a new tribe.
-func NewTribe(numAgents int) *Tribe {
+func NewTribe(numAgents int, rnGen *rand.Rand) *Tribe {
   // create the tribe
-  var assm = NewAssessModule(RandRep(), RandRep(), RandRep(), RandRep(),
-                             RandRep(), RandRep(), RandRep(), RandRep())
+  var assm = NewAssessModule(RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
+                             RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen))
   t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0, mutP: 0.01 }
   // create the tribe's agents
   t.agents = make([]*Agent, numAgents)
   // create agents
   for i := 0; i < numAgents; i++ {
-    t.agents[i] = NewAgent(t)
+    t.agents[i] = NewAgent(t, rnGen)
   }
 
   return t
@@ -35,13 +37,13 @@ func (self *Tribe) Reset() {
 }
 
 // Play the required rounds of the IR game to complete the current generation.
-func (self *Tribe) PlayRounds(cost int32, benefit int32) int32 {
+func (self *Tribe) PlayRounds(cost int32, benefit int32, rnGen *rand.Rand) int32 {
   var donor *Agent
   var recipient *Agent
   for i := 0; i < self.numAgents; i++ {
     for j := i+1; j < self.numAgents; j++ {
       // randomly assign the agents to roles
-      if (RandBool()) {
+      if (RandBool(rnGen)) {
         // agent i is donor and agent j is recipient
         donor = self.agents[i]
         recipient = self.agents[j]
@@ -52,7 +54,7 @@ func (self *Tribe) PlayRounds(cost int32, benefit int32) int32 {
       }
 
       // play the round
-      self.totalPayouts += donor.PlayRound(recipient, cost, benefit)
+      self.totalPayouts += donor.PlayRound(recipient, cost, benefit, rnGen)
     }
   }
 
@@ -62,8 +64,8 @@ func (self *Tribe) PlayRounds(cost int32, benefit int32) int32 {
 
 // Randomly select an agent from the local population.  The chance that an
 // agent is selected is proportional to its fitness.
-func (self *Tribe) SelectParent() *Agent {
-  ri := int32(RandInt(int64(self.totalPayouts)))
+func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
+  ri := int32(RandInt(rnGen, int64(self.totalPayouts)))
   thresh := int32(0);
   var parent *Agent
   for i := 0; i < self.numAgents; i++ {
@@ -78,22 +80,22 @@ func (self *Tribe) SelectParent() *Agent {
 
 // Randomly select an agent from the local population.  Each agent has an equal
 // chance of being selected.
-func (self *Tribe) SelectMutationParent() *Agent {
+func (self *Tribe) SelectMutationParent(rnGen *rand.Rand) *Agent {
   // select the index of the agent
-  i := RandInt(int64(self.numAgents))
+  i := RandInt(rnGen, int64(self.numAgents))
   return self.agents[i]
 }
 
 // Create the next generation by propagating action modules to the next
 // generation based on the fitness those modules achieved.
-func (self *Tribe) CreateNextGen() {
+func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
   var parent *Agent
   for i := 0; i < self.numAgents; i++ {
     // select parent
-    if (RandPercent() < float64(self.mutP)) {
-      parent = self.SelectMutationParent()
+    if (RandPercent(rnGen) < float64(self.mutP)) {
+      parent = self.SelectMutationParent(rnGen)
     } else {
-      parent = self.SelectParent()
+      parent = self.SelectParent(rnGen)
     }
     // inherit parent's action module
     self.agents[i].actMod = parent.actMod;

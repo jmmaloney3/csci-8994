@@ -1,5 +1,7 @@
 package sim
 
+import "math/rand"
+
 type ActionModule struct {
   bits [4]bool
   errP float32 // mu_e - execution error - fail to donate
@@ -10,7 +12,7 @@ func NewActionModule(b1 bool, b2 bool, b3 bool, b4 bool) *ActionModule {
                          errP: 0.001 }
 }
 
-func (self *ActionModule) ChooseDonate(donor Rep, recip Rep) bool {
+func (self *ActionModule) ChooseDonate(donor Rep, recip Rep, rnGen *rand.Rand) bool {
   var rval bool
   if (donor == GOOD) {
     if (recip == GOOD) {
@@ -26,7 +28,7 @@ func (self *ActionModule) ChooseDonate(donor Rep, recip Rep) bool {
     }
   }
   // check for execution error
-  if (RandPercent() < float64(self.errP)) {
+  if (RandPercent(rnGen) < float64(self.errP)) {
     rval = !rval
   }
   // return the action
