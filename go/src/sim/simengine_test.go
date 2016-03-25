@@ -3,11 +3,19 @@ package sim
 import "testing"
 import "math"
 
-func TestEvolveTribes(u *testing.T) {
+func TestSim(u *testing.T) {
+  runSimTest(u, false)
+}
+
+func TestSimMP(u *testing.T) {
+  runSimTest(u, true)
+}
+
+func runSimTest(u *testing.T, useMP bool) {
   cost := int32(1)
   benefit := int32(3)
 
-  s := NewSimEngine(2,2,false)
+  s := NewSimEngine(2,2,useMP)
   // set probability of conflict to 1 so tribes always evolve
   s.conP = float32(1)
   // set Beta to infinity so tribe with largest payout always wins
@@ -37,15 +45,6 @@ func TestEvolveTribes(u *testing.T) {
   s.tribes[1].agents[0].actMod = NewActionModule(false, false, false,false)
   s.tribes[1].agents[1].actMod = NewActionModule(false, false, false,false)
 
-  runSimTest(u, s, cost, benefit)
-
-  // run test with multiprocessing
-  s.useMP = true
-  s.Reset()
-  runSimTest(u, s, cost, benefit)
-}
-
-func runSimTest(u *testing.T, s *SimEngine, cost int32, benefit int32) {
   s.PlayRounds(cost, benefit)
   for i := 0; i < s.numTribes; i++ {
     u.Logf("tribe %d totalPayouts = %d\n", i, s.tribes[i].totalPayouts)
