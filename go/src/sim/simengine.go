@@ -53,7 +53,7 @@ func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
   }
   // configure pConflict to 0.01
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      conP: 0.01, Beta: 1.2, eta: 0.1, migP: 0.005,
+                      conP: 0.01, Beta: 1.2, eta: 0.15, migP: 0.005,
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
                       rnGen: rnGen, mutP: 0.0001 }
 }
