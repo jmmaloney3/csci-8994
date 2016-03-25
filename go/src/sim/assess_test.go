@@ -3,17 +3,19 @@ package sim
 import "testing"
 
 func TestAssess(u *testing.T) {
+  rnGen := NewRandNumGen()
+
   // stern judging assessment module
   am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
 
-  AssertRepEqual(u, am.AssignRep(GOOD, GOOD, DONATE), GOOD)
-  AssertRepEqual(u, am.AssignRep(GOOD, GOOD, REFUSE), BAD)
-  AssertRepEqual(u, am.AssignRep(GOOD, BAD,  DONATE), BAD)
-  AssertRepEqual(u, am.AssignRep(GOOD, BAD,  REFUSE), GOOD)
-  AssertRepEqual(u, am.AssignRep(BAD,  GOOD, DONATE), GOOD)
-  AssertRepEqual(u, am.AssignRep(BAD,  GOOD, REFUSE), BAD)
-  AssertRepEqual(u, am.AssignRep(BAD,  BAD,  DONATE), BAD)
-  AssertRepEqual(u, am.AssignRep(BAD,  BAD,  REFUSE), GOOD)
+  AssertRepEqual(u, am.AssignRep(GOOD, GOOD, DONATE, rnGen), GOOD)
+  AssertRepEqual(u, am.AssignRep(GOOD, GOOD, REFUSE, rnGen), BAD)
+  AssertRepEqual(u, am.AssignRep(GOOD, BAD,  DONATE, rnGen), BAD)
+  AssertRepEqual(u, am.AssignRep(GOOD, BAD,  REFUSE, rnGen), GOOD)
+  AssertRepEqual(u, am.AssignRep(BAD,  GOOD, DONATE, rnGen), GOOD)
+  AssertRepEqual(u, am.AssignRep(BAD,  GOOD, REFUSE, rnGen), BAD)
+  AssertRepEqual(u, am.AssignRep(BAD,  BAD,  DONATE, rnGen), BAD)
+  AssertRepEqual(u, am.AssignRep(BAD,  BAD,  REFUSE, rnGen), GOOD)
 }
 
 func TestCopy(u *testing.T) {

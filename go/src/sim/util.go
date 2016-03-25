@@ -3,6 +3,7 @@ package sim
 //import "crypto/rand"
 //import "math/big"
 import "math/rand"
+import "time"
 
 type Rep int
 const (
@@ -15,6 +16,12 @@ const (
   DONATE Act = iota
   REFUSE Act = iota
 )
+
+// Return a new random number generator.  This generator is NOT protected
+// by a mutex lock and therefore not thread safe.
+func NewRandNumGen() *rand.Rand {
+  return rand.New(rand.NewSource(time.Now().UnixNano()))
+}
 
 // Generate a random boolean from the provided source
 func RandBool(source *rand.Rand) bool {

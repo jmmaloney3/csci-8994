@@ -37,6 +37,15 @@ func TestEvolveTribes(u *testing.T) {
   s.tribes[1].agents[0].actMod = NewActionModule(false, false, false,false)
   s.tribes[1].agents[1].actMod = NewActionModule(false, false, false,false)
 
+  runSimTest(u, s, cost, benefit)
+
+  // run test with multiprocessing
+  s.useMP = true
+  s.Reset()
+  runSimTest(u, s, cost, benefit)
+}
+
+func runSimTest(u *testing.T, s *SimEngine, cost int32, benefit int32) {
   s.PlayRounds(cost, benefit)
   for i := 0; i < s.numTribes; i++ {
     u.Logf("tribe %d totalPayouts = %d\n", i, s.tribes[i].totalPayouts)
