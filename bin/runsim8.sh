@@ -13,7 +13,7 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # echo $BIN
 
 # assumption: this bash script is in the $BIN directory
-GO=$BIN/../go/src
+GO=$BIN
 
 # run the Python script to execute simulation
 # assumption: the Python program is in the $PYT directory
@@ -23,7 +23,7 @@ cd $BASE
 for i in `seq -f "%03g" 1 $2`;
 do
   echo "  executing run $i..."
-  $GO/runsim -g $3 -t 64 -a 64 -b 5 -beta 3 -f $i.csv &> ./$i.log
+  $GO/runsim -g $3 -t 64 -a 64 -b 17 -c 1 -beta 10000 -f $i.csv &> ./$i.log
 done
 cd ..
 # python $PYT/runsim.py "$@"
