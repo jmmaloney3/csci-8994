@@ -20,7 +20,7 @@ import csv
 def main():
     desc = 'Calculate the bit fixation statistics'
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('csvfile', help='file that holds the data to be plotted')
+    parser.add_argument('csvfile', help='file that holds the raw generation data')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation')
     parser.add_argument('-o', type=str, help='output file')
     parser.add_argument('-v', action='store_true')
@@ -62,7 +62,7 @@ def run_script(csvfile, periods, ofile_name, verbose):
         else:
             files.append(csvfile)
 
-    # get csv writer
+    # get output file handle and calculate stats
     if (ofile_name is None):
         calc_stats(files, periods, sys.stdout, verbose)
     else:    
@@ -90,7 +90,7 @@ def calc_stats(files, periods, ofile, verbose):
         fname, fext = os.path.splitext(ifile)
         if (fext == '.csv'):
             process_file(ifile, periods, csv_writer, assess_columns, action_columns, verbose)
-# end process_files
+# end calc_stats
 
 def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, verbose):    
     # load CSV data
@@ -129,7 +129,7 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, v
     
     # output result
     csv_writer.writerow(assess_result+action_result)
-# end run_script
+# end process_file
 
 # run main method when this file is run from command line
 if __name__ == "__main__":
