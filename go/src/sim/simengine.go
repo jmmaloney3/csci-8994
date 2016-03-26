@@ -99,18 +99,22 @@ func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
   return self.totalPayouts
 }
 
-// Calculate the maximum total payout that could be earned by the agents
+// Calculate the maximum and minimum total payouts that could be earned by the agents
 // in a single generation
-func (self *SimEngine) MaxPayouts(cost int32, benefit int32) int32 {
-  var max int32 = 0
+func (self *SimEngine) MaxMinPayouts(cost int32, benefit int32) (max int32, min int32) {
+  max = 0
+  min = 0
   numAgents := self.tribes[0].numAgents
   for i := 0; i < numAgents; i++ {
     for j := i+1; j < numAgents; j++ {
       // add (benefit - cost) + (2*cost)
       max += (benefit + cost)
+      min += 2*cost
     }
   }
-  return max*int32(self.numTribes)
+  max = max*int32(self.numTribes)
+  min = min*int32(self.numTribes)
+  return max, min
 }
 
 // Create the next generation by propagating action modules to the next
