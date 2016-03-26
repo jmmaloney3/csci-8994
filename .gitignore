@@ -3,4 +3,4 @@
 **/*.m~
 **/*.class
 **/~$*.xlsx
-project/lib/*
+go/pkg/*
