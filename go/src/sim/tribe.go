@@ -41,13 +41,9 @@ func (self *Tribe) PlayRounds(cost int32, benefit int32, rnGen *rand.Rand) int32
   var donor *Agent
   var recipient *Agent
   // randomize the order of the agents
-  outer_idx := rnGen.Perm(self.numAgents)
-  for _, i := range outer_idx {
-    // randomize the inner loop
-    inner_idx := rnGen.Perm(self.numAgents - (i + 1))
-    for _, j := range inner_idx {
-      // adjust index j to be in right range
-      j = j + (i + 1)
+  random_idx := rnGen.Perm(self.numAgents)
+  for idx, i := range random_idx {
+    for _, j := range random_idx[idx+1:] {
       // randomly assign the agents to roles
       if (RandBool(rnGen)) {
         // agent i is donor and agent j is recipient
