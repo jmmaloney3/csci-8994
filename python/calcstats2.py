@@ -49,7 +49,6 @@ def run_script(csvfile, ofile_name, verbose):
 
 def get_result(data, column):
     counts = data[column].value_counts()
-    print counts
     if ('1' in counts):
         b1 = counts['1']
     else:
