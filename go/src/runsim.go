@@ -42,9 +42,10 @@ func main() {
   start := time.Now()
   var s *sim.SimEngine = sim.NewSimEngine(*numTribes,*numAgents, *useMP)
   s.Beta = *beta
-  if (*useMP) {
-    fmt.Println("using multiprocessing...")
-  }
+
+  // output simulation parameters
+  WriteSimParams(s, gens, cost, benefit, fname)
+
   // calculate max possible payout per generation
   max, min := s.MaxMinPayouts(int32(*cost),int32(*benefit))
   // execute simulation
@@ -73,4 +74,14 @@ func WriteStats(w io.Writer, gen int, numTribes int, numAgents int,
                  n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
                  a[0], a[1], a[2], a[3],
                  p, min, max)
+}
+
+func WriteSimParams(s *sim.SimEngine, gens *int, cost *int, benefit *int, fname *string) {
+  // output simulation parameters
+  fmt.Println("IR simulation parameters:")
+  fmt.Printf("  num gens:     %8d\n", *gens)
+  fmt.Printf("  cost:         %8d\n", *cost)
+  fmt.Printf("  benefit:      %8d\n", *benefit)
+  fmt.Printf("  out file:     %s\n", *fname)
+  s.WriteSimParams()
 }

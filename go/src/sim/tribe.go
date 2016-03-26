@@ -1,6 +1,7 @@
 package sim
 
 import "math/rand"
+import "fmt"
 
 // A tribe of agents that uses an assessment module to assign reputations
 // to agents.
@@ -107,4 +108,13 @@ func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
 // Return the average payout for an agent in this tribe
 func (self *Tribe) AvgPayout() float64 {
   return float64(self.totalPayouts)/float64(self.numAgents)
+}
+
+func (self *Tribe) WriteSimParams() {
+  fmt.Printf("  num agents:   %8d\n", self.numAgents)
+  fmt.Printf("  p-action mut: %8.5f\n", self.mutP)
+  // write assess module parameters
+  self.assessMod.WriteSimParams()
+  // write agent parameters
+  self.agents[0].WriteSimParams()
 }

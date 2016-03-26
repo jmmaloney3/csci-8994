@@ -4,7 +4,7 @@ import "math"
 import "math/rand"
 import "time"
 import "runtime"
-//import "fmt"
+import "fmt"
 
 // A simulation engine for simulating the indirect reciprocity game
 // played among agents divided into tribes.
@@ -217,4 +217,17 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.R
   }
   //bits = loser.assessMod.GetBits()
   //fmt.Printf("after:  %8b (%4d)\n", bits, bits)
+}
+
+func (self *SimEngine) WriteSimParams() {
+  fmt.Printf("  num tribes:   %8d\n", self.numTribes)
+  fmt.Printf("  beta:         %8.5f\n", self.Beta)
+  fmt.Printf("  eta:          %8.5f\n", self.eta)
+  fmt.Printf("  p-conflict:   %8.5f\n", self.conP)
+  fmt.Printf("  p-migration:  %8.5f\n", self.migP)
+  fmt.Printf("  p-asses mut:  %8.5f\n", self.mutP)
+  fmt.Printf("  use MP:       %t\n", self.useMP)
+  fmt.Printf("  num CPUs:     %8d\n", self.numCpu)
+  // write tribe sim parameters
+  self.tribes[0].WriteSimParams()
 }

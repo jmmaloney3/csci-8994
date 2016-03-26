@@ -1,6 +1,7 @@
 package sim
 
 import "math/rand"
+import "fmt"
 
 type ActionModule struct {
   bits [4]bool
@@ -41,4 +42,8 @@ func (self *ActionModule) GetBit(i int) int {
   } else {
     return 0
   }
+}
+
+func (self *ActionModule) WriteSimParams() {
+  fmt.Printf("  exec error:   %8.5f\n", self.errP)
 }

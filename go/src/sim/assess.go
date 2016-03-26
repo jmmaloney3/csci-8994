@@ -2,6 +2,7 @@ package sim
 
 import "math"
 import "math/rand"
+import "fmt"
 
 type AssessModule struct {
   bits [8]Rep
@@ -87,4 +88,8 @@ func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act, rnGen *rand.R
   }
   // return the reputation
   return rval
+}
+
+func (self *AssessModule) WriteSimParams() {
+  fmt.Printf("  assess err:   %8.5f\n", self.errP)
 }

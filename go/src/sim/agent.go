@@ -67,3 +67,8 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32, rnGen 
   // return total payout earned by both agents
   return totalPayout
 }
+
+func (self *Agent) WriteSimParams() {
+  // no parameters stored directly on agent (for now)
+  self.actMod.WriteSimParams()
+}
