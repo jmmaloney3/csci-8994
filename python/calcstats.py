@@ -13,12 +13,17 @@ Created on Tue Mar 22 20:40:17 2016
 import argparse
 import pandas as pd
 import sys
+import os.path as path
+import os
+import csv
 
 def main():
     desc = 'Calculate the bit fixation statistics'
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('csvfile', help='file that holds the data to be plotted')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation')
+    parser.add_argument('-o', type=str, help='output file')
+    parser.add_argument('-v', action='store_true')
     
     args = parser.parse_args()
     #print args.csvfile
@@ -28,8 +33,13 @@ def main():
         periods = -1
     else:
         periods = args.p
+    
+    if (not args.o):
+        ofile = None
+    else:
+        ofile = args.o
 
-    run_script(args.csvfile, periods)
+    run_script(args.csvfile, periods, ofile, args.v)
 # end main
 
 def get_result(percent):
@@ -41,27 +51,69 @@ def get_result(percent):
         return 'X'
 # end get_result
 
-def run_script(csvfile, periods):
+def run_script(csvfile, periods, ofile_name, verbose):
+    # Collect the files to process
+    files = []
+    if (path.exists(csvfile)):
+        if (path.isdir(csvfile)):
+            fnames = os.walk(csvfile).next()[2]
+            for fn in fnames:
+                files.append(path.join(csvfile, fn))
+        else:
+            files.append(csvfile)
+
+    # get csv writer
+    if (ofile_name is None):
+        calc_stats(files, periods, sys.stdout, verbose)
+    else:    
+        if (path.exists(ofile_name)):
+            sys.stderr.write('output file %s exists\n' % ofile_name)
+            return
+        else:
+            with open(ofile_name, 'wb') as ofile:
+                calc_stats(files, periods, ofile, verbose)
+# end run_script
+    
+def calc_stats(files, periods, ofile, verbose):
+    # create csv writer
+    csv_writer = csv.writer(ofile)
+    
+    # define column names
+    assess_columns = ['n0','n1','n2','n3','n4','n5','n6','n7']
+    action_columns = ['a0','a1','a2','a3']
+    
+    # write headers to output file
+    csv_writer.writerow(assess_columns+action_columns)
+
+    # process the files and calculate statistics
+    for ifile in files:
+        fname, fext = os.path.splitext(ifile)
+        if (fext == '.csv'):
+            process_file(ifile, periods, csv_writer, assess_columns, action_columns, verbose)
+# end process_files
+
+def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, verbose):    
     # load CSV data
-    sys.stderr.write('Loading data from %s...\n' % csvfile)
+    if (verbose):
+        sys.stderr.write('Loading data from %s...\n' % csvfile)
     data = pd.read_csv(csvfile)
     
-    # bit columns
-    assess_columns = ['n0','n1','n2','n3','n4','n5','n6','n7']
+    # get bit column data
     assess_data = data[assess_columns]
-    action_columns = ['a0','a1','a2','a3']
     action_data = data[action_columns]
     
     # negative periods argument means plot all the data
     if (periods < 0):
-        sys.stderr.write('  calculate statistics using data for all periods...\n')
+        if (verbose):
+            sys.stderr.write('  calculate statistics using data for all periods...\n')
     else:
-        sys.stderr.write('  calculate statistics using data for last %d periods...\n' % periods)
+        if (verbose):
+            sys.stderr.write('  calculate statistics using data for last %d periods...\n' % periods)
         start_idx = data.shape[0] - periods
         assess_data = assess_data[start_idx:]
         action_data = action_data[start_idx:]
 
-    # get numbe of tribes and agents
+    # get number of tribes and agents
     num_tribes = data['t'][0]
     num_agents = data['a'][0]
 
@@ -69,21 +121,14 @@ def run_script(csvfile, periods):
     max_assess = periods*num_tribes
     max_action = periods*num_agents
     
-    # calculate assess results
+    # calculate results
     assess_percent = assess_data.sum()/max_assess
     assess_result = [ get_result(p) for p in assess_percent ]
     action_percent = action_data.sum()/max_action
     action_result = [ get_result(p) for p in action_percent ]
     
     # output result
-    sys.stdout.write('assess: [')
-    for ch in assess_result:
-        sys.stdout.write(ch)
-    sys.stdout.write(']')
-    sys.stdout.write(' action:[')
-    for ch in action_result:
-        sys.stdout.write(ch)
-    sys.stdout.write(']\n')
+    csv_writer.writerow(assess_result+action_result)
 # end run_script
 
 # run main method when this file is run from command line
