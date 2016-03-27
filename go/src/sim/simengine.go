@@ -227,8 +227,9 @@ func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe, rnGen *rand.Rand) 
 
 // Shift the loser's assessment module toward the winner's assessment module
 func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.Rand) {
-  // copy assess module in case this is shared with another tribe
-  loser.assessMod = CopyAssessModule(*loser.assessMod)
+  // before changing the loser's assess module, make a copy in case
+  // it is shared with another tribe
+  loser.assessMod = loser.assessMod.Copy()
   // get average payouts
   poW := winner.AvgPayout()
   poL := loser.AvgPayout()

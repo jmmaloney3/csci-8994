@@ -15,7 +15,7 @@ func NewAssessModule(r1 Rep, r2 Rep, r3 Rep, r4 Rep, r5 Rep,
                          passerr: passerr }
 }
 
-func CopyAssessModule(am AssessModule) *AssessModule {
+func (am *AssessModule) Copy() *AssessModule {
   return NewAssessModule(am.bits[0], am.bits[1], am.bits[2], am.bits[3],
                          am.bits[4], am.bits[5], am.bits[6], am.bits[7],
                          am.passerr)
