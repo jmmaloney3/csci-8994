@@ -5,6 +5,40 @@ package sim
 import "math/rand"
 import "time"
 
+// default parameter values
+const (
+ NUMGENS = 10 // default number of generations per simulation
+ GENS_F = "g"
+ COST = 1  // default donation cost
+ COST_F = "c"
+ BENEFIT = 3 // default donation benefit
+ BEN_F = "b"
+ NUMTRIBES = 64 // default number of tribes in a simulation
+ TRIBES_F = "t"
+ BETA = 1.2 // default value of conflict selection strength
+ BETA_F = "beta"
+ ETA = 0.15 // default value of bit switching selection strength
+ ETA_F = "eta"
+ PCON = 0.01 // default probability of tribal conflict
+ PCON_F = "pcon"
+ PMIG = 0.005 // default probability of migration
+ PMIG_F = "pmig"
+ PASSMUT = 0.0001 // default probability of assess module bit mutation
+ PASSM_F = "passmut"
+ NUMAGENTS = 64 // default number of agents per tribe
+ AGENTS_F = "a"
+ PACTMUT = 0.01 // default probability of action module bit mutation
+ PACTM_F = "pactmut"
+ PASSERR = 0.001 // default probability of assessment error
+ PASSE_F = "passerr"
+ PEXEERR = 0.001 // defaul tprobability of execution error
+ PEXEE_F = "pexeerr"
+ FNAME = "stats.csv"
+ FNAME_F = "f"
+ USEMP = false
+ USEMP_F = "mp"
+)
+
 type Rep int
 const (
   GOOD Rep = iota

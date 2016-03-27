@@ -21,15 +21,33 @@ Author: John Maloney
 */
 func main() {
   // parse command line arguments
-  numTribes := flag.Int("t", 64, "number f tribes")
-  numAgents := flag.Int("a", 64, "number of agents")
-  cost := flag.Int("c", 1, "cost c to donate")
-  benefit := flag.Int("b", 3, "benefit b received from donation")
-  gens := flag.Int("g", 10, "number of generations to simulate")
-  fname := flag.String("f", "stats.csv", "file to collect stats")
-  useMP := flag.Bool("mp", false, "whether to use multiprocessing")
-  beta := flag.Float64("beta", 1.2, "selection strength")
+  gens    := flag.Int(sim.GENS_F, sim.NUMGENS, "number of generations to simulate")
+  cost    := flag.Int(sim.COST_F, sim.COST, "cost c to donate")
+  benefit := flag.Int(sim.BEN_F,  sim.BENEFIT, "benefit b received from donation")
+  numTribes := flag.Int(sim.TRIBES_F, sim.NUMTRIBES, "number of tribes")
+  numAgents := flag.Int(sim.AGENTS_F, sim.NUMAGENTS, "number of agents")
+  beta    := flag.Float64(sim.BETA_F, sim.BETA, "conflict selection strength")
+  eta     := flag.Float64(sim.ETA_F, sim.ETA, "bit switch selection strength")
+  pcon    := flag.Float64(sim.PCON_F, sim.PCON, "conflict probability")
+  pmig    := flag.Float64(sim.PMIG_F, sim.PMIG, "migration probability")
+  passmut := flag.Float64(sim.PASSM_F, sim.PASSMUT, "assess module bit mutation probability")
+  pactmut := flag.Float64(sim.PACTM_F, sim.PACTMUT, "action module bit mutation probability")
+  passerr := flag.Float64(sim.PASSE_F, sim.PASSERR, "assessment error probability")
+  pexeerr := flag.Float64(sim.PEXEE_F, sim.PEXEERR, "execution error probability")
+  fname   := flag.String(sim.FNAME_F, sim.FNAME, "file to collect stats")
+  useMP   := flag.Bool(sim.USEMP_F, sim.USEMP, "whether to use multiprocessing")
   flag.Parse()
+
+  // create parameter map
+  var params = make(map[string]float64)
+  params[sim.BETA_F]  = *beta
+  params[sim.ETA_F]   = *eta
+  params[sim.PCON_F]  = *pcon
+  params[sim.PMIG_F]  = *pmig
+  params[sim.PASSM_F] = *passmut
+  params[sim.PACTM_F] = *pactmut
+  params[sim.PASSE_F] = *passerr
+  params[sim.PEXEE_F] = *pexeerr
 
   // set up the output file
   ofile, err := os.Create(*fname)
@@ -38,13 +56,13 @@ func main() {
   writer := bufio.NewWriter(ofile)
   WriteHeader(writer)
 
-  // run simulation
   start := time.Now()
-  var s *sim.SimEngine = sim.NewSimEngine(*numTribes,*numAgents, *useMP)
-  s.Beta = *beta
+
+  // create simulation
+  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, *useMP)
 
   // output simulation parameters
-  WriteSimParams(s, gens, cost, benefit, fname)
+  WriteSimParams(s, *gens, *cost, *benefit, *fname)
 
   // calculate max possible payout per generation
   max, min := s.MaxMinPayouts(int32(*cost),int32(*benefit))
@@ -76,12 +94,14 @@ func WriteStats(w io.Writer, gen int, numTribes int, numAgents int,
                  p, min, max)
 }
 
-func WriteSimParams(s *sim.SimEngine, gens *int, cost *int, benefit *int, fname *string) {
+func WriteSimParams(s *sim.SimEngine, gens int, cost int, benefit int, fname string) {
   // output simulation parameters
-  fmt.Println("IR simulation parameters:")
-  fmt.Printf("  num gens:     %8d\n", *gens)
-  fmt.Printf("  cost:         %8d\n", *cost)
-  fmt.Printf("  benefit:      %8d\n", *benefit)
-  fmt.Printf("  out file:     %s\n", *fname)
+  fmt.Println("{")
+  fmt.Printf("  \"simtype\":\"IR\",\n")
+  fmt.Printf("  \"ngens\":%d,\n", gens)
+  fmt.Printf("  \"cost\":%d,\n", cost)
+  fmt.Printf("  \"benefit\":%d,\n", benefit)
+  fmt.Printf("  \"ofile\":\"%s\",\n", fname)
   s.WriteSimParams()
+  fmt.Println("}")
 }

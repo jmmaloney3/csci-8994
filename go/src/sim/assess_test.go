@@ -6,7 +6,7 @@ func TestAssess(u *testing.T) {
   rnGen := NewRandNumGen()
 
   // stern judging assessment module
-  am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
+  am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
 
   AssertRepEqual(u, am.AssignRep(GOOD, GOOD, DONATE, rnGen), GOOD)
   AssertRepEqual(u, am.AssignRep(GOOD, GOOD, REFUSE, rnGen), BAD)
@@ -20,7 +20,7 @@ func TestAssess(u *testing.T) {
 
 func TestCopy(u *testing.T) {
   // stern judging assessment module
-  am1 := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
+  am1 := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
   am2 := CopyAssessModule(*am1)
 
   AssertFalse(u, am1 == am2)

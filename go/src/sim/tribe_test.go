@@ -3,7 +3,7 @@ package sim
 import "testing"
 
 func TestInit(u *testing.T) {
-  t := NewTribe(3, NewRandNumGen())
+  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, NewRandNumGen())
   AssertInt32Equal(u, t.totalPayouts, 0)
   AssertIntEqual(u, len(t.agents), 3)
 }
@@ -13,11 +13,11 @@ func TestPlayRounds(u * testing.T) {
   benefit := int32(3)
   rnGen := NewRandNumGen()
 
-  t := NewTribe(3, rnGen)
-  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
+  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, rnGen)
+  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
 
   // all agents use CO action model
-  co := NewActionModule(true, false, true, false)
+  co := NewActionModule(true, false, true, false, PEXEERR)
   for i := 0; i < len(t.agents); i++ {
     t.agents[i].actMod = co
   }
@@ -81,10 +81,10 @@ func TestPlayRounds(u * testing.T) {
 func TestSelectParent(u *testing.T) {
   rnGen := NewRandNumGen()
 
-  t := NewTribe(3, rnGen)
+  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, rnGen)
 
-  allc := NewActionModule(true, true, true, true)
-  alld := NewActionModule(false, false, false, false)
+  allc := NewActionModule(true, true, true, true, PEXEERR)
+  alld := NewActionModule(false, false, false, false, PEXEERR)
 
   t.agents[0].payout = -1
   t.agents[0].actMod = allc

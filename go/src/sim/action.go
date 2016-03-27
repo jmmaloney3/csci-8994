@@ -5,12 +5,12 @@ import "fmt"
 
 type ActionModule struct {
   bits [4]bool
-  errP float32 // mu_e - execution error - fail to donate
+  pexeerr float32 // mu_e - execution error - fail to donate
 }
 
-func NewActionModule(b1 bool, b2 bool, b3 bool, b4 bool) *ActionModule {
+func NewActionModule(b1 bool, b2 bool, b3 bool, b4 bool, pexeerr float32) *ActionModule {
   return &ActionModule { bits: [4]bool{b1, b2, b3, b4},
-                         errP: 0.001 }
+                         pexeerr: pexeerr }
 }
 
 func (self *ActionModule) ChooseDonate(donor Rep, recip Rep, rnGen *rand.Rand) bool {
@@ -29,7 +29,7 @@ func (self *ActionModule) ChooseDonate(donor Rep, recip Rep, rnGen *rand.Rand) b
     }
   }
   // check for execution error
-  if (RandPercent(rnGen) < float64(self.errP)) {
+  if (RandPercent(rnGen) < float64(self.pexeerr)) {
     rval = !rval
   }
   // return the action
@@ -45,5 +45,5 @@ func (self *ActionModule) GetBit(i int) int {
 }
 
 func (self *ActionModule) WriteSimParams() {
-  fmt.Printf("  exec error:   %8.5f\n", self.errP)
+  fmt.Printf("  \"pexeerr\":%.5f\n", self.pexeerr)
 }

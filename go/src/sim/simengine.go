@@ -17,20 +17,56 @@ type SimEngine struct {
   numCpu int
   cpuTasks []int // when using MP, num tasks to assign to each CPU
   cpuRNG []*rand.Rand // a separate random number generator for each CPU
-  conP float32 // prob of tribal conflict: recommended 0.01
-  Beta float64 // selection strength varies from 10^0 to 10^5
+  pcon float32 // prob of tribal conflict: recommended 0.01
+  beta float64 // selection strength varies from 10^0 to 10^5
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
-  migP float32 // prob of migration: recommended 0.005
-  mutP float32 // prob of assess module bit mutation: recommended 0.0001
+  pmig float32 // prob of migration: recommended 0.005
+  passmut float32 // prob of assess module bit mutation: recommended 0.0001
+}
+
+func NewDefaultSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
+  // create parameter map
+  var params = make(map[string]float64)
+
+  // populate arg maps
+  params[PASSE_F] = PASSERR
+  params[PACTM_F] = PACTMUT
+  params[PEXEE_F] = PEXEERR
+  params[PCON_F]  = PCON
+  params[BETA_F]  = BETA
+  params[ETA_F]   = ETA
+  params[PMIG_F]  = PMIG
+  params[PASSM_F] = PASSMUT
+
+  // create simulation engine with default values
+  return NewSimEngine(numTribes, numAgents, params, useMP)
 }
 
 // Make a new simulation engine.
-func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
-  tribes := make([]*Tribe, numTribes)
+func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP bool) *SimEngine {
+  // get parameters
+  passerr, ok := params[PASSE_F]
+  if (!ok) { passerr = PASSERR }
+  pactmut, ok := params[PACTM_F]
+  if (!ok) { pactmut = PACTMUT }
+  pexeerr, ok := params[PEXEE_F]
+  if (!ok) { pexeerr = PEXEERR }
+  pcon, ok := params[PCON_F]
+  if (!ok) { pcon = PCON }
+  beta, ok := params[BETA_F]
+  if (!ok) { beta = BETA }
+  eta, ok := params[ETA_F]
+  if (!ok) { eta = ETA }
+  pmig, ok := params[PMIG_F]
+  if (!ok) { pmig = PMIG }
+  passmut, ok := params[PASSM_F]
+  if (!ok) { passmut = PASSMUT }
+
   // create tribes
+  tribes := make([]*Tribe, numTribes)
   rnGen := rand.New(rand.NewSource(time.Now().UnixNano()))
   for i := 0; i < numTribes; i++ {
-    tribes[i] = NewTribe(numAgents, rnGen)
+    tribes[i] = NewTribe(numAgents, float32(passerr), float32(pactmut), float32(pexeerr), rnGen)
   }
   // figure out multiprocessing parameters if MP enabled
   ncpu := runtime.NumCPU()
@@ -51,11 +87,12 @@ func NewSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
       }
     }
   }
-  // configure pConflict to 0.01
+
+  // create sim engine
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
-                      conP: 0.01, Beta: 1.2, eta: 0.15, migP: 0.005,
+                      pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, mutP: 0.0001 }
+                      rnGen: rnGen, passmut: float32(passmut) }
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -132,7 +169,7 @@ func (self *SimEngine) EvolveTribes() {
   // iterate over the tribes and select pairs for confict
   for i := 0; i < self.numTribes; i++ {
     for j := i+1; j < self.numTribes; j++ {
-      if (RandPercent(self.rnGen) < float64(self.conP)) {
+      if (RandPercent(self.rnGen) < float64(self.pcon)) {
         winner, loser := self.Conflict(self.tribes[i], self.tribes[j], self.rnGen)
         self.ShiftAssessMod(winner, loser, self.rnGen)
         self.MigrateAgents(winner, loser, self.rnGen)
@@ -144,7 +181,7 @@ func (self *SimEngine) EvolveTribes() {
 // Migrate some agents from the first tribe to the second tribe
 func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe, rnGen *rand.Rand) {
   for i := 0; i < to.numAgents; i++ {
-    if (RandPercent(rnGen) < float64(self.migP)) {
+    if (RandPercent(rnGen) < float64(self.pmig)) {
       to.agents[i].actMod = from.agents[i].actMod
     }
   }
@@ -169,7 +206,7 @@ func (self *SimEngine) GetStats() (assess_stats [8]int, action_stats [4]int) {
 
 // Determine the tribe that wins the conflict
 func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe, rnGen *rand.Rand) (winner, loser *Tribe) {
-  if (math.IsInf(self.Beta, int(1))) {
+  if (math.IsInf(self.beta, int(1))) {
     // if Beta is infinite then tribe with higher payout always wins
     if (tribeB.AvgPayout() > tribeA.AvgPayout()) {
       return tribeB, tribeA
@@ -179,7 +216,7 @@ func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe, rnGen *rand.Rand) 
     }
   } else {
     diff := tribeB.AvgPayout() - tribeA.AvgPayout()
-    p  := math.Pow(float64(1) + math.Exp(diff*(-self.Beta)), float64(-1))
+    p  := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
     if (RandPercent(rnGen) > p) {
       return tribeB, tribeA
     } else {
@@ -195,17 +232,17 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.R
   // get average payouts
   poW := winner.AvgPayout()
   poL := loser.AvgPayout()
-  p  := (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
+  pflip := (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
   //bits := loser.assessMod.GetBits()
   //wBits := winner.assessMod.GetBits()
   //fmt.Printf("before: %8b (%4d) => %8b (%4d)\n", bits, bits, wBits, wBits)
   for i := 0; i < 8; i++ {
     if (loser.assessMod.bits[i] != winner.assessMod.bits[i]) {
-      if (RandPercent(rnGen) < p) {
+      if (RandPercent(rnGen) < pflip) {
         loser.assessMod.bits[i] = winner.assessMod.bits[i]
       }
     } else {
-      if (RandPercent(rnGen) < float64(self.mutP)) {
+      if (RandPercent(rnGen) < float64(self.passmut)) {
         if (loser.assessMod.bits[i] == GOOD) {
           loser.assessMod.bits[i] = BAD
         } else {
@@ -220,14 +257,14 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.R
 }
 
 func (self *SimEngine) WriteSimParams() {
-  fmt.Printf("  num tribes:   %8d\n", self.numTribes)
-  fmt.Printf("  beta:         %8.5f\n", self.Beta)
-  fmt.Printf("  eta:          %8.5f\n", self.eta)
-  fmt.Printf("  p-conflict:   %8.5f\n", self.conP)
-  fmt.Printf("  p-migration:  %8.5f\n", self.migP)
-  fmt.Printf("  p-asses mut:  %8.5f\n", self.mutP)
-  fmt.Printf("  use MP:       %t\n", self.useMP)
-  fmt.Printf("  num CPUs:     %8d\n", self.numCpu)
+  fmt.Printf("  \"ntribes\":%d,\n", self.numTribes)
+  fmt.Printf("  \"beta\":%.5f,\n", self.beta)
+  fmt.Printf("  \"eta\":%.5f,\n", self.eta)
+  fmt.Printf("  \"pcon\":%.5f,\n", self.pcon)
+  fmt.Printf("  \"pmig\":%.5f,\n", self.pmig)
+  fmt.Printf("  \"passmut\":%.5f,\n", self.passmut)
+  fmt.Printf("  \"mp\":%t,\n", self.useMP)
+  fmt.Printf("  \"ncpu\":%d,\n", self.numCpu)
   // write tribe sim parameters
   self.tribes[0].WriteSimParams()
 }

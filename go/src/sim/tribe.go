@@ -10,20 +10,21 @@ type Tribe struct {
   assessMod *AssessModule
   numAgents int
   totalPayouts int32
-  mutP float32 // mu_s - mutation probability
+  pactmut float32 // mu_s - action module bit mutation probability
 }
 
 // Create a new tribe.
-func NewTribe(numAgents int, rnGen *rand.Rand) *Tribe {
+func NewTribe(numAgents int, passerr float32, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Tribe {
   // create the tribe
   var assm = NewAssessModule(RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
-                             RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen))
-  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0, mutP: 0.01 }
+                             RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
+                             passerr)
+  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0, pactmut: pactmut }
   // create the tribe's agents
   t.agents = make([]*Agent, numAgents)
   // create agents
   for i := 0; i < numAgents; i++ {
-    t.agents[i] = NewAgent(t, rnGen)
+    t.agents[i] = NewAgent(t, pexeerr, rnGen)
   }
 
   return t
@@ -95,7 +96,7 @@ func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
   var parent *Agent
   for i := 0; i < self.numAgents; i++ {
     // select parent
-    if (RandPercent(rnGen) < float64(self.mutP)) {
+    if (RandPercent(rnGen) < float64(self.pactmut)) {
       parent = self.SelectMutationParent(rnGen)
     } else {
       parent = self.SelectParent(rnGen)
@@ -111,8 +112,8 @@ func (self *Tribe) AvgPayout() float64 {
 }
 
 func (self *Tribe) WriteSimParams() {
-  fmt.Printf("  num agents:   %8d\n", self.numAgents)
-  fmt.Printf("  p-action mut: %8.5f\n", self.mutP)
+  fmt.Printf("  \"nagents\":%d,\n", self.numAgents)
+  fmt.Printf("  \"pactmut\":%.5f,\n", self.pactmut)
   // write assess module parameters
   self.assessMod.WriteSimParams()
   // write agent parameters

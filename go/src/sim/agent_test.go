@@ -3,7 +3,7 @@ package sim
 import "testing"
 
 func TestNewAgent(u *testing.T) {
-  t := NewTribe(1, NewRandNumGen())
+  t := NewTribe(1, PASSERR, PACTMUT, PEXEERR, NewRandNumGen())
   a := t.agents[0]
   AssertRepEqual(u, a.rep, GOOD)
   AssertInt32Equal(u, a.payout, 0)
@@ -15,9 +15,9 @@ func TestPlayround(t *testing.T) {
   benefit := int32(3)
   rnGen := NewRandNumGen()
 
-  u := NewTribe(2, rnGen)
+  u := NewTribe(2, PASSERR, PACTMUT, PEXEERR, rnGen)
   // configure tribe assess module
-  u.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD)
+  u.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
 
   don := u.agents[0]
   AssertRepEqual(t, don.rep, GOOD)
@@ -27,7 +27,7 @@ func TestPlayround(t *testing.T) {
   AssertInt32Equal(t, rec.payout, 0)
 
   // configure donor action module
-  don.actMod = NewActionModule(true, false, true, true);
+  don.actMod = NewActionModule(true, false, true, true, PEXEERR);
 
   // GOOD GOOD
   AssertTrue(t, don.ChooseDonate(rec, rnGen))

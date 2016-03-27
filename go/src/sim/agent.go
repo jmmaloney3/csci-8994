@@ -12,9 +12,9 @@ type Agent struct {
 }
 
 // Create a new agent.  By default the agent has a GOOD reputation.
-func NewAgent(t *Tribe, rnGen *rand.Rand) *Agent {
+func NewAgent(t *Tribe, pexeerr float32, rnGen *rand.Rand) *Agent {
   var actm = NewActionModule(RandBool(rnGen), RandBool(rnGen),
-                             RandBool(rnGen), RandBool(rnGen))
+                             RandBool(rnGen), RandBool(rnGen), pexeerr)
   return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
 }
 

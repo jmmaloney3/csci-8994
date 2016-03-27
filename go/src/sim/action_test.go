@@ -4,7 +4,7 @@ import "testing"
 
 func TestAction(u *testing.T) {
   // CO action module
-  am := NewActionModule(true, false, true, false)
+  am := NewActionModule(true, false, true, false, PEXEERR)
 
   rnGen := NewRandNumGen()
   AssertTrue(u, am.ChooseDonate(GOOD, GOOD, rnGen))

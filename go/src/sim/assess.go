@@ -6,18 +6,19 @@ import "fmt"
 
 type AssessModule struct {
   bits [8]Rep
-  errP float32 // mu_a - assessment error - assing wrong reputation
+  passerr float32 // mu_a - assessment error - assing wrong reputation
 }
 
 func NewAssessModule(r1 Rep, r2 Rep, r3 Rep, r4 Rep, r5 Rep,
-                     r6 Rep, r7 Rep, r8 Rep) *AssessModule {
+                     r6 Rep, r7 Rep, r8 Rep, passerr float32) *AssessModule {
   return &AssessModule { bits: [8]Rep{r1, r2, r3, r4, r5, r6, r7, r8},
-                         errP: 0.001 }
+                         passerr: passerr }
 }
 
 func CopyAssessModule(am AssessModule) *AssessModule {
   return NewAssessModule(am.bits[0], am.bits[1], am.bits[2], am.bits[3],
-                         am.bits[4], am.bits[5], am.bits[6], am.bits[7])
+                         am.bits[4], am.bits[5], am.bits[6], am.bits[7],
+                         am.passerr)
 }
 
 // return true of the two modules have the same bits
@@ -79,7 +80,7 @@ func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act, rnGen *rand.R
     }
   }
   // check assessment error
-  if (RandPercent(rnGen) < float64(self.errP)) {
+  if (RandPercent(rnGen) < float64(self.passerr)) {
     if (rval == GOOD) {
       rval = BAD
     } else {
@@ -91,5 +92,5 @@ func (self *AssessModule) AssignRep(donor Rep, recip Rep, act Act, rnGen *rand.R
 }
 
 func (self *AssessModule) WriteSimParams() {
-  fmt.Printf("  assess err:   %8.5f\n", self.errP)
+  fmt.Printf("  \"passerr\":%.5f,\n", self.passerr)
 }
