@@ -81,7 +81,9 @@ func TestPlayRounds(u * testing.T) {
 func TestSelectParent(u *testing.T) {
   rnGen := NewRandNumGen()
 
-  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, rnGen)
+  // set tribe's probability of action module bit mutation to zero
+  pactmut := float32(0)
+  t := NewTribe(3, PASSERR, pactmut, PEXEERR, rnGen)
 
   allc := NewActionModule(true, true, true, true, PEXEERR)
   alld := NewActionModule(false, false, false, false, PEXEERR)
@@ -102,8 +104,20 @@ func TestSelectParent(u *testing.T) {
   AssertAgentEqual(u, t.SelectParent(rnGen), t.agents[2])
 
   // all agents in next generation will inherit from agent #2
+  // -- probability of action module bit mutation was set to zero above
   t.CreateNextGen(rnGen)
   for i := 0; i < len(t.agents); i++ {
     AssertActModEqual(u, t.agents[i].actMod, alld)
+  }
+
+  // set tribe's probability of action module bit mutation to one
+  t.pactmut = float32(1)
+
+  // all agents in next generation will inherit from agent #2 again
+  // because payouts have not changed, but the probability of mutation
+  // is now 1 so the child agent's modules will be allc
+  t.CreateNextGen(rnGen)
+  for i := 0; i < len(t.agents); i++ {
+    AssertActModEqual(u, t.agents[i].actMod, allc)
   }
 }

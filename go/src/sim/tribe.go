@@ -82,27 +82,22 @@ func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
   return parent
 }
 
-// Randomly select an agent from the local population.  Each agent has an equal
-// chance of being selected.
-func (self *Tribe) SelectMutationParent(rnGen *rand.Rand) *Agent {
-  // select the index of the agent
-  i := RandInt(rnGen, int64(self.numAgents))
-  return self.agents[i]
-}
-
 // Create the next generation by propagating action modules to the next
 // generation based on the fitness those modules achieved.
 func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
   var parent *Agent
   for i := 0; i < self.numAgents; i++ {
     // select parent
-    if (RandPercent(rnGen) < float64(self.pactmut)) {
-      parent = self.SelectMutationParent(rnGen)
-    } else {
-      parent = self.SelectParent(rnGen)
+    parent = self.SelectParent(rnGen)
+    // inherit (copy of) parent's action module
+    self.agents[i].actMod = parent.actMod.Copy();
+    // mutate inherited strategy
+    for j := 0; j < 4; j++ {
+      if (RandPercent(rnGen) < float64(self.pactmut)) {
+        // flip bit i
+        self.agents[i].actMod.bits[j] = !self.agents[i].actMod.bits[j]
+      }
     }
-    // inherit parent's action module
-    self.agents[i].actMod = parent.actMod;
   }
 }
 
