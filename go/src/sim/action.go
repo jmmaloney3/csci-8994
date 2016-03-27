@@ -40,6 +40,17 @@ func (self *ActionModule) ChooseDonate(donor Rep, recip Rep, rnGen *rand.Rand) b
   return rval
 }
 
+// return true of the two modules have the same bits
+func (self *ActionModule) SameBits(am *ActionModule) bool {
+  if (self == am) { return true }
+  for i := 0; i < 4; i++ {
+    if (self.bits[i] != am.bits[i]) {
+      return false
+    }
+  }
+  return true
+}
+
 func (self *ActionModule) GetBit(i int) int {
   if (self.bits[i]) {
     return 1
