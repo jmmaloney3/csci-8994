@@ -27,7 +27,7 @@ func AssertAgentEqual(t *testing.T, r1 *Agent, r2 *Agent) {
 }
 // assert that the two action modules are equal
 func AssertActModEqual(t *testing.T, r1 *ActionModule, r2 *ActionModule) {
-  if (r1 != r2) {
+  if (!r1.SameBits(r2)) {
     LogErr(t, fmt.Sprintf("%v does not equal %v", r1, r2))
   }
 }
