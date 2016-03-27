@@ -13,6 +13,10 @@ func NewActionModule(b1 bool, b2 bool, b3 bool, b4 bool, pexeerr float32) *Actio
                          pexeerr: pexeerr }
 }
 
+func (am *ActionModule) Copy() *ActionModule {
+  return NewActionModule(am.bits[0], am.bits[1], am.bits[2], am.bits[3], am.pexeerr)
+}
+
 func (self *ActionModule) ChooseDonate(donor Rep, recip Rep, rnGen *rand.Rand) bool {
   var rval bool
   if (donor == GOOD) {
