@@ -21,7 +21,7 @@ func TestAssess(u *testing.T) {
 func TestCopy(u *testing.T) {
   // stern judging assessment module
   am1 := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
-  am2 := CopyAssessModule(*am1)
+  am2 := am1.Copy()
 
   AssertFalse(u, am1 == am2)
   AssertRepEqual(u, am1.bits[0], am2.bits[0])
