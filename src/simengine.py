@@ -29,7 +29,7 @@ class SimEngine:
     '''
     Play the required rounds of the IR game to complete the current generation.
     '''
-    def playrounds(self, cost, benefit, USE_MP=False):
+    def playrounds(self, cost, benefit, USE_MP=True):
         if (USE_MP):
             simengine_mp.playrounds_mp(self, cost, benefit);
         else:

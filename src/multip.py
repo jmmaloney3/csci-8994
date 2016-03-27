@@ -7,7 +7,9 @@ Created on Sun Mar 13 17:39:33 2016
 
 import multiprocessing;
 import simengine
+import tribe
 import itertools
+import time
 
 pool = multiprocessing.Pool(2);
 
@@ -124,8 +126,15 @@ def testtribe():
         for a in t.agents:
             print "  agent payout: %d" % a.payout
 
+def simrounds(tribe_data):
+    # reconsruct tribe
+    num_agents = len(tribe_data) - 1
+    tribe = tribe.Tribe(0,num_agents)
+    for a in tribe_data[1:]:
+        
+
 def testpool():
-    sim = simengine.SimEngine(2,2)
+    sim = simengine.SimEngine(64,64)
     
     for t in sim.tribes:
         print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
@@ -140,30 +149,50 @@ def testpool():
     
     pool = multiprocessing.Pool()
     
+    start = time.time();
+    start_cpu = time.clock()
+    
     cost = itertools.repeat(1)
     benefit = itertools.repeat(3)
     queue = itertools.repeat(Q)
     value = itertools.repeat(V)
     lock = itertools.repeat(L)
     
-    args = itertools.izip(sim.tribes, cost, benefit, queue, value, lock)
+    # collect data needed to recreate tribes
+    tasks = []
+    for j in xrange(len(sim.tribes)):
+        tribe_data = []
+        tribe_data.append(sim.tribes[j].total_payouts)
+        for i in xrange(len(sim.tribes[j].agents)):
+            agent_data = []
+            agent_data.append([t.agents[i].rep, t.agents[i].payout])
+            tribe_data.append(agent_data)
+        tasks.append(tribe_data)
+        
+    for i in xrange(10):
+        args = itertools.izip(sim.tribes, cost, benefit, queue, value, lock)
+        pool.map(tribe_poolit, args)
     
-    pool.map(tribe_poolit, args)
-
-    new_tribes = []
-    while (not Q.empty()):
-        t = Q.get()
-        new_tribes.append(t)
-        print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
-        for a in t.agents:
-            print "  agent payout: %d" % a.payout
+        #new_tribes = []
+        #while (not Q.empty()):
+            #t = Q.get()
+            #new_tribes.append(t)
+            #print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
+            #for a in t.agents:
+            #    print "  agent payout: %d" % a.payout
     
-    sim.tribes = new_tribes
-
+        #sim.tribes = new_tribes
+    
+    end_cpu = time.clock()
+    end = time.time()
+    
     for t in sim.tribes:
         print "tribe payout: %d (%d)" % (t.total_payouts, len(t.agents))
         for a in t.agents:
             print "  agent payout: %d" % a.payout
     
     print 'total payout: %d' % V.value
+    
+    print 'cpu time:  %6.2f seconds' % (end_cpu - start_cpu)
+    print 'wall time: %6.2f seconds' % (end - start)
  

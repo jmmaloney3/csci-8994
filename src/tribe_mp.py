@@ -48,4 +48,6 @@ def playrounds_mp(t, cost, benefit):
     args = itertools.izip(t.agents, C, B)
     # play rounds using multiprocessing
     rvals = POOL.map(playrounds_worker, args)
+    # process return values
+    
     return t.total_payouts;
