@@ -6,7 +6,7 @@ func TestAssess(u *testing.T) {
   rnGen := NewRandNumGen()
 
   // stern judging assessment module
-  am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
+  am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, 0)
 
   AssertRepEqual(u, am.AssignRep(GOOD, GOOD, DONATE, rnGen), GOOD)
   AssertRepEqual(u, am.AssignRep(GOOD, GOOD, REFUSE, rnGen), BAD)
