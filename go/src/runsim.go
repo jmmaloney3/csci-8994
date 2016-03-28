@@ -62,7 +62,9 @@ func main() {
   var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, *useMP)
 
   // output simulation parameters
+  fmt.Println("[")
   WriteSimParams(s, *gens, *cost, *benefit, *fname)
+  fmt.Println(",")
 
   // calculate max possible payout per generation
   max, min := s.MaxMinPayouts(int32(*cost),int32(*benefit))
@@ -72,25 +74,28 @@ func main() {
     // fmt.Printf("total payout for generation %5d: %7d\n", g, p)
     s.EvolveTribes()
     s.Reset()
-    n, a := s.GetStats()
-    WriteStats(writer, g, *numTribes, *numAgents, n, a, p, min, max)
+    n, a, allc, alld := s.GetStats()
+    WriteStats(writer, g, *numTribes, *numAgents, n, a, allc, alld, p, min, max)
   }
   end := time.Now()
 
   writer.Flush()
 
-  fmt.Println("completed in ", end.Sub(start))
+  fmt.Println("{\n  \"runtime\":", end.Sub(start), "\n}")
+  fmt.Println("]")
 }
 
 func WriteHeader(w io.Writer) {
-  fmt.Fprintf(w, "gen,t,a,n0,n1,n2,n3,n4,n5,n6,n7,a0,a1,a2,a3,po,minpo,maxpo\n")
+  fmt.Fprintf(w, "gen,t,a,n0,n1,n2,n3,n4,n5,n6,n7,a0,a1,a2,a3,allc,alld,po,minpo,maxpo\n")
 }
 func WriteStats(w io.Writer, gen int, numTribes int, numAgents int,
-                n [8]int, a [4]int, p int32, min int32, max int32) {
-  fmt.Fprintf(w, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+                n [8]int, a [4]int, allcCnt int, alldCnt int,
+                p int32, min int32, max int32) {
+  fmt.Fprintf(w, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                  gen, numTribes, numAgents,
                  n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
                  a[0], a[1], a[2], a[3],
+                 allcCnt, alldCnt,
                  p, min, max)
 }
 

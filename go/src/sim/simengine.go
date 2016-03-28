@@ -22,6 +22,9 @@ type SimEngine struct {
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
   pmig float32 // prob of migration: recommended 0.005
   passmut float32 // prob of assess module bit mutation: recommended 0.0001
+  // define some standard action modules for comparison
+  ALLD *ActionModule // a constant used for comparison during stats gathering
+  ALLC *ActionModule // a constant used for comparison during stats gathering
 }
 
 func NewDefaultSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
@@ -92,7 +95,9 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, passmut: float32(passmut) }
+                      rnGen: rnGen, passmut: float32(passmut),
+                      ALLC: NewActionModule(true, true, true, true, 0),
+                      ALLD: NewActionModule(false, false, false, false, 0) }
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -188,20 +193,26 @@ func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe, rnGen *rand.Rand) {
 }
 
 // Collect statistics for the most recently completed generation
-func (self *SimEngine) GetStats() (assess_stats [8]int, action_stats [4]int) {
+func (self *SimEngine) GetStats() (assessStats [8]int, actionStats [4]int, allcCnt int, alldCnt int) {
   for i := 0; i < self.numTribes; i++ {
     // collect statistics on the tribe's assess module
     for j := 0; j < 8; j++ {
-      assess_stats[j] += self.tribes[i].assessMod.GetBit(j)
+      assessStats[j] += self.tribes[i].assessMod.GetBit(j)
     }
     // collect statistics on the agent's action modules
     for k := 0; k < self.tribes[i].numAgents; k++ {
       for m := 0; m < 4; m++ {
-        action_stats[m] += self.tribes[i].agents[k].actMod.GetBit(m)
+        actionStats[m] += self.tribes[i].agents[k].actMod.GetBit(m)
+      }
+      // count occurences of ALLD and ALLC
+      if (self.tribes[i].agents[k].actMod.SameBits(self.ALLD)) {
+        alldCnt++
+      } else if (self.tribes[i].agents[k].actMod.SameBits(self.ALLC)) {
+        allcCnt++
       }
     }
   }
-  return assess_stats, action_stats
+  return assessStats, actionStats, allcCnt, alldCnt
 }
 
 // Determine the tribe that wins the conflict
