@@ -22,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('csvfile', help='file that holds the raw generation data')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation')
+    parser.add_argument('-t', type=percent_type, help='threshold for ALLD/ALLC strategy types')
     parser.add_argument('-o', type=str, help='output file')
     parser.add_argument('-v', action='store_true')
     
@@ -34,13 +35,25 @@ def main():
     else:
         periods = args.p
     
+    if (not args.t):
+        allcd_t = 0.1
+    else:
+        allcd_t = args.t
+
     if (not args.o):
         ofile = None
     else:
         ofile = args.o
 
-    run_script(args.csvfile, periods, ofile, args.v)
+    run_script(args.csvfile, periods, allcd_t, ofile, args.v)
 # end main
+
+def percent_type(value):
+    fvalue = float(value)
+    if ((fvalue <0) or (fvalue > 1)):
+        msg = "%s is an invalid percent value" % value
+        raise argparse.ArgumentTypeError(msg)
+    return fvalue
 
 def get_result(percent):
     if (percent > 0.95):
@@ -51,7 +64,7 @@ def get_result(percent):
         return 'X'
 # end get_result
 
-def run_script(csvfile, periods, ofile_name, verbose):
+def run_script(csvfile, periods, allcd_t, ofile_name, verbose):
     # Collect the files to process
     files = []
     if (path.exists(csvfile)):
@@ -64,17 +77,17 @@ def run_script(csvfile, periods, ofile_name, verbose):
 
     # get output file handle and calculate stats
     if (ofile_name is None):
-        calc_stats(files, periods, sys.stdout, verbose)
+        calc_stats(files, periods, allcd_t, sys.stdout, verbose)
     else:    
         if (path.exists(ofile_name)):
             sys.stderr.write('output file %s exists\n' % ofile_name)
             return
         else:
             with open(ofile_name, 'wb') as ofile:
-                calc_stats(files, periods, ofile, verbose)
+                calc_stats(files, periods, allcd_t, ofile, verbose)
 # end run_script
     
-def calc_stats(files, periods, ofile, verbose):
+def calc_stats(files, periods, allcd_t, ofile, verbose):
     # create csv writer
     csv_writer = csv.writer(ofile)
     
@@ -89,10 +102,10 @@ def calc_stats(files, periods, ofile, verbose):
     for ifile in files:
         fname, fext = os.path.splitext(ifile)
         if (fext == '.csv'):
-            process_file(ifile, periods, csv_writer, assess_columns, action_columns, verbose)
+            process_file(ifile, periods, csv_writer, assess_columns, action_columns, allcd_t, verbose)
 # end calc_stats
 
-def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, verbose):    
+def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, allcd_t, verbose):    
     # load CSV data
     if (verbose):
         sys.stderr.write('Loading data from %s...\n' % csvfile)
@@ -101,8 +114,9 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, v
     # get bit column data
     assess_data = data[assess_columns]
     action_data = data[action_columns]
-    
-    # negative periods argument means plot all the data
+    allcd_data  = data[['allc', 'alld']]
+
+    # negative periods argument means use all the data
     if (periods < 0):
         if (verbose):
             sys.stderr.write('  calculate statistics using data for all periods...\n')
@@ -112,6 +126,7 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, v
         start_idx = data.shape[0] - periods
         assess_data = assess_data[start_idx:]
         action_data = action_data[start_idx:]
+        allcd_data  = allcd_data[start_idx:]
 
     # get number of tribes and agents
     num_tribes = data['t'][0]
@@ -119,8 +134,17 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, v
 
     # calculate maximum count given specified number of periods
     max_assess = periods*num_tribes
-    max_action = periods*num_agents
+    max_action = periods*(num_agents*num_tribes)
     
+    # check allc/alld threshold
+    allcd_percent = allcd_data.sum()/max_action
+    if (allcd_percent['allc'] > allcd_t):
+        sys.stderr.write('  [%s] ALLC prevelance (%4.2f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['allc'], allcd_t))
+        return
+    if (allcd_percent['alld'] > allcd_t):
+        sys.stderr.write('  [%s] ALLD prevelance (%4.2f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['alld'], allcd_t))
+        return
+
     # calculate results
     assess_percent = assess_data.sum()/max_assess
     assess_result = [ get_result(p) for p in assess_percent ]
