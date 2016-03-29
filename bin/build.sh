@@ -14,7 +14,7 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # assumption: this bash script is in the $BIN directory
 # set the go path
-GOPATH=$BIN/../go
+export GOPATH=$BIN/../go
 
 # build and install the sim package
 go install sim
