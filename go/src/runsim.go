@@ -35,7 +35,7 @@ func main() {
   passerr := flag.Float64(sim.PASSE_F, sim.PASSERR, "assessment error probability")
   pexeerr := flag.Float64(sim.PEXEE_F, sim.PEXEERR, "execution error probability")
   fname   := flag.String(sim.FNAME_F, sim.FNAME, "file to collect stats")
-  useMP   := flag.Bool(sim.USEMP_F, sim.USEMP, "whether to use multiprocessing")
+  noMP    := flag.Bool(sim.NOMP_F, sim.NOMP, "turn off multiprocessing")
   flag.Parse()
 
   // create parameter map
@@ -59,7 +59,7 @@ func main() {
   start := time.Now()
 
   // create simulation
-  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, *useMP)
+  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, !*noMP)
 
   // output simulation parameters
   fmt.Println("[")

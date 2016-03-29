@@ -17,7 +17,7 @@ const (
  TRIBES_F = "t"
  BETA = 1.2 // default value of conflict selection strength
  BETA_F = "beta"
- ETA = 0.15 // default value of bit switching selection strength
+ ETA = 0.1 // default value of bit switching selection strength
  ETA_F = "eta"
  PCON = 0.01 // default probability of tribal conflict
  PCON_F = "pcon"
@@ -35,8 +35,8 @@ const (
  PEXEE_F = "pexeerr"
  FNAME = "stats.csv"
  FNAME_F = "f"
- USEMP = false
- USEMP_F = "mp"
+ NOMP = false
+ NOMP_F = "nmp"
 )
 
 type Rep int

@@ -13,7 +13,7 @@ type SimEngine struct {
   numTribes int
   totalPayouts int32
   rnGen *rand.Rand // hold a RN generator for sequential processing
-  useMP bool
+  useMP bool // flag that indicates whether multiprocessing should be used
   numCpu int
   cpuTasks []int // when using MP, num tasks to assign to each CPU
   cpuRNG []*rand.Rand // a separate random number generator for each CPU
