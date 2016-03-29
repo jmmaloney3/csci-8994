@@ -13,7 +13,7 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # run several sim jobs
 
-GENS = 10000
+GENS=10000
 #GENS=10
 SIMS=500
 #SIMS=5
