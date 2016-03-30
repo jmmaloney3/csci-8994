@@ -13,12 +13,12 @@ func TestAction(u *testing.T) {
   AssertFalse(u, am.ChooseDonate(BAD, BAD, rnGen))
 }
 
-func TestGetBit(u *testing.T) {
+func TestActionGetBit(u *testing.T) {
   // CO action module
   am := NewActionModule(true, false, true, false, PEXEERR)
 
   AssertIntEqual(u, am.GetBit(0), 1)
   AssertIntEqual(u, am.GetBit(1), 0)
   AssertIntEqual(u, am.GetBit(2), 1)
-  AssertIntEqual(u, am.GetBit(3), 0)  
+  AssertIntEqual(u, am.GetBit(3), 0)
 }
