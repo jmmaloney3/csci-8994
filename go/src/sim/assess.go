@@ -4,6 +4,22 @@ import "math"
 import "math/rand"
 import "fmt"
 
+/*
+ * An asessment module that assigns a reputation to a donor based on the
+ * donor's reputation, the recipient's reputation and the action taken by
+ * the donor.
+ *
+ *   donor rep  recip rep  donor act  result rep
+ *   ---------  ---------  ---------  ----------
+ *     GOOD        GOOD      DONATE    bits[0]
+ *     GOOD        GOOD      REFUSE    bits[1]
+ *     GOOD        BAD       DONATE    bits[2]
+ *     GOOD        BAD       REFUSE    bits[3]
+ *     BAD         GOOD      DONATE    bits[4]
+ *     BAD         GOOD      REFUSE    bits[5]
+ *     BAD         BAD       DONATE    bits[6]
+ *     BAD         BAD       REFUSE    bits[7]
+ */
 type AssessModule struct {
   bits [8]Rep
   passerr float32 // mu_a - assessment error - assing wrong reputation
