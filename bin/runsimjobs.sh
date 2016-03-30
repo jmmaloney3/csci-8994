@@ -52,11 +52,14 @@ PASSERR=0
 # benefit = 5
 BEN=5
 time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
+tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
 
 # benefit = 10
 BEN=10
 time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
+tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
 
 # benefit = 20
 BEN=20
 time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
+tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
