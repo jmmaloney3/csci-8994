@@ -32,17 +32,31 @@ SIMS=500
 #BETA=10
 #time $BIN/runsim8.sh beta-$BETA $SIMS -g $GENS -beta $BETA
 
-BETA = 1000
+BETA=1000
+
+# benefit = 5
+#BEN=5
+#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
+
+# benefit = 10
+#BEN=10
+#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
+
+# benefit = 20
+#BEN=20
+#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
+
+# set assessment/perception errors to zero
+PASSERR=0
 
 # benefit = 5
 BEN=5
-time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
+time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
 
 # benefit = 10
 BEN=10
-time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
+time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
 
 # benefit = 20
 BEN=20
-time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
-	
+time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
