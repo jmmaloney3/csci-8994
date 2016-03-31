@@ -52,7 +52,7 @@ func TestCopy(u *testing.T) {
   AssertRepNotEqual(u, am1.bits[7], am2.bits[7])
 }
 
-func TestGetBit(u *testing.T) {
+func TestAssessGetBit(u *testing.T) {
   // stern judging assessment module
   am := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
 
@@ -63,5 +63,5 @@ func TestGetBit(u *testing.T) {
   AssertIntEqual(u, am.GetBit(4), 1)
   AssertIntEqual(u, am.GetBit(5), 0)
   AssertIntEqual(u, am.GetBit(6), 0)
-  AssertIntEqual(u, am.GetBit(7), 1)  
+  AssertIntEqual(u, am.GetBit(7), 1)
 }
