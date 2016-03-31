@@ -27,7 +27,7 @@ func TestPlayround(t *testing.T) {
   AssertInt32Equal(t, rec.payout, 0)
 
   // configure donor action module
-  don.actMod = NewActionModule(true, false, true, true, PEXEERR);
+  don.actMod = NewActionModule(true, false, true, true, PACTMUT, PEXEERR);
 
   // GOOD GOOD
   AssertTrue(t, don.ChooseDonate(rec, rnGen))

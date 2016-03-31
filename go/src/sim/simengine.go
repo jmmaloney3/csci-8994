@@ -96,8 +96,8 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
                       rnGen: rnGen, passmut: float32(passmut),
-                      ALLC: NewActionModule(true, true, true, true, 0),
-                      ALLD: NewActionModule(false, false, false, false, 0) }
+                      ALLC: NewActionModule(true, true, true, true, 0, 0),
+                      ALLD: NewActionModule(false, false, false, false, 0, 0) }
 }
 
 // Reset the simulations to prepare for participation in the next generation.

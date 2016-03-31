@@ -28,7 +28,7 @@ func ChooseDonateManualTest() {
   errorRate := float32(0.5)
 
   // CO action module
-  am := NewActionModule(true, false, true, false, errorRate)
+  am := NewActionModule(true, false, true, false, PACTMUT, errorRate)
 
   rnGen := NewRandNumGen()
 
@@ -42,6 +42,28 @@ func ChooseDonateManualTest() {
   }
   fmt.Printf("  expected error rate: %6.4f\n", errorRate)
   fmt.Printf("  actual error rate:   %6.4f\n", float64(errors)/float64(N))
+}
+
+func CloneWithMutationsManualTest() {
+  fmt.Println("ActionModule.CloneWithMutations")
+  pactmut := float32(0.5)
+
+  // CO action module
+  am := NewActionModule(true, false, true, false, pactmut, PEXEERR)
+
+  rnGen := NewRandNumGen()
+
+  mutations := 0
+  N := 100
+  for i := 0; i < N; i++ {
+    clone := am.CloneWithMutations(rnGen)
+    // count mutations
+    for j := 0; j < 4; j++ {
+      if (am.bits[j] != clone.bits[j]) { mutations++ }
+    }
+  }
+  fmt.Printf("  expected mutation rate: %6.4f\n", pactmut)
+  fmt.Printf("  actual error rate:   %6.4f\n", float64(mutations)/float64(N*4))
 }
 
 func AssignRolesManualTest() {

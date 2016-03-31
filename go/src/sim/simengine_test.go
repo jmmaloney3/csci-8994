@@ -39,16 +39,17 @@ func runSimTest(u *testing.T, useMP bool) {
   s := NewSimEngine(2, 2, params, useMP)
 
   // set up tribe 0
+  pactmut := float32(0)
   s.tribes[0].assessMod = NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, PASSERR)
   // unconditional cooperators
-  s.tribes[0].agents[0].actMod = NewActionModule(true, true, true, true, PEXEERR)
-  s.tribes[0].agents[1].actMod = NewActionModule(true, true, true, true, PEXEERR)
+  s.tribes[0].agents[0].actMod = NewActionModule(true, true, true, true, pactmut, PEXEERR)
+  s.tribes[0].agents[1].actMod = NewActionModule(true, true, true, true, pactmut, PEXEERR)
 
   // set up tribe 1
   s.tribes[1].assessMod = NewAssessModule(BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, PASSERR)
   // unconditional defectors
-  s.tribes[1].agents[0].actMod = NewActionModule(false, false, false, false, PEXEERR)
-  s.tribes[1].agents[1].actMod = NewActionModule(false, false, false, false, PEXEERR)
+  s.tribes[1].agents[0].actMod = NewActionModule(false, false, false, false, pactmut, PEXEERR)
+  s.tribes[1].agents[1].actMod = NewActionModule(false, false, false, false, pactmut, PEXEERR)
 
   s.PlayRounds(cost, benefit)
   for i := 0; i < s.numTribes; i++ {

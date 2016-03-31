@@ -4,7 +4,7 @@ import "testing"
 
 func TestAction(u *testing.T) {
   // CO action module
-  am := NewActionModule(true, false, true, false, PEXEERR)
+  am := NewActionModule(true, false, true, false, PACTMUT, PEXEERR)
 
   rnGen := NewRandNumGen()
   AssertTrue(u, am.ChooseDonate(GOOD, GOOD, rnGen))
@@ -15,7 +15,7 @@ func TestAction(u *testing.T) {
 
 func TestActionGetBit(u *testing.T) {
   // CO action module
-  am := NewActionModule(true, false, true, false, PEXEERR)
+  am := NewActionModule(true, false, true, false, PACTMUT, PEXEERR)
 
   AssertIntEqual(u, am.GetBit(0), 1)
   AssertIntEqual(u, am.GetBit(1), 0)

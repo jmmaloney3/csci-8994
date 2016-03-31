@@ -10,7 +10,6 @@ type Tribe struct {
   assessMod *AssessModule
   numAgents int
   totalPayouts int32
-  pactmut float32 // mu_s - action module bit mutation probability
 }
 
 // Create a new tribe.
@@ -19,12 +18,12 @@ func NewTribe(numAgents int, passerr float32, pactmut float32, pexeerr float32, 
   var assm = NewAssessModule(RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
                              RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
                              passerr)
-  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0, pactmut: pactmut }
+  t := &Tribe { assessMod: assm, numAgents: numAgents, totalPayouts: 0 }
   // create the tribe's agents
   t.agents = make([]*Agent, numAgents)
   // create agents
   for i := 0; i < numAgents; i++ {
-    t.agents[i] = NewAgent(t, pexeerr, rnGen)
+    t.agents[i] = NewAgent(t, pactmut, pexeerr, rnGen)
   }
 
   return t
@@ -95,15 +94,8 @@ func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
   for i := 0; i < self.numAgents; i++ {
     // select parent
     parent = self.SelectParent(rnGen)
-    // inherit (copy of) parent's action module
-    self.agents[i].actMod = parent.actMod.Copy();
-    // mutate inherited strategy
-    for j := 0; j < 4; j++ {
-      if (RandPercent(rnGen) < float64(self.pactmut)) {
-        // flip bit i
-        self.agents[i].actMod.bits[j] = !self.agents[i].actMod.bits[j]
-      }
-    }
+    // inherit clone of parent's action module with mutations
+    self.agents[i].actMod = parent.actMod.CloneWithMutations(rnGen);
   }
 }
 
@@ -114,7 +106,6 @@ func (self *Tribe) AvgPayout() float64 {
 
 func (self *Tribe) WriteSimParams() {
   fmt.Printf("  \"nagents\":%d,\n", self.numAgents)
-  fmt.Printf("  \"pactmut\":%.5f,\n", self.pactmut)
   // write assess module parameters
   self.assessMod.WriteSimParams()
   // write agent parameters
