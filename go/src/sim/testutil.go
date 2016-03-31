@@ -44,11 +44,7 @@ func AssertRepEqual(t *testing.T, r1 Rep, r2 Rep) {
 // assert that the two reputations are NOT equal
 func AssertRepNotEqual(t *testing.T, r1 Rep, r2 Rep) {
   if (r1 == r2) {
-    var rep1 string
-    var rep2 string
-    if (r1 == 0) { rep1 = "GOOD" } else { rep1 = "BAD" }
-    if (r2 == 0) { rep2 = "GOOD" } else { rep2 = "BAD" }
-    LogErr(t, fmt.Sprintf("%v does equals %v", rep1, rep2))
+    LogErr(t, fmt.Sprintf("%v does equals %v", r1, r2))
   }
 }
 // assert that the two Int8s aee equal
