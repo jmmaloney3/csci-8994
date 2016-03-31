@@ -21,6 +21,7 @@ func NewAgent(t *Tribe, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Age
 // Reset the agent's internal state to prepare for participation in the
 // next generation.
 func (self *Agent) Reset() {
+  self.rep = GOOD
   self.payout = 0
   self.numGames = 0
 }
