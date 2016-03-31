@@ -228,7 +228,7 @@ func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe, rnGen *rand.Rand) 
   } else {
     diff := tribeB.AvgPayout() - tribeA.AvgPayout()
     p  := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
-    if (RandPercent(rnGen) > p) {
+    if (RandPercent(rnGen) < p) {
       return tribeB, tribeA
     } else {
       return tribeA, tribeB
