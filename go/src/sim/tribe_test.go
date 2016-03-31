@@ -17,7 +17,7 @@ func TestPlayRounds(u * testing.T) {
   t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
 
   // all agents use CO action model
-  co := NewActionModule(true, false, true, false, PEXEERR)
+  co := NewActionModule(true, false, true, false, 0)
   for i := 0; i < len(t.agents); i++ {
     t.agents[i].actMod = co
   }
