@@ -45,6 +45,10 @@ const (
   BAD Rep = iota
 )
 
+func (r Rep) String() string {
+  if (r == GOOD) { return "GOOD" } else { return "BAD" }
+}
+
 type Act int
 const (
   DONATE Act = iota
