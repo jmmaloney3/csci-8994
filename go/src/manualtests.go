@@ -7,5 +7,7 @@ func main() {
 
   sim.AssignRepManualTest()
 
+  sim.AssignRolesManualTest()
+  
   sim.SelectParentManualTest()
 }

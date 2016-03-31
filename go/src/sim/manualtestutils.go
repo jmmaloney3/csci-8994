@@ -44,6 +44,33 @@ func ChooseDonateManualTest() {
   fmt.Printf("  actual error rate:   %6.4f\n", float64(errors)/float64(N))
 }
 
+func AssignRolesManualTest() {
+  fmt.Println("Tribe.AssignRoles")
+  rnGen := NewRandNumGen()
+  const numAgents = 2
+
+  // tribe with numAgents agents
+  t := NewTribe(numAgents, PASSERR, PACTMUT, PEXEERR, rnGen)
+
+  // print out some randomly selected parent agents
+  var selected [numAgents]int
+  N := 100
+  for i := 0; i < N; i++ {
+    a,_ := t.AssignRoles(t.agents[0], t.agents[1], rnGen)
+    for j := 0; j < numAgents; j++ {
+      if (a == t.agents[j]) {
+        selected[j]++
+      }
+    }
+    // fmt.Printf("parent payout: %d\n", a.payout)
+  }
+
+  for i := 0; i < numAgents; i++ {
+    fmt.Printf("  expected rate for agent %d: %6.4f\n", i, 0.5)
+    fmt.Printf("  actual rate for agent   %d: %6.4f\n", i, float64(selected[i])/float64(N))
+  }
+}
+
 func SelectParentManualTest() {
   fmt.Println("Tribe.SelectParent")
   rnGen := NewRandNumGen()
@@ -74,6 +101,7 @@ func SelectParentManualTest() {
     }
     // fmt.Printf("parent payout: %d\n", a.payout)
   }
+
   for i := 0; i < numAgents; i++ {
     fmt.Printf("  expected rate for agent %d: %6.4f\n", i, float64(t.agents[i].payout)/float64(t.totalPayouts))
     fmt.Printf("  actual rate for agent   %d: %6.4f\n", i, float64(selected[i])/float64(N))

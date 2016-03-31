@@ -47,15 +47,7 @@ func (self *Tribe) PlayRounds(cost int32, benefit int32, rnGen *rand.Rand) int32
   for idx, i := range random_idx {
     for _, j := range random_idx[idx+1:] {
       // randomly assign the agents to roles
-      if (RandBool(rnGen)) {
-        // agent i is donor and agent j is recipient
-        donor = self.agents[i]
-        recipient = self.agents[j]
-      } else {
-        // agent j is donor and agent i is recipient
-        donor = self.agents[j]
-        recipient = self.agents[i]
-      }
+      donor, recipient = self.AssignRoles(self.agents[i], self.agents[j], rnGen)
 
       // play the round
       self.totalPayouts += donor.PlayRound(recipient, cost, benefit, rnGen)
@@ -66,6 +58,20 @@ func (self *Tribe) PlayRounds(cost int32, benefit int32, rnGen *rand.Rand) int32
   return self.totalPayouts
 }
 
+// Randomly assign the agents to the donor and recipient roles
+func (self *Tribe) AssignRoles(a1 *Agent, a2 *Agent, rnGen *rand.Rand) (donor, recipient *Agent) {
+  // randomly assign the agents to roles
+  if (RandBool(rnGen)) {
+    // agent 1 is donor and agent 2 is recipient
+    donor = a1
+    recipient = a2
+  } else {
+    // agent 2 is donor and agent 1 is recipient
+    donor = a2
+    recipient = a1
+  }
+  return donor,recipient
+}
 // Randomly select an agent from the local population.  The chance that an
 // agent is selected is proportional to its fitness.
 func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
