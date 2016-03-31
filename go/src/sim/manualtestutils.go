@@ -1,6 +1,7 @@
 package sim
 
 import "fmt"
+import "math"
 
 func AssignRepManualTest() {
   fmt.Println("AssessModule.AssignRep")
@@ -128,4 +129,36 @@ func SelectParentManualTest() {
     fmt.Printf("  expected rate for agent %d: %6.4f\n", i, float64(t.agents[i].payout)/float64(t.totalPayouts))
     fmt.Printf("  actual rate for agent   %d: %6.4f\n", i, float64(selected[i])/float64(N))
   }
+}
+
+func ConflictManualTest() {
+  fmt.Println("SimEngine.Conflict")
+  rnGen := NewRandNumGen()
+  const numTribes = 2
+  const numAgents = 2
+  const beta = .6
+
+  // simengine with numTribes tribes and numAgents agents per tribes
+  s := NewDefaultSimEngine(numTribes, numAgents, true)
+  s.beta = beta
+
+  // set tribe payouts
+  t1 := s.tribes[0]
+  t1.totalPayouts = 10
+  t2 := s.tribes[1]
+  t2.totalPayouts = 20
+
+  // calculate conflict threshold
+  diff := t2.AvgPayout() - t1.AvgPayout()
+  p  := math.Pow(float64(1) + math.Exp(diff*(-beta)), float64(-1))
+
+  t2Wins := 0
+  N := 100
+  for i := 0; i < N; i++ {
+    w, _ := s.Conflict(t1, t2, rnGen)
+    if (w == t2) { t2Wins++ }
+  }
+
+  fmt.Printf("  expected win rate: %6.4f\n", p)
+  fmt.Printf("  actual win rate:   %6.4f\n", float64(t2Wins)/float64(N))
 }
