@@ -143,9 +143,11 @@ func ConflictManualTest() {
   s.beta = beta
 
   // set tribe payouts
-  t1 := s.tribes[0]
+  t1_idx := 0
+  t1 := s.tribes[t1_idx]
   t1.totalPayouts = 10
-  t2 := s.tribes[1]
+  t2_idx := 1
+  t2 := s.tribes[t2_idx]
   t2.totalPayouts = 20
 
   // calculate conflict threshold
@@ -155,8 +157,8 @@ func ConflictManualTest() {
   t2Wins := 0
   N := 100
   for i := 0; i < N; i++ {
-    w, _ := s.Conflict(t1, t2, rnGen)
-    if (w == t2) { t2Wins++ }
+    w_idx, _ := s.Conflict(t1_idx, t2_idx, rnGen)
+    if (w_idx == t2_idx) { t2Wins++ }
   }
 
   fmt.Printf("  expected win rate: %6.4f\n", p)
