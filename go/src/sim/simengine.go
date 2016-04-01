@@ -5,6 +5,7 @@ import "math/rand"
 import "time"
 import "runtime"
 import "fmt"
+import "sort"
 
 // A simulation engine for simulating the indirect reciprocity game
 // played among agents divided into tribes.
@@ -159,28 +160,62 @@ func (self *SimEngine) MaxMinPayouts(cost int32, benefit int32) (max int32, min 
   return max, min
 }
 
-// Create the next generation by propagating action modules to the next
-// generation based on the fitness those modules achieved.
-/*
-func (self *SimEngine) CreateNextGen() {
-  for i := 0; i < self.numTribes; i++ {
-    self.tribes[i].CreateNextGen()
-  }
-}
-*/
 // Evolve the tribal assessment modules based on the average payouts
 // earned by each tribe during the last generation
 func (self *SimEngine) EvolveTribes() {
+  // create a list of clones for the next generation
+  newTribes := make([]*Tribe, self.numTribes)
+  for i := 0; i < self.numTribes; i++ {
+    // create a copy for the next generation
+    // -- agents will be linked to this new tribe not the original
+    newTribes[i] = self.tribes[i].ShallowCopy()
+  }
+
+  // map tribes to a list of defeated tribes
+  conflicts := make(map[*Tribe][]*Tribe)
   // iterate over the tribes and select pairs for confict
   for i := 0; i < self.numTribes; i++ {
     for j := i+1; j < self.numTribes; j++ {
       if (RandPercent(self.rnGen) < float64(self.pcon)) {
-        winner, loser := self.Conflict(self.tribes[i], self.tribes[j], self.rnGen)
-        self.ShiftAssessMod(winner, loser, self.rnGen)
-        self.MigrateAgents(winner, loser, self.rnGen)
+        w, l := self.Conflict(i, j, self.rnGen)
+        // append the loser to the winner's list of defeated tribes
+        // -- take winner from original list (it will be source of modifications)
+        winner := self.tribes[w]
+        // -- take loser from new list (it will be modified)
+        loser := newTribes[l]
+        conflicts[winner] = append(conflicts[winner], loser)
       }
     }
   }
+
+  // sort the map keys based on payouts
+  // -- get the keys (http://stackoverflow.com/questions/21362950/go-golang-getting-an-array-of-keys-from-a-map)
+  keys := make([]*Tribe, len(conflicts))
+  i := 0
+  for k := range conflicts {
+    keys[i] = k
+    i++
+  }
+  // -- sort the keys
+  sort.Sort(SortTribesByPayouts(keys))
+
+  // evolve assessment modules and migrate agents
+  // -- tribes with a lower payout go first
+  // -- this implies that tribes with higher payouts can undo the changes made
+  // -- by tribes with lower payouts
+  for _, winner := range keys {
+    // get list of defeated tribes
+    losers := conflicts[winner]
+    for _, loser := range losers {
+      // winner comes from original list (source of modifications)
+      // loser comes from new list (will be modified)
+      self.ShiftAssessMod(winner, loser, self.rnGen)
+      self.MigrateAgents(winner, loser, self.rnGen)
+    }
+  }
+
+  // replace the original tribes with the new tribes
+  self.tribes = newTribes
 }
 
 // Migrate some agents from the first tribe to the second tribe
@@ -216,22 +251,24 @@ func (self *SimEngine) GetStats() (assessStats [8]int, actionStats [4]int, allcC
 }
 
 // Determine the tribe that wins the conflict
-func (self *SimEngine) Conflict(tribeA *Tribe, tribeB *Tribe, rnGen *rand.Rand) (winner, loser *Tribe) {
+func (self *SimEngine) Conflict(a int, b int, rnGen *rand.Rand) (winner, loser int) {
+  avgPayoutA := self.tribes[a].AvgPayout()
+  avgPayoutB := self.tribes[b].AvgPayout()
   if (math.IsInf(self.beta, int(1))) {
     // if Beta is infinite then tribe with higher payout always wins
-    if (tribeB.AvgPayout() > tribeA.AvgPayout()) {
-      return tribeB, tribeA
+    if (avgPayoutB > avgPayoutA) {
+      return b, a
     } else {
       // if A payout is greater than B payout or payouts are equal
-      return tribeA, tribeB
+      return a, b
     }
   } else {
-    diff := tribeB.AvgPayout() - tribeA.AvgPayout()
+    diff := avgPayoutB - avgPayoutA
     p  := math.Pow(float64(1) + math.Exp(diff*(-self.beta)), float64(-1))
     if (RandPercent(rnGen) < p) {
-      return tribeB, tribeA
+      return b, a
     } else {
-      return tribeA, tribeB
+      return a, b
     }
   }
 }
