@@ -19,10 +19,12 @@ func runSimTest(u *testing.T, useMP bool) {
   benefit := int32(3)
 
   // populate arg maps
-  // -- use default assessment error probability
-  params[PASSE_F] = PASSERR
-  // -- use default execution error probability
-  params[PEXEE_F] = PEXEERR
+  // -- set assessment error to zero so that agent actions are deterministic
+  passerr := float32(0)
+  params[PASSE_F] = float64(passerr)
+  // -- set execution error to zero so that agent actions are deterministic
+  pexeerr := float32(0)
+  params[PEXEE_F] = float64(pexeerr)
   // -- set probability of conflict to 1 so tribes always evolve
   params[PCON_F]  = float64(1)
   // -- set Beta to infinity so tribe with largest payout always wins
@@ -34,24 +36,26 @@ func runSimTest(u *testing.T, useMP bool) {
   // -- set probability of mutation to zero so that winner bits are copied faithfully
   params[PASSM_F] = float64(0)
   // -- set mutation probability to zero so only fittest stratgies are copied forward
-  params[PACTM_F] = float64(0)
+  pactmut := float32(0)
+  params[PACTM_F] = pactmut
 
   s := NewSimEngine(2, 2, params, useMP)
 
   // set up tribe 0
-  pactmut := float32(0)
-  s.tribes[0].assessMod = NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, PASSERR)
+  s.tribes[0].assessMod = NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, passerr)
   // unconditional cooperators
-  s.tribes[0].agents[0].actMod = NewActionModule(true, true, true, true, pactmut, PEXEERR)
-  s.tribes[0].agents[1].actMod = NewActionModule(true, true, true, true, pactmut, PEXEERR)
+  s.tribes[0].agents[0].actMod = NewActionModule(true, true, true, true, pactmut, pexeerr)
+  s.tribes[0].agents[1].actMod = NewActionModule(true, true, true, true, pactmut, pexeerr)
 
   // set up tribe 1
-  s.tribes[1].assessMod = NewAssessModule(BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, PASSERR)
+  s.tribes[1].assessMod = NewAssessModule(BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, passerr)
   // unconditional defectors
-  s.tribes[1].agents[0].actMod = NewActionModule(false, false, false, false, pactmut, PEXEERR)
-  s.tribes[1].agents[1].actMod = NewActionModule(false, false, false, false, pactmut, PEXEERR)
+  s.tribes[1].agents[0].actMod = NewActionModule(false, false, false, false, pactmut, pexeerr)
+  s.tribes[1].agents[1].actMod = NewActionModule(false, false, false, false, pactmut, pexeerr)
 
   s.PlayRounds(cost, benefit)
+
+  u.Logf("payouts before tribe evolution")
   for i := 0; i < s.numTribes; i++ {
     u.Logf("tribe %d totalPayouts = %d\n", i, s.tribes[i].totalPayouts)
     for j := 0; j < s.tribes[i].numAgents; j++ {
@@ -61,8 +65,16 @@ func runSimTest(u *testing.T, useMP bool) {
 
   s.EvolveTribes()
 
-  AssertTrue(u, s.tribes[0].assessMod.SameBits(s.tribes[1].assessMod))
-  am := NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, PASSERR)
-  AssertTrue(u, s.tribes[0].assessMod.SameBits(am))
-  AssertTrue(u, s.tribes[1].assessMod.SameBits(am))
+  u.Logf("payouts after tribe evolution")
+  for i := 0; i < s.numTribes; i++ {
+    u.Logf("tribe %d totalPayouts = %d\n", i, s.tribes[i].totalPayouts)
+    for j := 0; j < s.tribes[i].numAgents; j++ {
+      u.Logf("  agent %d payout = %d\n", j, s.tribes[i].agents[j].payout)
+    }
+  }
+
+  AssertAssModEqual(u, s.tribes[0].assessMod, s.tribes[1].assessMod)
+  am := NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, passerr)
+  AssertAssModEqual(u, s.tribes[0].assessMod, am)
+  AssertAssModEqual(u, s.tribes[1].assessMod, am)
 }
