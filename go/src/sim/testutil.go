@@ -31,6 +31,12 @@ func AssertActModEqual(t *testing.T, r1 *ActionModule, r2 *ActionModule) {
     LogErr(t, fmt.Sprintf("%v does not equal %v", r1, r2))
   }
 }
+// assert that the two action modules are equal
+func AssertAssModEqual(t *testing.T, r1 *AssessModule, r2 *AssessModule) {
+  if (!r1.SameBits(r2)) {
+    LogErr(t, fmt.Sprintf("%v does not equal %v", r1, r2))
+  }
+}
 // assert that the two reputations are equal
 func AssertRepEqual(t *testing.T, r1 Rep, r2 Rep) {
   if (r1 != r2) {
