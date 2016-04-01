@@ -29,6 +29,18 @@ func NewTribe(numAgents int, passerr float32, pactmut float32, pexeerr float32, 
   return t
 }
 
+// make a shallow copy of the tribe
+// -- agents will be transferred from original tribe to copy
+func (t *Tribe) ShallowCopy() *Tribe {
+  copy := &Tribe { assessMod: t.assessMod, numAgents: t.numAgents,
+                   totalPayouts: t.totalPayouts, agents: t.agents }
+  // link agents with this new shallow copy
+  for i := 0; i < copy.numAgents; i++ {
+    copy.agents[i].tribe = copy
+  }
+  return copy
+}
+
 // Reset the tribe's agents to prepare for participation in the next generation.
 func (self *Tribe) Reset() {
   self.totalPayouts = 0;
@@ -113,4 +125,16 @@ func (self *Tribe) WriteSimParams() {
   self.assessMod.WriteSimParams()
   // write agent parameters
   self.agents[0].WriteSimParams()
+}
+
+// type and function to support sorting tribes by payouts
+type SortTribesByPayouts []*Tribe
+func (tribes SortTribesByPayouts) Len() int {
+  return len(tribes)
+}
+func (tribes SortTribesByPayouts) Swap(i, j int) {
+  tribes[i], tribes[j] = tribes[j], tribes[i]
+}
+func (tribes SortTribesByPayouts) Less(i, j int) bool {
+  return tribes[i].totalPayouts < tribes[j].totalPayouts
 }
