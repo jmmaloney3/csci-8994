@@ -91,12 +91,15 @@ func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
 // generation based on the fitness those modules achieved.
 func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
   var parent *Agent
+  newAgents := make([]*Agent, self.numAgents)
   for i := 0; i < self.numAgents; i++ {
     // select parent
     parent = self.SelectParent(rnGen)
-    // inherit clone of parent's action module with mutations
-    self.agents[i].actMod = parent.actMod.CloneWithMutations(rnGen);
+    // create a clone of parent
+    newAgents[i] = parent.CloneWithMutations(rnGen)
   }
+  // replace the tribe's agents with the new agents
+  self.agents = newAgents
 }
 
 // Return the average payout for an agent in this tribe

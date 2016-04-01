@@ -18,6 +18,19 @@ func NewAgent(t *Tribe, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Age
   return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
 }
 
+// make a copy of the agent, the action module is copied but the tribe is not
+func (a *Agent) Copy() *Agent {
+  return &Agent { tribe: a.tribe, rep: a.rep, payout: a.payout, numGames: a.numGames,
+                  actMod: a.actMod.Copy() }
+}
+
+// clone the agent with possible mutations added, the action model is cloned
+// with mutatations, the tribe is the same as the original agent
+func (a *Agent) CloneWithMutations(rnGen *rand.Rand) *Agent {
+  return &Agent { tribe: a.tribe, rep: a.rep, payout: a.payout, numGames: a.numGames,
+                  actMod: a.actMod.CloneWithMutations(rnGen) }
+}
+
 // Reset the agent's internal state to prepare for participation in the
 // next generation.
 func (self *Agent) Reset() {
