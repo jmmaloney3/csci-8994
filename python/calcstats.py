@@ -139,10 +139,10 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     # check allc/alld threshold
     allcd_percent = allcd_data.sum()/max_action
     if (allcd_percent['allc'] > allcd_t):
-        sys.stderr.write('  [%s] ALLC prevelance (%4.2f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['allc'], allcd_t))
+        sys.stderr.write('  [%s] ALLC prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['allc'], allcd_t))
         return
     if (allcd_percent['alld'] > allcd_t):
-        sys.stderr.write('  [%s] ALLD prevelance (%4.2f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['alld'], allcd_t))
+        sys.stderr.write('  [%s] ALLD prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['alld'], allcd_t))
         return
 
     # calculate results
