@@ -81,7 +81,7 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
     tasksPerCpu := int(math.Ceil(float64(numTribes)/float64(ncpu)))
     taskSum := 0
     for i := 0; i < ncpu; i++ {
-      cpuRNG[i] = rand.New(rand.NewSource(time.Now().UnixNano()))
+      cpuRNG[i] = NewRandNumGen()
       if ((numTribes - taskSum) > tasksPerCpu) {
         cpuTasks[i] = tasksPerCpu
         taskSum += tasksPerCpu
@@ -101,6 +101,11 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
                       ALLD: NewActionModule(false, false, false, false, 0, 0) }
 }
 
+// Get the total payouts earned by al tribes in the most recent generation
+func (self *SimEngine) GetTotalPayouts() int32 {
+  return self.totalPayouts
+}
+
 // Reset the simulations to prepare for participation in the next generation.
 func (self *SimEngine) Reset() {
   self.totalPayouts = 0
@@ -109,9 +114,10 @@ func (self *SimEngine) Reset() {
   }
 }
 
-// Play the required rounds of the IR game to complete the current generation
-// and then create the next generation.
-func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
+// Play the required rounds of the IR game to complete the current generation.
+// Create and return the next generation.
+func (self *SimEngine) PlayRounds(cost int32, benefit int32) (nextGen []*Tribe) {
+  nextGen = make([]*Tribe, self.numTribes)
   if (self.useMP) {
     // create channel to collect payouts from each parallel task
     payouts := make(chan int32, self.numCpu)
@@ -124,7 +130,7 @@ func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
         task_payouts := int32(0)
         for j := tribeStart; j < tribeEnd; j++ {
           task_payouts += self.tribes[j].PlayRounds(cost, benefit, rnGen)
-          self.tribes[j].CreateNextGen(rnGen)
+          nextGen[j] = self.tribes[j].CreateNextGen(rnGen)
         }
         payouts <- task_payouts
       } (tribeStart, tribeEnd, self.cpuRNG[i])
@@ -136,10 +142,10 @@ func (self *SimEngine) PlayRounds(cost int32, benefit int32) int32 {
   } else {
     for i := 0; i < self.numTribes; i++ {
       self.totalPayouts += self.tribes[i].PlayRounds(cost, benefit, self.rnGen)
-      self.tribes[i].CreateNextGen(self.rnGen)
+      nextGen[i] = self.tribes[i].CreateNextGen(self.rnGen)
     }
   }
-  return self.totalPayouts
+  return nextGen
 }
 
 // Calculate the maximum and minimum total payouts that could be earned by the agents
@@ -162,15 +168,7 @@ func (self *SimEngine) MaxMinPayouts(cost int32, benefit int32) (max int32, min 
 
 // Evolve the tribal assessment modules based on the average payouts
 // earned by each tribe during the last generation
-func (self *SimEngine) EvolveTribes() {
-  // create a list of clones for the next generation
-  newTribes := make([]*Tribe, self.numTribes)
-  for i := 0; i < self.numTribes; i++ {
-    // create a copy for the next generation
-    // -- agents will be linked to this new tribe not the original
-    newTribes[i] = self.tribes[i].ShallowCopy()
-  }
-
+func (self *SimEngine) EvolveTribes(nextGen []*Tribe) {
   // map tribes to a list of defeated tribes
   conflicts := make(map[*Tribe][]*Tribe)
   // iterate over the tribes and select pairs for confict
@@ -182,7 +180,7 @@ func (self *SimEngine) EvolveTribes() {
         // -- take winner from original list (it will be source of modifications)
         winner := self.tribes[w]
         // -- take loser from new list (it will be modified)
-        loser := newTribes[l]
+        loser := nextGen[l]
         conflicts[winner] = append(conflicts[winner], loser)
       }
     }
@@ -205,6 +203,7 @@ func (self *SimEngine) EvolveTribes() {
   // -- by tribes with lower payouts
   for _, winner := range keys {
     // get list of defeated tribes
+    // -- TODO: check ok value to ensure value is found
     losers := conflicts[winner]
     for _, loser := range losers {
       // winner comes from original list (source of modifications)
@@ -215,7 +214,7 @@ func (self *SimEngine) EvolveTribes() {
   }
 
   // replace the original tribes with the new tribes
-  self.tribes = newTribes
+  self.tribes = nextGen
 }
 
 // Migrate some agents from the first tribe to the second tribe
@@ -275,16 +274,26 @@ func (self *SimEngine) Conflict(a int, b int, rnGen *rand.Rand) (winner, loser i
 
 // Shift the loser's assessment module toward the winner's assessment module
 func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.Rand) {
-  // before changing the loser's assess module, make a copy in case
-  // it is shared with another tribe
-  loser.assessMod = loser.assessMod.Copy()
   // get average payouts
   poW := winner.AvgPayout()
   poL := loser.AvgPayout()
-  pflip := (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
-  //bits := loser.assessMod.GetBits()
-  //wBits := winner.assessMod.GetBits()
-  //fmt.Printf("before: %8b (%4d) => %8b (%4d)\n", bits, bits, wBits, wBits)
+  // calculate probability that loser's bit value will flip to winner's bit value
+  var pflip float64
+  if ((poW == 0) && (poL == 0)) {
+    if (self.eta > 0) {
+      pflip = float64(1)
+    } else {
+      pflip = float64(0)
+    }
+  } else {
+    pflip = (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
+  }
+  //if pflip is zero then none of the bits will flip - return immediately
+  if (pflip == 0) { return }
+  // before changing the loser's assess module, make a copy in case
+  // it is shared with another tribe
+  loser.assessMod = loser.assessMod.Copy()
+  // mutate the loser's assessment module
   for i := 0; i < 8; i++ {
     if (loser.assessMod.bits[i] != winner.assessMod.bits[i]) {
       if (RandPercent(rnGen) < pflip) {
@@ -298,11 +307,8 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.R
           loser.assessMod.bits[i] = GOOD
         }
       }
-      // mutation
     }
   }
-  //bits = loser.assessMod.GetBits()
-  //fmt.Printf("after:  %8b (%4d)\n", bits, bits)
 }
 
 func (self *SimEngine) WriteSimParams() {
