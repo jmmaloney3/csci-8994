@@ -2,7 +2,25 @@ package sim
 
 import "testing"
 
-func TestAction(u *testing.T) {
+func TestCloneWithMutation(u *testing.T) {
+  rnGen := NewRandNumGen()
+  // CO action module
+  // set mutation rate to zero
+  co := NewActionModule(true, false, true, false, float32(0.0), PEXEERR)
+
+  clone := co.CloneWithMutations(rnGen)
+  // mutation rate is zero so modules will be the same
+  AssertActModEqual(u, co, clone)
+
+  // set mutation rate to occurences
+  co.pactmut = float32(1.0)
+
+  clone = co.CloneWithMutations(rnGen)
+  // mutation rate is one so modules will be opposites
+  AssertActModOpposite(u, co, clone)
+}
+
+func TestChooseDonate(u *testing.T) {
   // CO action module
   am := NewActionModule(true, false, true, false, PACTMUT, PEXEERR)
 
