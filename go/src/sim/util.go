@@ -73,6 +73,7 @@ func RandBool(source *rand.Rand) bool {
 
 // Generate a random integer in the range [0, max] from the provided source
 func RandInt(source *rand.Rand, max int64) int64 {
+  if (max == 0) { return 0 }
   return source.Int63n(max)
 }
 
