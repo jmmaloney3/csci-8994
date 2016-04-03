@@ -29,6 +29,24 @@ func NewTribe(numAgents int, passerr float32, pactmut float32, pexeerr float32, 
   return t
 }
 
+// return the list of agents
+func (t *Tribe) GetAgents() []*Agent {
+  return t.agents
+}
+
+// generate string representation of a tribe
+func (t *Tribe) String() string {
+  str := "{\n"
+  str = str + fmt.Sprintf("  \"type\":%T\n", t)
+  str = str + fmt.Sprintf("  \"addr\":%p\n", t)
+  str = str + fmt.Sprintf("  \"num-agents\":%d\n", t.numAgents)
+  str = str + fmt.Sprintf("  \"assess-mod\":%v\n", t.assessMod)
+  str = str + fmt.Sprintf("  \"total-payouts\":%d \n", t.totalPayouts)
+  str = str + fmt.Sprintf("  \"agents\":%d \n", t.agents)
+  str = str + "}"
+  return str
+}
+
 // make a shallow copy of the tribe
 // -- agents will be transferred from original tribe to copy
 func (t *Tribe) ShallowCopy() *Tribe {
@@ -101,17 +119,19 @@ func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
 
 // Create the next generation by propagating action modules to the next
 // generation based on the fitness those modules achieved.
-func (self *Tribe) CreateNextGen(rnGen *rand.Rand) {
+func (currentGen *Tribe) CreateNextGen(rnGen *rand.Rand) *Tribe {
+  // create the next generation tribe
+  nextGen := &Tribe { assessMod: currentGen.assessMod, numAgents: currentGen.numAgents }
+  // create the next generation of agents
+  nextGen.agents = make([]*Agent, nextGen.numAgents)
   var parent *Agent
-  newAgents := make([]*Agent, self.numAgents)
-  for i := 0; i < self.numAgents; i++ {
-    // select parent
-    parent = self.SelectParent(rnGen)
-    // create a clone of parent
-    newAgents[i] = parent.CloneWithMutations(rnGen)
+  for i := 0; i < nextGen.numAgents; i++ {
+    // select parent from the current generation
+    parent = currentGen.SelectParent(rnGen)
+    // create a child of the parent and add to next generation
+    nextGen.agents[i] = parent.CreateChild(nextGen, rnGen)
   }
-  // replace the tribe's agents with the new agents
-  self.agents = newAgents
+  return nextGen
 }
 
 // Return the average payout for an agent in this tribe
@@ -128,6 +148,7 @@ func (self *Tribe) WriteSimParams() {
 }
 
 // type and function to support sorting tribes by payouts
+// -- tribes are sorted in ascending order of payouts
 type SortTribesByPayouts []*Tribe
 func (tribes SortTribesByPayouts) Len() int {
   return len(tribes)
