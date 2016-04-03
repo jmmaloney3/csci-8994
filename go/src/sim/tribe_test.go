@@ -1,23 +1,37 @@
 package sim
 
 import "testing"
+import "sort"
 
-func TestInit(u *testing.T) {
-  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, NewRandNumGen())
+func TestNewTribe(u *testing.T) {
+  numAgents := 3
+  t := NewTribe(numAgents, PASSERR, PACTMUT, PEXEERR, NewRandNumGen())
+  AssertIntEqual(u, t.numAgents, numAgents)
   AssertInt32Equal(u, t.totalPayouts, 0)
-  AssertIntEqual(u, len(t.agents), 3)
+  AssertIntEqual(u, len(t.agents), numAgents)
+  var agent *Agent
+  for i := 0; i < numAgents; i++ {
+    agent = t.agents[i]
+    AssertTrue(u, agent.tribe == t)
+    AssertRepEqual(u, agent.rep, GOOD)
+    AssertInt32Equal(u, agent.payout, 0)
+    AssertInt8Equal(u, agent.numGames, 0)
+  }
 }
 
 func TestPlayRounds(u * testing.T) {
   cost := int32(1)
   benefit := int32(3)
   rnGen := NewRandNumGen()
+  // make agent actions deterministic
+  pexeerr := float32(0)
+  passerr := float32(0)
 
-  t := NewTribe(3, PASSERR, PACTMUT, PEXEERR, rnGen)
-  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, PASSERR)
+  t := NewTribe(3, passerr, PACTMUT, pexeerr, rnGen)
+  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, passerr)
 
   // all agents use CO action model
-  co := NewActionModule(true, false, true, false, PACTMUT, 0)
+  co := NewActionModule(true, false, true, false, PACTMUT, pexeerr)
   for i := 0; i < len(t.agents); i++ {
     t.agents[i].actMod = co
   }
@@ -78,6 +92,49 @@ func TestPlayRounds(u * testing.T) {
   AssertInt32Equal(u, t.PlayRounds(cost, benefit, rnGen), 12)
 }
 
+func TestPlayRounds2(u *testing.T) {
+  cost := int32(1)
+  benefit := int32(3)
+  rnGen := NewRandNumGen()
+  // make agent actions deterministic
+  pexeerr := float32(0)
+  passerr := float32(0)
+
+  t := NewTribe(3, passerr, PACTMUT, pexeerr, rnGen)
+  // stern-judging assessment module
+  t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, passerr)
+
+  // all agents use CO action model
+  co := NewActionModule(true, false, true, false, PACTMUT, pexeerr)
+  for i := 0; i < len(t.agents); i++ {
+    t.agents[i].actMod = co
+  }
+
+  // set agent reps to BAD
+  for i := 0; i < len(t.agents); i++ {
+    t.agents[i].rep = BAD
+  }
+
+  // play rounds using stern-judging and CO
+  t.PlayRounds(cost, benefit, rnGen)
+
+  // count number of good agents
+  numGood := 0
+  for i := 0; i < 3; i++ {
+    if (t.agents[i].rep == GOOD) { numGood++ }
+  }
+  AssertTrue(u, (numGood == 2) || (numGood == 3))
+
+  // check results
+  tp := t.totalPayouts
+  switch {
+  case (numGood == 2):
+    AssertTrue(u, (tp == 6) || (tp == 8))
+  case (numGood == 3):
+    AssertTrue(u, (tp ==8) || (tp == 10))
+  }
+}
+
 func TestSelectParent(u *testing.T) {
   rnGen := NewRandNumGen()
 
@@ -105,9 +162,17 @@ func TestSelectParent(u *testing.T) {
 
   // all agents in next generation will inherit from agent #2
   // -- probability of action module bit mutation was set to zero above
-  t.CreateNextGen(rnGen)
-  for i := 0; i < len(t.agents); i++ {
-    AssertActModEqual(u, t.agents[i].actMod, alld)
+  nextGen := t.CreateNextGen(rnGen)
+  AssertAssModEqual(u, t.assessMod, nextGen.assessMod)
+  AssertIntEqual(u, t.numAgents, nextGen.numAgents)
+  AssertInt32Equal(u, nextGen.totalPayouts, 0)
+  for i := 0; i < len(nextGen.agents); i++ {
+    agent := nextGen.agents[i]
+    AssertTrue(u, agent.tribe == nextGen)
+    AssertRepEqual(u, agent.rep, GOOD)
+    AssertActModEqual(u, agent.actMod, alld)
+    AssertInt32Equal(u, agent.payout, 0)
+    AssertInt8Equal(u, agent.numGames, 0)
   }
 
   // set tribe's probability of action module bit mutation to one
@@ -118,8 +183,36 @@ func TestSelectParent(u *testing.T) {
   // all agents in next generation will inherit from agent #2 again
   // because payouts have not changed, but the probability of mutation
   // is now 1 so the child agent's modules will be allc
-  t.CreateNextGen(rnGen)
-  for i := 0; i < len(t.agents); i++ {
-    AssertActModEqual(u, t.agents[i].actMod, allc)
+  nextGen = t.CreateNextGen(rnGen)
+  AssertAssModEqual(u, t.assessMod, nextGen.assessMod)
+  AssertIntEqual(u, t.numAgents, nextGen.numAgents)
+  AssertInt32Equal(u, nextGen.totalPayouts, 0)
+  for i := 0; i < len(nextGen.agents); i++ {
+    agent := nextGen.agents[i]
+    AssertTrue(u, agent.tribe == nextGen)
+    AssertRepEqual(u, agent.rep, GOOD)
+    AssertActModEqual(u, agent.actMod, allc)
+    AssertInt32Equal(u, agent.payout, 0)
+    AssertInt8Equal(u, agent.numGames, 0)
+  }
+}
+
+func TestSortByPayout(u *testing.T) {
+  rnGen := NewRandNumGen()
+  numTribes := 50
+  numAgents := 2
+  tribes := make([]*Tribe, numTribes)
+  payouts := rnGen.Perm(numTribes)
+  for i := 0; i < numTribes; i++ {
+    tribes[i] = NewTribe(numAgents, PASSERR, PACTMUT, PEXEERR, rnGen)
+    tribes[i].totalPayouts = int32(payouts[i])
+  }
+  // sort the tribes by their payouts
+  sort.Sort(SortTribesByPayouts(tribes))
+  // test that the tribes are sorted correctly
+  current := int32(-1)
+  for i := 0; i < numTribes; i++ {
+    AssertInt32GT(u, tribes[i].totalPayouts, current)
+    current = tribes[i].totalPayouts
   }
 }
