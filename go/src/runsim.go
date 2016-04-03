@@ -66,13 +66,15 @@ func main() {
   WriteSimParams(s, *gens, *cost, *benefit, *fname)
   fmt.Println(",")
 
-  // calculate max possible payout per generation
+  // calculate max and min possible payouts per generation
   max, min := s.MaxMinPayouts(int32(*cost),int32(*benefit))
   // execute simulation
+  var p int32
+  var nextGen []*sim.Tribe
   for g := 0; g < *gens; g++ {
-    var p = s.PlayRounds(int32(*cost),int32(*benefit))
-    // fmt.Printf("total payout for generation %5d: %7d\n", g, p)
-    s.EvolveTribes()
+    nextGen = s.PlayRounds(int32(*cost),int32(*benefit))
+    p = s.GetTotalPayouts()
+    s.EvolveTribes(nextGen)
     s.Reset()
     n, a, allc, alld := s.GetStats()
     WriteStats(writer, g, *numTribes, *numAgents, n, a, allc, alld, p, min, max)
