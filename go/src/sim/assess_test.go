@@ -2,7 +2,7 @@ package sim
 
 import "testing"
 
-func TestAssess(u *testing.T) {
+func TestAssignRep(u *testing.T) {
   rnGen := NewRandNumGen()
 
   // stern judging assessment module

@@ -31,10 +31,26 @@ func AssertActModEqual(t *testing.T, r1 *ActionModule, r2 *ActionModule) {
     LogErr(t, fmt.Sprintf("%v does not equal %v", r1, r2))
   }
 }
-// assert that the two action modules are equal
+// assert that the two action modules are opposites
+func AssertActModOpposite(t *testing.T, r1 *ActionModule, r2 *ActionModule) {
+  for i := 0; i < 4; i++ {
+    if (r1.bits[i] == r2.bits[i]) {
+      LogErr(t, fmt.Sprintf("%v is not opposite %v", r1, r2))
+    }
+  }
+}
+// assert that the two assessment modules are equal
 func AssertAssModEqual(t *testing.T, r1 *AssessModule, r2 *AssessModule) {
   if (!r1.SameBits(r2)) {
     LogErr(t, fmt.Sprintf("%v does not equal %v", r1, r2))
+  }
+}
+// assert that the two assessment modules are opposites
+func AssertAssModOpposite(t *testing.T, r1 *AssessModule, r2 *AssessModule) {
+  for i := 0; i < 8; i++ {
+    if (r1.bits[i] == r2.bits[i]) {
+      LogErr(t, fmt.Sprintf("%v is not opposite %v", r1, r2))
+    }
   }
 }
 // assert that the two reputations are equal
@@ -67,6 +83,24 @@ func AssertInt8Equal(t *testing.T, v1 int8, v2 int8) {
 }
 // assert that the two Int32s aee equal
 func AssertInt32Equal(t *testing.T, v1 int32, v2 int32) {
+  if (v1 != v2) {
+    LogErr(t, fmt.Sprintf("%v does not equal %v", v1, v2))
+  }
+}
+// assert that v1 is greater than v2
+func AssertInt32GT(t *testing.T, v1 int32, v2 int32) {
+  if (v1 <= v2) {
+    LogErr(t, fmt.Sprintf("%v is less than %v", v1, v2))
+  }
+}
+// assert that v1 is equal to v2
+func AssertFloat32Equal(t *testing.T, v1 float32, v2 float32) {
+  if (v1 != v2) {
+    LogErr(t, fmt.Sprintf("%v does not equal %v", v1, v2))
+  }
+}
+// assert that v1 is equal to v2
+func AssertFloat64Equal(t *testing.T, v1 float64, v2 float64) {
   if (v1 != v2) {
     LogErr(t, fmt.Sprintf("%v does not equal %v", v1, v2))
   }
