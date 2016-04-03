@@ -1,6 +1,7 @@
 package sim
 
 import "math/rand"
+import "fmt"
 
 // An agent that use an action module to decide how to act
 type Agent struct {
@@ -18,18 +19,29 @@ func NewAgent(t *Tribe, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Age
   return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
 }
 
-// make a copy of the agent, the action module is copied but the tribe is not
-func (a *Agent) Copy() *Agent {
-  return &Agent { tribe: a.tribe, rep: a.rep, payout: a.payout, numGames: a.numGames,
-                  actMod: a.actMod.Copy() }
+// Create a child of this agent to be part of the specified next generation
+// tribe.  The new agent's action module is a clone of its parent's action
+// module (possibly with mutations).  The new agent is added to the next generation
+// tribe.  The new other attributes are set to default values.
+func (parent *Agent) CreateChild(nextGen *Tribe, rnGen *rand.Rand) *Agent {
+  inheritedActMod := parent.actMod.CloneWithMutations(rnGen)
+  return &Agent { tribe: nextGen, actMod: inheritedActMod }
 }
 
-// clone the agent with possible mutations added, the action model is cloned
-// with mutatations, the tribe is the same as the original agent
-func (a *Agent) CloneWithMutations(rnGen *rand.Rand) *Agent {
-  return &Agent { tribe: a.tribe, rep: a.rep, payout: a.payout, numGames: a.numGames,
-                  actMod: a.actMod.CloneWithMutations(rnGen) }
+// generate string representation of an agent
+func (a *Agent) String() string {
+  str := "{\n"
+  str = str + fmt.Sprintf("  \"type\":%T\n", a)
+  str = str + fmt.Sprintf("  \"addr\":%p\n", a)
+  str = str + fmt.Sprintf("  \"tribe\":%p\n", a.tribe)
+  str = str + fmt.Sprintf("  \"rep\":%v\n", a.rep)
+  str = str + fmt.Sprintf("  \"act-mod\":%v \n", a.actMod)
+  str = str + fmt.Sprintf("  \"payout\":%d \n", a.payout)
+  str = str + fmt.Sprintf("  \"num-games\":%d \n", a.numGames)
+  str = str + "}"
+  return str
 }
+
 
 // Reset the agent's internal state to prepare for participation in the
 // next generation.
