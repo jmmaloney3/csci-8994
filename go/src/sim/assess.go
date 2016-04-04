@@ -51,7 +51,7 @@ func (self *AssessModule) SameBits(am *AssessModule) bool {
 func (self *AssessModule) GetBits() int {
   rval := int(0)
   for i := 0; i < 8; i++ {
-    rval += self.GetBit(i) * int(math.Pow(2,float64(8-i)))
+    rval += self.GetBit(i) * int(math.Pow(2,float64(7-i)))
   }
   return rval
 }
