@@ -110,7 +110,7 @@ func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
 // generation based on the fitness those modules achieved.
 func (currentGen *Tribe) CreateNextGen(rnGen *rand.Rand) *Tribe {
   // create the next generation tribe
-  nextGen := &Tribe { assessMod: currentGen.assessMod, numAgents: currentGen.numAgents }
+  nextGen := &Tribe { assessMod: currentGen.assessMod.Copy(), numAgents: currentGen.numAgents }
   // create the next generation of agents
   nextGen.agents = make([]*Agent, nextGen.numAgents)
   var parent *Agent
