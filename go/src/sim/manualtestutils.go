@@ -164,3 +164,112 @@ func ConflictManualTest() {
   fmt.Printf("  expected win rate: %6.4f\n", p)
   fmt.Printf("  actual win rate:   %6.4f\n", float64(t2Wins)/float64(N))
 }
+
+func SingleTribeSim() {
+  numAgents := 5
+  passerr := float32(0)
+  pactmut := float32(0) // float32(PACTMUT)
+  pexeerr := float32(0)
+  rnGen := NewRandNumGen()
+  numGens := 20
+  cost := int32(1)
+  benefit := int32(3)
+
+  // create the tribe
+  t := NewTribe(numAgents, passerr, pactmut, pexeerr, rnGen)
+
+  // set the tribe assessment modue to stern-judging
+  sj := NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, passerr)
+  t.assessMod = sj
+  fmt.Printf("assess module: [%d][%08b]\n", sj.GetBits(), sj.GetBits())
+
+  // print put CO action module for reference
+  co := NewActionModule(true, false, true, false, pactmut, pexeerr)
+  fmt.Println(co.bits)
+  fmt.Printf("CO: [%d][%04b]\n", co.GetBits(), co.GetBits())
+
+  // configure one agent to use CO
+  t.agents[0].actMod = co
+
+  // configure all agents to use CO
+  /*
+  for i := 0; i < numAgents; i++ {
+    t.agents[i].actMod = co
+  }
+  */
+
+  // run generations
+  for g := 0; g < numGens; g++ {
+    t.PlayRounds(cost, benefit, rnGen)
+    // print current state
+    var a *Agent
+    for i := 0; i < numAgents; i++ {
+      a = t.agents[i]
+      fmt.Printf("%4d %1d [%04b] ", a.payout, a.rep, a.actMod.GetBits())
+    }
+    fmt.Println()
+    // get next generation
+    t = t.CreateNextGen(rnGen)
+  }
+}
+
+func MultiTribeSim() {
+  numTribes := 64
+  numAgents := 64
+  passerr := float32(0)
+  pactmut := float32(0) // float32(PACTMUT)
+  pexeerr := float32(0)
+  passmut := PASSMUT+0.005 // float32(0)
+  pcon    := PCON // float64(0.1)
+  beta    := BETA // math.Inf(int(1))
+  eta     := ETA // float64(0.5)
+  pmig    := PMIG // float64(1) // since all agents are using the same AM, this doesn't matter
+  numGens := 10000
+  cost := int32(1)
+  benefit := int32(3)
+
+  // create parameter map
+  var params = make(map[string]float64)
+
+  // populate arg maps
+  params[PASSE_F] = float64(passerr)
+  params[PACTM_F] = float64(pactmut)
+  params[PEXEE_F] = float64(pexeerr)
+  params[PCON_F]  = pcon
+  params[BETA_F]  = beta
+  params[ETA_F]   = eta
+  params[PMIG_F]  = pmig
+  params[PASSM_F] = float64(passmut)
+
+  // create the simengine
+  s := NewSimEngine(numTribes, numAgents, params, true)
+
+  // configure all agents to use the CO action module
+  /*
+  co := NewActionModule(true, false, true, false, pactmut, pexeerr)
+  fmt.Println(co.bits)
+  fmt.Printf("CO: [%d][%04b]\n", co.GetBits(), co.GetBits())
+  for i := 0; i < numTribes; i++ {
+    for j := 0; j < numAgents; j++ {
+      s.tribes[i].agents[j].actMod = co
+    }
+  }
+ */
+  // run generations
+  var newTribes []*Tribe
+  for g := 0; g < numGens; g++ {
+    newTribes = s.PlayRounds(cost, benefit)
+    // print current state
+    var t *Tribe
+    for i := 0; i < numTribes; i++ {
+      t = s.tribes[i]
+      fmt.Printf("%5d [%08b] ", t.totalPayouts, t.assessMod.GetBits())
+    }
+    fmt.Println()
+    // evolve tribes to next generation
+    s.EvolveTribes(newTribes)
+  }
+  max, min := s.MaxMinPayouts(cost, benefit)
+  fmt.Printf("max: %d  min: %d\n", max, min)
+
+}
