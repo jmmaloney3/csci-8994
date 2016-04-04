@@ -1,5 +1,6 @@
 package sim
 
+import "math"
 import "math/rand"
 import "fmt"
 
@@ -64,6 +65,14 @@ func (self *ActionModule) SameBits(am *ActionModule) bool {
     }
   }
   return true
+}
+
+func (self *ActionModule) GetBits() int {
+  rval := int(0)
+  for i := 0; i < 4; i++ {
+    rval += self.GetBit(i) * int(math.Pow(2,float64(3-i)))
+  }
+  return rval
 }
 
 func (self *ActionModule) GetBit(i int) int {
