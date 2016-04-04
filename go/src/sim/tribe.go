@@ -47,18 +47,6 @@ func (t *Tribe) String() string {
   return str
 }
 
-// make a shallow copy of the tribe
-// -- agents will be transferred from original tribe to copy
-func (t *Tribe) ShallowCopy() *Tribe {
-  copy := &Tribe { assessMod: t.assessMod, numAgents: t.numAgents,
-                   totalPayouts: t.totalPayouts, agents: t.agents }
-  // link agents with this new shallow copy
-  for i := 0; i < copy.numAgents; i++ {
-    copy.agents[i].tribe = copy
-  }
-  return copy
-}
-
 // Reset the tribe's agents to prepare for participation in the next generation.
 func (self *Tribe) Reset() {
   self.totalPayouts = 0;
@@ -101,6 +89,7 @@ func (self *Tribe) AssignRoles(a1 *Agent, a2 *Agent, rnGen *rand.Rand) (donor, r
   }
   return donor,recipient
 }
+
 // Randomly select an agent from the local population.  The chance that an
 // agent is selected is proportional to its fitness.
 func (self *Tribe) SelectParent(rnGen *rand.Rand) *Agent {
