@@ -49,16 +49,25 @@ def run_script(csvfile, ofile_name, verbose):
 
 def get_result(data, column):
     counts = data[column].value_counts()
+    # bit value fixated at 1
     if ('1' in counts):
         b1 = counts['1']
+    elif (1 in counts):
+        b1 = counts[1]
     else:
         b1 = 0
+    # bit value fixated at 0
     if ('0' in counts):
         b0 = counts['0']
+    elif (0 in counts):
+        b0 = counts[0]
     else:
         b0 = 0
+    # bit value did not fixate
     if ('X' in counts):
         bX = counts['X']
+    elif (-1 in counts):
+        bX = counts[-1]
     else:
         bX = 0
 
@@ -78,20 +87,15 @@ def calc_stats(csvfile, ofile, verbose):
     # load CSV data
     if (verbose):
         sys.stderr.write('Loading data from %s...\n' % csvfile)
-    data = pd.read_csv(csvfile)
+    data = pd.read_csv(csvfile, skipinitialspace=True)
     
     # calculate results
     assess_result = [ get_result(data, column) for column in assess_columns ]
     action_result = [ get_result(data, column) for column in action_columns ]
     
     # output results
-    ofile.write('assess: [')
-    for bit in assess_result:
-        ofile.write(' %s' % bit)
-    sys.stdout.write('] action: [')
-    for bit in action_result:
-        ofile.write(' %s' % bit)
-    ofile.write(']\n')
+    ofile.write('assess: [%s]' % ','.join(bit for bit in assess_result))
+    ofile.write(' action: [%s]\n' % ','.join(bit for bit in action_result))
 # end process_file
 
 # run main method when this file is run from command line

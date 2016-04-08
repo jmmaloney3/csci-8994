@@ -109,7 +109,7 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     # load CSV data
     if (verbose):
         sys.stderr.write('Loading data from %s...\n' % csvfile)
-    data = pd.read_csv(csvfile)
+    data = pd.read_csv(csvfile, skipinitialspace=True)
     
     # get bit column data
     assess_data = data[assess_columns]
@@ -117,9 +117,10 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     allcd_data  = data[['allc', 'alld']]
 
     # negative periods argument means use all the data
-    if (periods < 0):
+    if ((periods < 0) or (data.shape[0] < periods)):
+        periods = data.shape[0]
         if (verbose):
-            sys.stderr.write('  calculate statistics using data for all periods...\n')
+            sys.stderr.write('  calculate statistics using data for all %d periods...\n' % periods)
     else:
         if (verbose):
             sys.stderr.write('  calculate statistics using data for last %d periods...\n' % periods)
@@ -151,6 +152,10 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     action_percent = action_data.sum()/max_action
     action_result = [ get_result(p) for p in action_percent ]
     
+    # output percentages
+    assess_str = ','.join('%4.2f' % n for n in assess_percent)
+    action_str = ','.join('%4.2f' % n for n in action_percent)
+    sys.stderr.write('  [%s] [%s] [%s]\n' % (path.basename(csvfile), assess_str, action_str))
     # output result
     csv_writer.writerow(assess_result+action_result)
 # end process_file
