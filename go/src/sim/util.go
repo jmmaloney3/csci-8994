@@ -37,6 +37,8 @@ const (
  FNAME_F = "f"
  NOMP = false
  NOMP_F = "nmp"
+ ALLD = 0
+ ALLC = 15
 )
 
 type Rep int

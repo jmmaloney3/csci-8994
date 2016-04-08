@@ -36,10 +36,6 @@ func TestNewSimEngine(u *testing.T) {
   AssertFloat64Equal(u, s.eta, ETA)
   AssertFloat32Equal(u, s.pmig, PMIG)
   AssertFloat32Equal(u, s.passmut, PASSMUT)
-  alld := NewActionModule(false, false, false, false, PACTMUT, PEXEERR)
-  AssertActModEqual(u, s.ALLD, alld)
-  allc := NewActionModule(true, true, true, true, PACTMUT, PEXEERR)
-  AssertActModEqual(u, s.ALLC, allc)
 }
 
 func TestConflict(u *testing.T) {
@@ -146,12 +142,14 @@ func TestMigrateAgents(u *testing.T) {
   numAgents := 2
   useMP := true
   s := NewDefaultSimEngine(numTribes, numAgents, useMP)
+  allc := NewActionModule(true, true, true, true, PACTMUT, PEXEERR)
+  alld := NewActionModule(false, false, false, false, PACTMUT, PEXEERR)
 
   // tribe zero has unconditional cooperators
   // tribe one has unconditional defectors
   for i := 0; i < numAgents; i++ {
-    s.tribes[0].agents[i].actMod = s.ALLC
-    s.tribes[1].agents[i].actMod = s.ALLD
+    s.tribes[0].agents[i].actMod = allc
+    s.tribes[1].agents[i].actMod = alld
   }
 
   // set probability of migration to one
@@ -162,16 +160,16 @@ func TestMigrateAgents(u *testing.T) {
 
   // verify that all agents are now using ALLC
   for i := 0; i < numAgents; i++ {
-    AssertActModEqual(u, s.tribes[0].agents[i].actMod, s.ALLC)
-    AssertActModEqual(u, s.tribes[1].agents[i].actMod, s.ALLC)
+    AssertActModEqual(u, s.tribes[0].agents[i].actMod, allc)
+    AssertActModEqual(u, s.tribes[1].agents[i].actMod, allc)
   }
 
   // reset to original state
   // tribe zero has unconditional cooperators
   // tribe one has unconditional defectors
   for i := 0; i < numAgents; i++ {
-    s.tribes[0].agents[i].actMod = s.ALLC
-    s.tribes[1].agents[i].actMod = s.ALLD
+    s.tribes[0].agents[i].actMod = allc
+    s.tribes[1].agents[i].actMod = alld
   }
 
   // set probability of migration to zero
@@ -182,8 +180,8 @@ func TestMigrateAgents(u *testing.T) {
 
   // verify that no miration occured
   for i := 0; i < numAgents; i++ {
-    AssertActModEqual(u, s.tribes[0].agents[i].actMod, s.ALLC)
-    AssertActModEqual(u, s.tribes[1].agents[i].actMod, s.ALLD)
+    AssertActModEqual(u, s.tribes[0].agents[i].actMod, allc)
+    AssertActModEqual(u, s.tribes[1].agents[i].actMod, alld)
   }
 }
 

@@ -23,9 +23,6 @@ type SimEngine struct {
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
   pmig float32 // prob of migration: recommended 0.005
   passmut float32 // prob of assess module bit mutation: recommended 0.0001
-  // define some standard action modules for comparison
-  ALLD *ActionModule // a constant used for comparison during stats gathering
-  ALLC *ActionModule // a constant used for comparison during stats gathering
 }
 
 func NewDefaultSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
@@ -96,14 +93,17 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, passmut: float32(passmut),
-                      ALLC: NewActionModule(true, true, true, true, 0, 0),
-                      ALLD: NewActionModule(false, false, false, false, 0, 0) }
+                      rnGen: rnGen, passmut: float32(passmut) }
 }
 
 // Get the total payouts earned by al tribes in the most recent generation
 func (self *SimEngine) GetTotalPayouts() int32 {
   return self.totalPayouts
+}
+
+// Set the assessment module mutation rate
+func (self *SimEngine) SetPassmut(passmut float32) {
+  self.passmut = passmut
 }
 
 // Reset the simulations to prepare for participation in the next generation.
@@ -239,9 +239,9 @@ func (self *SimEngine) GetStats() (assessStats [8]int, actionStats [4]int, allcC
         actionStats[m] += self.tribes[i].agents[k].actMod.GetBit(m)
       }
       // count occurences of ALLD and ALLC
-      if (self.tribes[i].agents[k].actMod.SameBits(self.ALLD)) {
+      if (self.tribes[i].agents[k].actMod.GetBits() == ALLD) {
         alldCnt++
-      } else if (self.tribes[i].agents[k].actMod.SameBits(self.ALLC)) {
+      } else if (self.tribes[i].agents[k].actMod.GetBits() == ALLC) {
         allcCnt++
       }
     }
