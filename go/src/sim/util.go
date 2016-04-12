@@ -23,10 +23,14 @@ const (
  ETA_F = "eta"
  PCON = 0.01 // default probability of tribal conflict
  PCON_F = "pcon"
+ SINGLE_DEF = true // whether a tribe is limited to a single defeat per generation
+ SINGLE_DEF_F = "singdef"
  PMIG = 0.005 // default probability of migration
  PMIG_F = "pmig"
  PASSMUT = 0.0001 // default probability of assess module bit mutation
  PASSM_F = "passmut"
+ PASSMUT_ALL = false // default value always attempting to mutate assmod bits
+ PASSMUT_ALL_F = "passmutall"
  NUMAGENTS = 64 // default number of agents per tribe
  AGENTS_F = "a"
  PACTMUT = 0.01 // default probability of action module bit mutation

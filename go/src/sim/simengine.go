@@ -19,10 +19,12 @@ type SimEngine struct {
   cpuTasks []int // when using MP, num tasks to assign to each CPU
   cpuRNG []*rand.Rand // a separate random number generator for each CPU
   pcon float32 // prob of tribal conflict: recommended 0.01
+  singdef bool // whether tribes are limited to a single defeat per generation
   beta float64 // selection strength varies from 10^0 to 10^5
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
   pmig float32 // prob of migration: recommended 0.005
   passmut float64 // prob of assess module bit mutation: recommended 0.0001
+  passmutall bool // false if only matching assmod bits shoudl be mutated
   useAM bool // indicates whether adaptive mutation should be used
 }
 
@@ -94,7 +96,8 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useAM
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, passmut: passmut, useAM: useAM }
+                      rnGen: rnGen, passmut: passmut, passmutall: true, singdef: true,
+                      useAM: useAM }
 }
 
 // Get the total payouts earned by al tribes in the most recent generation
@@ -158,8 +161,14 @@ func (self *SimEngine) MinMaxTribalPayouts(cost int32, benefit int32) (min int32
 // Evolve the tribal assessment modules based on the average payouts
 // earned by each tribe during the last generation
 func (self *SimEngine) EvolveTribes(nextGen []*Tribe, minPO, maxPO int32) {
-  // map tribes to a list of defeated tribes
-  conflicts := make(map[*Tribe][]*Tribe)
+  // map tribes to a list of defeated tribes (used when !self.singdef)
+  winnerToLosers := make(map[*Tribe][]*Tribe)
+
+  // map the losing tribe to its most dominant winner (used when self.singdef)
+  loserToWinner :=  make(map[*Tribe]*Tribe)
+  var currentWinner *Tribe
+  var ok bool
+
   // iterate over the tribes and select pairs for confict
   for i := 0; i < self.numTribes; i++ {
     for j := i+1; j < self.numTribes; j++ {
@@ -170,35 +179,58 @@ func (self *SimEngine) EvolveTribes(nextGen []*Tribe, minPO, maxPO int32) {
         winner := self.tribes[w]
         // -- take loser from new list (it will be modified)
         loser := nextGen[l]
-        conflicts[winner] = append(conflicts[winner], loser)
+
+        // update maps of winners and losers
+        if (!self.singdef) {
+          // add loser to list of winner's defeated tribes
+          winnerToLosers[winner] = append(winnerToLosers[winner], loser)
+        } else {
+          currentWinner, ok = loserToWinner[loser]
+          if (!ok) {
+            // record first defeat for loser tribe (!ok case), OR
+            loserToWinner[loser] = winner
+          } else if (winner.totalPayouts > currentWinner.totalPayouts) {
+            // replace winner with more dominant winner
+            loserToWinner[loser] = currentWinner
+          }
+        }
       }
     }
   }
 
-  // sort the map keys based on payouts
-  // -- get the keys (http://stackoverflow.com/questions/21362950/go-golang-getting-an-array-of-keys-from-a-map)
-  keys := make([]*Tribe, len(conflicts))
-  i := 0
-  for k := range conflicts {
-    keys[i] = k
-    i++
-  }
-  // -- sort the keys
-  sort.Sort(SortTribesByPayouts(keys))
-
-  // evolve assessment modules and migrate agents
-  // -- tribes with a lower payout go first
-  // -- this implies that tribes with higher payouts can undo the changes made
-  // -- by tribes with lower payouts
-  for _, winner := range keys {
-    // get list of defeated tribes
-    // -- TODO: check ok value to ensure value is found
-    losers := conflicts[winner]
-    for _, loser := range losers {
-      // winner comes from original list (source of modifications)
-      // loser comes from new list (will be modified)
+  if (self.singdef) {
+    // evolve assessment modules and migrate agents
+    // -- each loser is only evolved by one winner tribe
+    for loser, winner := range loserToWinner {
       self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, self.rnGen)
       self.MigrateAgents(winner, loser, self.rnGen)
+    }
+  } else {
+    // sort the map keys based on payouts
+    // -- get the keys (http://stackoverflow.com/questions/21362950/go-golang-getting-an-array-of-keys-from-a-map)
+    keys := make([]*Tribe, len(winnerToLosers))
+    i := 0
+    for k := range winnerToLosers {
+      keys[i] = k
+      i++
+    }
+    // -- sort the keys
+    sort.Sort(SortTribesByPayouts(keys))
+
+    // evolve assessment modules and migrate agents
+    // -- tribes with a lower payout go first
+    // -- this implies that tribes with higher payouts can undo the changes made
+    // -- by tribes with lower payouts
+    for _, winner := range keys {
+      // get list of defeated tribes
+      // -- TODO: check ok value to ensure value is found
+      losers := winnerToLosers[winner]
+      for _, loser := range losers {
+        // winner comes from original list (source of modifications)
+        // loser comes from new list (will be modified)
+        self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, self.rnGen)
+        self.MigrateAgents(winner, loser, self.rnGen)
+      }
     }
   }
 
@@ -289,18 +321,17 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, useAM bool,
   // it is shared with another tribe
   loser.assessMod = loser.assessMod.Copy()
   // mutate the loser's assessment module
+  var bitSame bool
   for i := 0; i < 8; i++ {
-    if (loser.assessMod.bits[i] != winner.assessMod.bits[i]) {
-      if ((pflip != 0) && (RandPercent(rnGen) < pflip)) {
-        loser.assessMod.bits[i] = winner.assessMod.bits[i]
-      }
-    } else {
-      if (RandPercent(rnGen) < float64(mutRate)) {
-        if (loser.assessMod.bits[i] == GOOD) {
-          loser.assessMod.bits[i] = BAD
-        } else {
-          loser.assessMod.bits[i] = GOOD
-        }
+    bitSame = loser.assessMod.bits[i] == winner.assessMod.bits[i]
+    if ((!bitSame) && (pflip != 0) && (RandPercent(rnGen) < pflip)) {
+      loser.assessMod.bits[i] = winner.assessMod.bits[i]
+    }
+    if ((self.passmutall || bitSame) && (RandPercent(rnGen) < float64(mutRate))) {
+      if (loser.assessMod.bits[i] == GOOD) {
+        loser.assessMod.bits[i] = BAD
+      } else {
+        loser.assessMod.bits[i] = GOOD
       }
     }
   }

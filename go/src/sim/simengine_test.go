@@ -314,9 +314,14 @@ func runSimTest(u *testing.T, useAM, useMP bool) {
   // set pmig to one so that migration always occurs
   s.pmig = float32(1)
 
+  // if passmutall is false then passmut doesn't come into play since the two
+  // assessment modules have no matching bits - however, if passmutall is
+  // true then an attempt to mutate bits will occur regardless of whether the
+  // bits match or not - so set passmut to zero if passmutall is true
+  if (s.passmutall) { s.passmut = float64(0) }
+
   s.EvolveTribes(nextGen, minPO, maxPO)
 
-  // Passmut doesn't come into play since the two assessment modules have no matching bits
   // Since eta is one, loser's assessment module bits are always flipped
   AssertAssModEqual(u, s.tribes[0].assessMod, allg)
   AssertAssModEqual(u, s.tribes[1].assessMod, allb)
