@@ -2,6 +2,7 @@ package sim
 
 import "fmt"
 import "math"
+import "math/rand"
 
 func AssignRepManualTest() {
   fmt.Println("AssessModule.AssignRep")
@@ -29,7 +30,7 @@ func ChooseDonateManualTest() {
   errorRate := float32(0.5)
 
   // CO action module
-  am := NewActionModule(true, false, true, false, PACTMUT, errorRate)
+  am := NewActionModule(true, false, true, false, errorRate)
 
   rnGen := NewRandNumGen()
 
@@ -47,17 +48,17 @@ func ChooseDonateManualTest() {
 
 func CloneWithMutationsManualTest() {
   fmt.Println("ActionModule.CloneWithMutations")
-  pactmut := float32(0.5)
+  pactmut := float64(0.5)
 
   // CO action module
-  am := NewActionModule(true, false, true, false, pactmut, PEXEERR)
+  am := NewActionModule(true, false, true, false, PEXEERR)
 
   rnGen := NewRandNumGen()
 
   mutations := 0
   N := 100
   for i := 0; i < N; i++ {
-    clone := am.CloneWithMutations(rnGen)
+    clone := am.CloneWithMutations(pactmut, rnGen)
     // count mutations
     for j := 0; j < 4; j++ {
       if (am.bits[j] != clone.bits[j]) { mutations++ }
@@ -139,7 +140,7 @@ func ConflictManualTest() {
   const beta = .6
 
   // simengine with numTribes tribes and numAgents agents per tribes
-  s := NewDefaultSimEngine(numTribes, numAgents, true)
+  s := NewDefaultSimEngine(numTribes, numAgents, true, true)
   s.beta = beta
 
   // set tribe payouts
@@ -168,7 +169,7 @@ func ConflictManualTest() {
 func SingleTribeSim() {
   numAgents := 5
   passerr := float32(0)
-  pactmut := float32(0) // float32(PACTMUT)
+  pactmut := float64(0) // float32(PACTMUT)
   pexeerr := float32(0)
   rnGen := NewRandNumGen()
   numGens := 20
@@ -184,7 +185,7 @@ func SingleTribeSim() {
   fmt.Printf("assess module: [%d][%08b]\n", sj.GetBits(), sj.GetBits())
 
   // print put CO action module for reference
-  co := NewActionModule(true, false, true, false, pactmut, pexeerr)
+  co := NewActionModule(true, false, true, false, pexeerr)
   fmt.Println(co.bits)
   fmt.Printf("CO: [%d][%04b]\n", co.GetBits(), co.GetBits())
 
@@ -216,14 +217,14 @@ func SingleTribeSim() {
 func MultiTribeSim() {
   numTribes := 64
   numAgents := 64
-  passerr := float32(0)
-  pactmut := float32(0) // float32(PACTMUT)
-  pexeerr := float32(0)
-  passmut := PASSMUT+0.005 // float32(0)
-  pcon    := PCON // float64(0.1)
+  passerr :=  float32(0) // PASSERR
+  pactmut := PACTMUT // float32(0)
+  pexeerr :=  float32(0) // PEXEERR
+  passmut := PASSMUT // +0.005 // float32(0)
+  pcon    := float64(0.5) // PCON // float64(0.1)
   beta    := BETA // math.Inf(int(1))
-  eta     := ETA // float64(0.5)
-  pmig    := PMIG // float64(1) // since all agents are using the same AM, this doesn't matter
+  eta     := float64(1) // ETA
+  pmig    := PMIG // float64(1)
   numGens := 10000
   cost := int32(1)
   benefit := int32(3)
@@ -241,8 +242,20 @@ func MultiTribeSim() {
   params[PMIG_F]  = pmig
   params[PASSM_F] = float64(passmut)
 
+  useMP := true
+  useAM := true
+
   // create the simengine
-  s := NewSimEngine(numTribes, numAgents, params, true)
+  s := NewSimEngine(numTribes, numAgents, params, useAM, useMP)
+
+  // calculate max and min payouts
+  minPO, maxPO := CalcMinMaxTribalPayouts(numAgents, cost, benefit)
+  minMaxDiff := maxPO - minPO
+
+  // convert into overall simulation payouts
+  simMinPO := minPO * int32(numTribes)
+  simMaxPO := maxPO * int32(numTribes)
+  simMinMaxDiff := simMaxPO - simMinPO
 
   // configure all agents to use the CO action module
   /*
@@ -256,20 +269,155 @@ func MultiTribeSim() {
   }
  */
   // run generations
+  var assmodCounts = make(map[int]int)
+  var assmodNum int
+  var actmodCounts = make(map[int]int)
+  var actmodNum int
   var newTribes []*Tribe
+  // var pMax float32
+  var errRate float64
+  var error float64
+
+  var evolveCount int
+  totalAgents := numTribes * numAgents
   for g := 0; g < numGens; g++ {
+    // play rounds
     newTribes = s.PlayRounds(cost, benefit)
-    // print current state
+    // count up the number of tribes following each assessment module
     var t *Tribe
+    var a *Agent
     for i := 0; i < numTribes; i++ {
       t = s.tribes[i]
-      fmt.Printf("%5d [%08b] ", t.totalPayouts, t.assessMod.GetBits())
+      // get assessment module number
+      assmodNum = t.assessMod.GetBits()
+      assmodCounts[assmodNum] = assmodCounts[assmodNum] + 1
+      for j := 0; j < numAgents; j++ {
+        a = t.agents[j]
+        actmodNum = a.actMod.GetBits()
+        actmodCounts[actmodNum] = actmodCounts[actmodNum] + 1
+      }
+    }
+    // print the stats for this round
+    var assmodCount int
+    var actmodCount int
+    var ok bool
+    var p float32
+    // print the payout stats
+    //pMax = float32(s.totalPayouts - min)/float32(max - min)
+    //fmt.Printf("%5d: total payout: %6d  %% of max: %6.4f  passmut: %6.4f\n", g, s.totalPayouts, pMax, s.passmut)
+    // calculate the error rate
+    error = float64(simMinMaxDiff) - float64(s.totalPayouts - simMinPO)
+    errRate = error / float64(simMinMaxDiff)
+    fmt.Printf("%5d: total payout: %6d  err rate: %6.4f  passmut: %6.4f\n", g, s.totalPayouts, errRate, s.passmut)
+
+    // print out the total payout and error rate for this simulation
+    //fmt.Printf("%5d: total payout: %6d  err rate: %6.4f\n", g, s.totalPayouts, errRate)
+
+    // print out the error rate and mutation rate for each tribe
+    var tErrRate float64
+    var tMutRate float64
+    for i := 0; i < s.numTribes; i++ {
+      t = s.tribes[i]
+      tErrRate = (float64(minMaxDiff) - float64(t.totalPayouts - minPO))/float64(minMaxDiff)
+      tMutRate = CalcAdaptTribalMutRate(float64(t.totalPayouts), minPO, maxPO)
+      fmt.Printf("[%02d:%3.2f(%5.4f)]", i, tErrRate, tMutRate)
+      // adapt mutation rate for each agent - if using AM
+      if (useAM) {
+        for j := 0; j < t.numAgents; j++ {
+          t.agents[j].pactmut = tMutRate
+        }
+      }
     }
     fmt.Println()
-    // evolve tribes to next generation
-    s.EvolveTribes(newTribes)
-  }
-  max, min := s.MaxMinPayouts(cost, benefit)
-  fmt.Printf("max: %d  min: %d\n", max, min)
 
+    // print assessment modules used
+    for i := 0; i < 256; i++ {
+      assmodCount, ok = assmodCounts[i]
+      if (ok) {
+        fmt.Printf(" [%08b]: %03d", i, assmodCount)
+      }
+    }
+    fmt.Println()
+    // print action modules used
+    for i := 0; i < 16; i++ {
+      actmodCount, ok = actmodCounts[i]
+      if (ok) {
+        p = float32(actmodCount)/float32(totalAgents)
+        fmt.Printf(" [%04b]: %05.3f", i, p)
+      }
+    }
+    fmt.Println()
+    fmt.Println()
+
+    // set assessment module mutation rate based on most recent results
+    // s.passmut = PASSMUT + float32((math.Pow(float64(1) - float64(pMax), float64(4)))*float64(0.002))
+    s.passmut = PASSMUT + math.Pow(errRate, float64(4))*float64(0.002)
+    //s.passmut = CalcAdaptTribalMutRate(float64(s.totalPayouts), simMinPO, simMaxPO)
+
+    // evolve tribes to next generation
+    evolveCount++
+    if (evolveCount >= 50) {
+      //s.EvolveTribes(newTribes, minPO, maxPO)
+      s.EvolveTribes2(newTribes, useAM, minPO, maxPO)
+      evolveCount = 0
+    }
+    s.Reset()
+    // clear maps for next round
+    assmodCounts = make(map[int]int)
+    actmodCounts = make(map[int]int)
+  }
+  fmt.Printf("min: %d  max: %d\n", simMinPO, simMaxPO)
+
+}
+
+// Randomly select an tribe.  The chance that a tribe is selected is
+// proportional to its fitness.
+func (self *SimEngine) SelectParentTribe(rnGen *rand.Rand) *Tribe {
+  ri := int32(RandInt(rnGen, int64(self.totalPayouts)))
+  thresh := int32(0);
+  var parent *Tribe
+  for i := 0; i < self.numTribes; i++ {
+    thresh += self.tribes[i].totalPayouts
+    if (ri <= thresh) {
+      parent = self.tribes[i]
+      break
+    }
+  }
+  return parent
+}
+
+// Create the next generation by propagating action modules to the next
+// generation based on the fitness those modules achieved.
+func (self *SimEngine) EvolveTribes2(nextGen []*Tribe, useAM bool, minPO int32, maxPO int32) {
+  // propagate successful assessment modules among the tribes
+  for i := 0; i < self.numTribes; i++ {
+    // select parent tribe from current generation
+    parent := self.SelectParentTribe(self.rnGen)
+    // switch assessment module of tribe i in next generation
+    nextGen[i].assessMod = parent.assessMod.Copy()
+
+    // migrate agents
+    self.MigrateAgents(parent, nextGen[i], self.rnGen)
+
+    // mutate assessment module
+    // get assessment module bit mutation rate
+    var mutRate float64
+    if (useAM) {
+      mutRate = CalcAdaptTribalMutRate(float64(parent.totalPayouts), minPO, maxPO)
+    } else {
+      mutRate = self.passmut
+    }
+    for i := 0; i < 8; i++ {
+      if (RandPercent(self.rnGen) < float64(mutRate)) {
+        if (nextGen[i].assessMod.bits[i] == GOOD) {
+          nextGen[i].assessMod.bits[i] = BAD
+        } else {
+          nextGen[i].assessMod.bits[i] = GOOD
+        }
+      }
+    }
+  }
+
+  // replace the original tribes with the new tribes
+  self.tribes = nextGen
 }
