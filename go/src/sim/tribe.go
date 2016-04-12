@@ -13,7 +13,7 @@ type Tribe struct {
 }
 
 // Create a new tribe.
-func NewTribe(numAgents int, passerr float32, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Tribe {
+func NewTribe(numAgents int, passerr float32, pactmut float64, pexeerr float32, rnGen *rand.Rand) *Tribe {
   // create the tribe
   var assm = NewAssessModule(RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),
                              RandRep(rnGen), RandRep(rnGen), RandRep(rnGen), RandRep(rnGen),

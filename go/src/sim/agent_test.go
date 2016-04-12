@@ -13,7 +13,7 @@ func TestNewAgent(u *testing.T) {
 func TestCreateChild(u *testing.T) {
   rnGen := NewRandNumGen()
   passerr := float32(0)
-  pactmut := float32(0)
+  pactmut := float64(0)
   pexeerr := float32(0)
   // create original tribe
   t1 := NewTribe(1, passerr, pactmut, pexeerr, rnGen)
@@ -30,7 +30,7 @@ func TestCreateChild(u *testing.T) {
   AssertInt8Equal(u, a2.numGames, 0)
 
   // create new original tribe with pactmut = 1.0
-  pactmut = 1.0
+  pactmut = float64(1.0)
   t1 = NewTribe(1, passerr, pactmut, pexeerr, rnGen)
   a1 = t1.agents[0]
 
@@ -50,7 +50,7 @@ func TestPlayround(t *testing.T) {
   benefit := int32(3)
   rnGen := NewRandNumGen()
   passerr := float32(0)
-  pactmut := float32(0)
+  pactmut := float64(0)
   pexeerr := float32(0)
 
   u := NewTribe(2, passerr, pactmut, pexeerr, rnGen)
@@ -65,7 +65,7 @@ func TestPlayround(t *testing.T) {
   AssertInt32Equal(t, rec.payout, 0)
 
   // configure donor action module
-  don.actMod = NewActionModule(true, false, true, true, pactmut, pexeerr);
+  don.actMod = NewActionModule(true, false, true, true, pexeerr);
 
   // GOOD GOOD
   AssertTrue(t, don.ChooseDonate(rec, rnGen))

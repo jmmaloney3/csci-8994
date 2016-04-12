@@ -22,10 +22,11 @@ type SimEngine struct {
   beta float64 // selection strength varies from 10^0 to 10^5
   eta  float64 // recommended <= 0.2 (used 0.1 in supporting materials)
   pmig float32 // prob of migration: recommended 0.005
-  passmut float32 // prob of assess module bit mutation: recommended 0.0001
+  passmut float64 // prob of assess module bit mutation: recommended 0.0001
+  useAM bool // indicates whether adaptive mutation should be used
 }
 
-func NewDefaultSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
+func NewDefaultSimEngine(numTribes int, numAgents int, useAM bool, useMP bool) *SimEngine {
   // create parameter map
   var params = make(map[string]float64)
 
@@ -40,11 +41,11 @@ func NewDefaultSimEngine(numTribes int, numAgents int, useMP bool) *SimEngine {
   params[PASSM_F] = PASSMUT
 
   // create simulation engine with default values
-  return NewSimEngine(numTribes, numAgents, params, useMP)
+  return NewSimEngine(numTribes, numAgents, params, useAM, useMP)
 }
 
 // Make a new simulation engine.
-func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP bool) *SimEngine {
+func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useAM, useMP bool) *SimEngine {
   // get parameters
   passerr, ok := params[PASSE_F]
   if (!ok) { passerr = PASSERR }
@@ -67,7 +68,7 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
   tribes := make([]*Tribe, numTribes)
   rnGen := rand.New(rand.NewSource(time.Now().UnixNano()))
   for i := 0; i < numTribes; i++ {
-    tribes[i] = NewTribe(numAgents, float32(passerr), float32(pactmut), float32(pexeerr), rnGen)
+    tribes[i] = NewTribe(numAgents, float32(passerr), pactmut, float32(pexeerr), rnGen)
   }
   // figure out multiprocessing parameters if MP enabled
   ncpu := runtime.NumCPU()
@@ -93,7 +94,7 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useMP
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, passmut: float32(passmut) }
+                      rnGen: rnGen, passmut: passmut, useAM: useAM }
 }
 
 // Get the total payouts earned by al tribes in the most recent generation
@@ -102,7 +103,7 @@ func (self *SimEngine) GetTotalPayouts() int32 {
 }
 
 // Set the assessment module mutation rate
-func (self *SimEngine) SetPassmut(passmut float32) {
+func (self *SimEngine) SetPassmut(passmut float64) {
   self.passmut = passmut
 }
 
@@ -148,27 +149,15 @@ func (self *SimEngine) PlayRounds(cost int32, benefit int32) (nextGen []*Tribe) 
   return nextGen
 }
 
-// Calculate the maximum and minimum total payouts that could be earned by the agents
+// Calculate the minimum and maximum total payout that can be earned by a tribe
 // in a single generation
-func (self *SimEngine) MaxMinPayouts(cost int32, benefit int32) (max int32, min int32) {
-  max = 0
-  min = 0
-  numAgents := self.tribes[0].numAgents
-  for i := 0; i < numAgents; i++ {
-    for j := i+1; j < numAgents; j++ {
-      // add (benefit - cost) + (2*cost)
-      max += (benefit + cost)
-      min += 2*cost
-    }
-  }
-  max = max*int32(self.numTribes)
-  min = min*int32(self.numTribes)
-  return max, min
+func (self *SimEngine) MinMaxTribalPayouts(cost int32, benefit int32) (min int32, max int32) {
+  return CalcMinMaxTribalPayouts(self.tribes[0].numAgents, cost, benefit)
 }
 
 // Evolve the tribal assessment modules based on the average payouts
 // earned by each tribe during the last generation
-func (self *SimEngine) EvolveTribes(nextGen []*Tribe) {
+func (self *SimEngine) EvolveTribes(nextGen []*Tribe, minPO, maxPO int32) {
   // map tribes to a list of defeated tribes
   conflicts := make(map[*Tribe][]*Tribe)
   // iterate over the tribes and select pairs for confict
@@ -208,7 +197,7 @@ func (self *SimEngine) EvolveTribes(nextGen []*Tribe) {
     for _, loser := range losers {
       // winner comes from original list (source of modifications)
       // loser comes from new list (will be modified)
-      self.ShiftAssessMod(winner, loser, self.rnGen)
+      self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, self.rnGen)
       self.MigrateAgents(winner, loser, self.rnGen)
     }
   }
@@ -273,10 +262,18 @@ func (self *SimEngine) Conflict(a int, b int, rnGen *rand.Rand) (winner, loser i
 }
 
 // Shift the loser's assessment module toward the winner's assessment module
-func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.Rand) {
+func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, useAM bool,
+                                      minPO int32, maxPO int32, rnGen *rand.Rand) {
   // get average payouts
   poW := winner.AvgPayout()
   poL := loser.AvgPayout()
+  // get assessment module bit mutation rate
+  var mutRate float64
+  if (useAM) {
+    mutRate = CalcAdaptTribalMutRate(poW, minPO, maxPO)
+  } else {
+    mutRate = self.passmut
+  }
   // calculate probability that loser's bit value will flip to winner's bit value
   var pflip float64
   if ((poW == 0) && (poL == 0)) {
@@ -288,19 +285,17 @@ func (self *SimEngine) ShiftAssessMod(winner *Tribe, loser *Tribe, rnGen *rand.R
   } else {
     pflip = (self.eta*poW)/((self.eta*poW) + (float64(1)-self.eta)*poL)
   }
-  //if pflip is zero then none of the bits will flip - return immediately
-  if (pflip == 0) { return }
   // before changing the loser's assess module, make a copy in case
   // it is shared with another tribe
   loser.assessMod = loser.assessMod.Copy()
   // mutate the loser's assessment module
   for i := 0; i < 8; i++ {
     if (loser.assessMod.bits[i] != winner.assessMod.bits[i]) {
-      if (RandPercent(rnGen) < pflip) {
+      if ((pflip != 0) && (RandPercent(rnGen) < pflip)) {
         loser.assessMod.bits[i] = winner.assessMod.bits[i]
       }
     } else {
-      if (RandPercent(rnGen) < float64(self.passmut)) {
+      if (RandPercent(rnGen) < float64(mutRate)) {
         if (loser.assessMod.bits[i] == GOOD) {
           loser.assessMod.bits[i] = BAD
         } else {
@@ -318,6 +313,7 @@ func (self *SimEngine) WriteSimParams() {
   fmt.Printf("  \"pcon\":%.5f,\n", self.pcon)
   fmt.Printf("  \"pmig\":%.5f,\n", self.pmig)
   fmt.Printf("  \"passmut\":%.5f,\n", self.passmut)
+  fmt.Printf("  \"am\":%t,\n", self.useAM)
   fmt.Printf("  \"mp\":%t,\n", self.useMP)
   fmt.Printf("  \"ncpu\":%d,\n", self.numCpu)
   // write tribe sim parameters

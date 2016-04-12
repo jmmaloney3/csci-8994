@@ -36,6 +36,7 @@ func main() {
   pexeerr := flag.Float64(sim.PEXEE_F, sim.PEXEERR, "execution error probability")
   fname   := flag.String(sim.FNAME_F, sim.FNAME, "file to collect stats")
   noMP    := flag.Bool(sim.NOMP_F, sim.NOMP, "turn off multiprocessing")
+  noAM    := flag.Bool(sim.NOAM_F, sim.NOAM, "turn off adaptive mutation")
   flag.Parse()
 
   // create parameter map
@@ -59,7 +60,7 @@ func main() {
   start := time.Now()
 
   // create simulation
-  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, !*noMP)
+  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, !*noAM, !*noMP)
 
   // output simulation parameters
   fmt.Println("[")
@@ -67,17 +68,21 @@ func main() {
   fmt.Println(",")
 
   // calculate max and min possible payouts per generation
-  max, min := s.MaxMinPayouts(int32(*cost),int32(*benefit))
+  minPO, maxPO := s.MinMaxTribalPayouts(int32(*cost),int32(*benefit))
+  simMinPO := minPO * int32(*numTribes)
+  simMaxPO := maxPO * int32(*numTribes)
+
   // execute simulation
   var p int32
   var nextGen []*sim.Tribe
+
   for g := 0; g < *gens; g++ {
     nextGen = s.PlayRounds(int32(*cost),int32(*benefit))
     p = s.GetTotalPayouts()
-    s.EvolveTribes(nextGen)
+    s.EvolveTribes(nextGen, minPO, maxPO)
     s.Reset()
     n, a, allc, alld := s.GetStats()
-    WriteStats(writer, g, *numTribes, *numAgents, n, a, allc, alld, p, min, max)
+    WriteStats(writer, g, *numTribes, *numAgents, n, a, allc, alld, p, simMinPO, simMaxPO)
   }
   end := time.Now()
 

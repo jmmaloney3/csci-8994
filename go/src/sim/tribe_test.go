@@ -31,7 +31,7 @@ func TestPlayRounds(u * testing.T) {
   t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, passerr)
 
   // all agents use CO action model
-  co := NewActionModule(true, false, true, false, PACTMUT, pexeerr)
+  co := NewActionModule(true, false, true, false, pexeerr)
   for i := 0; i < len(t.agents); i++ {
     t.agents[i].actMod = co
   }
@@ -105,7 +105,7 @@ func TestPlayRounds2(u *testing.T) {
   t.assessMod = NewAssessModule(GOOD, BAD, BAD, GOOD, GOOD, BAD, BAD, GOOD, passerr)
 
   // all agents use CO action model
-  co := NewActionModule(true, false, true, false, PACTMUT, pexeerr)
+  co := NewActionModule(true, false, true, false, pexeerr)
   for i := 0; i < len(t.agents); i++ {
     t.agents[i].actMod = co
   }
@@ -139,11 +139,11 @@ func TestSelectParent(u *testing.T) {
   rnGen := NewRandNumGen()
 
   // set tribe's probability of action module bit mutation to zero
-  pactmut := float32(0)
+  pactmut := float64(0)
   t := NewTribe(3, PASSERR, pactmut, PEXEERR, rnGen)
 
-  allc := NewActionModule(true, true, true, true, pactmut, PEXEERR)
-  alld := NewActionModule(false, false, false, false, pactmut, PEXEERR)
+  allc := NewActionModule(true, true, true, true, PEXEERR)
+  alld := NewActionModule(false, false, false, false, PEXEERR)
 
   t.agents[0].payout = -1
   t.agents[0].actMod = allc
@@ -177,7 +177,7 @@ func TestSelectParent(u *testing.T) {
 
   // set tribe's probability of action module bit mutation to one
   for i := 0; i < t.numAgents; i++ {
-    t.agents[i].actMod.pactmut = float32(1)
+    t.agents[i].pactmut = float64(1)
   }
 
   // all agents in next generation will inherit from agent #2 again

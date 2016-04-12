@@ -8,7 +8,8 @@ func TestNewSimEngine(u *testing.T) {
   numTribes := 2
   numAgents := 2
   useMP := true
-  s := NewDefaultSimEngine(numTribes, numAgents, useMP)
+  useAM := true
+  s := NewDefaultSimEngine(numTribes, numAgents, useAM, useMP)
 
   // check that engine was created correctly
   AssertIntEqual(u, s.numTribes, numTribes)
@@ -35,7 +36,7 @@ func TestNewSimEngine(u *testing.T) {
   AssertFloat64Equal(u, s.beta, BETA)
   AssertFloat64Equal(u, s.eta, ETA)
   AssertFloat32Equal(u, s.pmig, PMIG)
-  AssertFloat32Equal(u, s.passmut, PASSMUT)
+  AssertFloat64Equal(u, s.passmut, PASSMUT)
 }
 
 func TestConflict(u *testing.T) {
@@ -43,7 +44,8 @@ func TestConflict(u *testing.T) {
   numTribes := 2
   numAgents := 2
   useMP := true
-  s := NewDefaultSimEngine(numTribes, numAgents, useMP)
+  useAM := true
+  s := NewDefaultSimEngine(numTribes, numAgents, useAM, useMP)
 
   s.tribes[0].totalPayouts = 5
   s.tribes[1].totalPayouts = 10
@@ -70,7 +72,8 @@ func TestShiftAssessMod(u *testing.T) {
   numTribes := 2
   numAgents := 2
   useMP := true
-  s := NewDefaultSimEngine(numTribes, numAgents, useMP)
+  useAM := true
+  s := NewDefaultSimEngine(numTribes, numAgents, useAM, useMP)
 
   // all GOOD
   allg := NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, PASSERR)
@@ -101,7 +104,7 @@ func testSAM(u *testing.T, s *SimEngine, allb *AssessModule, allg *AssessModule,
   s.tribes[1].assessMod = allg
 
   // assume that tribe 0 is the winner
-  s.ShiftAssessMod(s.tribes[0], s.tribes[1], rnGen)
+  s.ShiftAssessMod(s.tribes[0], s.tribes[1], false, int32(0), int32(0), rnGen)
   AssertAssModEqual(u, s.tribes[0].assessMod, allb)
   AssertAssModEqual(u, s.tribes[1].assessMod, allb)
 
@@ -110,7 +113,7 @@ func testSAM(u *testing.T, s *SimEngine, allb *AssessModule, allg *AssessModule,
   s.tribes[1].assessMod = allg
 
   // assume that tribe 1 is the winner
-  s.ShiftAssessMod(s.tribes[1], s.tribes[0], rnGen)
+  s.ShiftAssessMod(s.tribes[1], s.tribes[0], false, int32(0), int32(0), rnGen)
   AssertAssModEqual(u, s.tribes[0].assessMod, allg)
   AssertAssModEqual(u, s.tribes[1].assessMod, allg)
 
@@ -122,7 +125,7 @@ func testSAM(u *testing.T, s *SimEngine, allb *AssessModule, allg *AssessModule,
   s.tribes[1].assessMod = allg
 
   // assume that tribe 0 is the winner
-  s.ShiftAssessMod(s.tribes[0], s.tribes[1], rnGen)
+  s.ShiftAssessMod(s.tribes[0], s.tribes[1], false, int32(0), int32(0), rnGen)
   AssertAssModEqual(u, s.tribes[0].assessMod, allb)
   AssertAssModEqual(u, s.tribes[1].assessMod, allg)
 
@@ -131,7 +134,7 @@ func testSAM(u *testing.T, s *SimEngine, allb *AssessModule, allg *AssessModule,
   s.tribes[1].assessMod = allg
 
   // assume that tribe 1 is the winner
-  s.ShiftAssessMod(s.tribes[1], s.tribes[0], rnGen)
+  s.ShiftAssessMod(s.tribes[1], s.tribes[0], false, int32(0), int32(0), rnGen)
   AssertAssModEqual(u, s.tribes[0].assessMod, allb)
   AssertAssModEqual(u, s.tribes[1].assessMod, allg)
 }
@@ -141,9 +144,10 @@ func TestMigrateAgents(u *testing.T) {
   numTribes := 2
   numAgents := 2
   useMP := true
-  s := NewDefaultSimEngine(numTribes, numAgents, useMP)
-  allc := NewActionModule(true, true, true, true, PACTMUT, PEXEERR)
-  alld := NewActionModule(false, false, false, false, PACTMUT, PEXEERR)
+  useAM := true
+  s := NewDefaultSimEngine(numTribes, numAgents, useAM, useMP)
+  allc := NewActionModule(true, true, true, true, PEXEERR)
+  alld := NewActionModule(false, false, false, false, PEXEERR)
 
   // tribe zero has unconditional cooperators
   // tribe one has unconditional defectors
@@ -186,14 +190,14 @@ func TestMigrateAgents(u *testing.T) {
 }
 
 func TestSim(u *testing.T) {
-  runSimTest(u, false)
+  runSimTest(u, false, false)
 }
 
 func TestSimMP(u *testing.T) {
-  runSimTest(u, true)
+  runSimTest(u, false, true)
 }
 
-func runSimTest(u *testing.T, useMP bool) {
+func runSimTest(u *testing.T, useAM, useMP bool) {
   // create parameter map
   var params = make(map[string]float64)
 
@@ -218,16 +222,19 @@ func runSimTest(u *testing.T, useMP bool) {
   // -- set probability of mutation to zero so that winner bits are copied faithfully
   params[PASSM_F] = float64(0)
   // -- set mutation probability to zero so only fittest stratgies are copied forward
-  pactmut := float32(0)
+  pactmut := float64(0)
   params[PACTM_F] = float64(pactmut)
 
-  s := NewSimEngine(2, 2, params, useMP)
+  numTribes := 2
+  numAgents := 2
+  s := NewSimEngine(numTribes, numAgents, params, useAM, useMP)
+  minPO, maxPO := CalcMinMaxTribalPayouts(numAgents, cost, benefit)
 
   allg := NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, passerr)
   allb := NewAssessModule(BAD, BAD, BAD, BAD, BAD, BAD, BAD, BAD, passerr)
 
-  allc := NewActionModule(true, true, true, true, pactmut, pexeerr)
-  alld := NewActionModule(false, false, false, false, pactmut, pexeerr)
+  allc := NewActionModule(true, true, true, true, pexeerr)
+  alld := NewActionModule(false, false, false, false, pexeerr)
 
   // set up tribe 0
   s.tribes[0].assessMod = allg
@@ -251,7 +258,7 @@ func runSimTest(u *testing.T, useMP bool) {
   AssertInt32Equal(u, s.tribes[1].totalPayouts, tp1)
   AssertInt32Equal(u, tp1, 2)
 
-  s.EvolveTribes(nextGen)
+  s.EvolveTribes(nextGen, minPO, maxPO)
 
   u.Logf("payouts after tribe evolution")
   for i := 0; i < s.numTribes; i++ {
@@ -280,7 +287,7 @@ func runSimTest(u *testing.T, useMP bool) {
   }
 
   // set passmut to one so that matching assessment module bits are always flipped
-  s.passmut = float32(1)
+  s.passmut = float64(1)
 
   // restore tribe 1 agents to unconditional defectors
   s.tribes[1].agents[0].actMod = alld
@@ -289,7 +296,7 @@ func runSimTest(u *testing.T, useMP bool) {
   // set pmig to zero so that migration never occurs
   s.pmig = float32(0)
 
-  s.EvolveTribes(nextGen)
+  s.EvolveTribes(nextGen, minPO, maxPO)
 
   // Since passmut is one, matching assessment module bits are always flipped
   AssertAssModEqual(u, s.tribes[0].assessMod, allg)
@@ -307,7 +314,7 @@ func runSimTest(u *testing.T, useMP bool) {
   // set pmig to one so that migration always occurs
   s.pmig = float32(1)
 
-  s.EvolveTribes(nextGen)
+  s.EvolveTribes(nextGen, minPO, maxPO)
 
   // Passmut doesn't come into play since the two assessment modules have no matching bits
   // Since eta is one, loser's assessment module bits are always flipped

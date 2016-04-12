@@ -10,22 +10,24 @@ type Agent struct {
   actMod *ActionModule
   payout int32
   numGames int8
+  pactmut float64 // mu_s - action module bit mutation probability
 }
 
 // Create a new agent.  By default the agent has a GOOD reputation.
-func NewAgent(t *Tribe, pactmut float32, pexeerr float32, rnGen *rand.Rand) *Agent {
+func NewAgent(t *Tribe, pactmut float64, pexeerr float32, rnGen *rand.Rand) *Agent {
   var actm = NewActionModule(RandBool(rnGen), RandBool(rnGen),
-                             RandBool(rnGen), RandBool(rnGen), pactmut, pexeerr)
-  return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, actMod: actm }
+                             RandBool(rnGen), RandBool(rnGen), pexeerr)
+  return &Agent { tribe: t, rep: GOOD, payout: 0, numGames: 0, pactmut: pactmut, actMod: actm }
 }
 
 // Create a child of this agent to be part of the specified next generation
 // tribe.  The new agent's action module is a clone of its parent's action
 // module (possibly with mutations).  The new agent is added to the next generation
-// tribe.  The new other attributes are set to default values.
+// tribe.  The other attributes are set to default values.
 func (parent *Agent) CreateChild(nextGen *Tribe, rnGen *rand.Rand) *Agent {
-  inheritedActMod := parent.actMod.CloneWithMutations(rnGen)
-  return &Agent { tribe: nextGen, actMod: inheritedActMod }
+  inheritedActMod := parent.actMod.CloneWithMutations(parent.pactmut, rnGen)
+  return &Agent { tribe: nextGen, rep: GOOD, payout: 0, numGames: 0,
+                  actMod: inheritedActMod, pactmut: parent.pactmut }
 }
 
 // generate string representation of an agent
@@ -95,6 +97,6 @@ func (self *Agent) PlayRound(recipient *Agent, cost int32, benefit int32, rnGen 
 }
 
 func (self *Agent) WriteSimParams() {
-  // no parameters stored directly on agent (for now)
+  fmt.Printf("  \"pactmut\":%.5f,\n", self.pactmut)
   self.actMod.WriteSimParams()
 }

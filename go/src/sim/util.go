@@ -2,8 +2,10 @@ package sim
 
 //import "crypto/rand"
 //import "math/big"
+import "math"
 import "math/rand"
 import "time"
+import "fmt"
 
 // default parameter values
 const (
@@ -33,6 +35,8 @@ const (
  PASSE_F = "passerr"
  PEXEERR = 0.001 // defaul tprobability of execution error
  PEXEE_F = "pexeerr"
+ NOAM = false
+ NOAM_F = "nam"
  FNAME = "stats.csv"
  FNAME_F = "f"
  NOMP = false
@@ -56,6 +60,71 @@ const (
   DONATE Act = iota
   REFUSE Act = iota
 )
+
+const epsilon = float64(0.00000001)
+// determine whether two floating point numbers are equal
+// http://stackoverflow.com/questions/4915462/how-should-i-do-floating-point-comparison
+func FloatAlmostEquals(f1 float64, f2 float64, epsilon float64) bool {
+  if (f1 == f2) {
+    return true
+  } else {
+    diff := math.Abs(f1 - f2)
+    if (f1 == 0 || f2 == 0 || diff < math.SmallestNonzeroFloat64) {
+      // f1 or f2 is zero or both are extremely close to it
+      // relative error is less meaningful here
+      return diff < (epsilon * math.SmallestNonzeroFloat64)
+    } else { // use relative error
+      return ((diff / (math.Abs(f1) + math.Abs(f2))) < epsilon)
+    }
+  }
+}
+
+const lowFitMutRate = float64(0.002)
+// Calculate an adaptive mutation rate for a tribe based on the provided total
+// payouts, min payout and max payout
+func CalcAdaptTribalMutRate(totalPayouts float64, minPO, maxPO int32) float64 {
+  // if the tribe earned the minimum payout then return low fit mutation rate
+  if (FloatAlmostEquals(totalPayouts, float64(minPO), epsilon)) {
+    return lowFitMutRate
+  }
+
+  // error checks
+  if (minPO >= maxPO) {
+    msg := fmt.Sprintf("minPO >= maxPO (minPO: %d, maxPO: %d)", minPO, maxPO)
+    panic(msg)
+  }
+
+  // calculate the percent of possible payout earned by the tribe
+  // -- calculate earned payout - the amount above the minimum payout
+  earnedPO := totalPayouts - float64(minPO)
+  // -- calculate the possible max earned payout - the diff between max and min payouts
+  maxEarnedPO := float64(maxPO - minPO)
+
+  // calculate mutation rate based on parent fitness
+  // -- linear mutation rate
+  // return lowFitMutRate - (earnedPO/maxEarnedPO)*lowFitMutRate
+  // -- error rate based
+  // errRate := float64(1) - earnedPO/maxEarnedPO
+  // return PASSMUT + math.Pow(errRate, float64(4))*float64(0.002)
+  // -- exponential mutation rate
+  return lowFitMutRate * math.Exp(math.Log(0.5)*5*earnedPO/maxEarnedPO)
+  //return lowFitMutRate * math.Exp(-6.2146*5*earnedPO/maxEarnedPO)
+}
+
+// Calculate the minimum and maximum total payouts that can be earned by a tribe
+// in a single generation
+func CalcMinMaxTribalPayouts(numAgents int, cost int32, benefit int32) (min int32, max int32) {
+  max = 0
+  min = 0
+  for i := 0; i < numAgents; i++ {
+    for j := i+1; j < numAgents; j++ {
+      // add (benefit - cost) + (2*cost)
+      max += (benefit + cost)
+      min += 2*cost
+    }
+  }
+  return min, max
+}
 
 // Return a new random number generator.  This generator is NOT protected
 // by a mutex lock and therefore not thread safe.
