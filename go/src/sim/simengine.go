@@ -384,6 +384,8 @@ func (self *SimEngine) WriteSimParams() {
   fmt.Printf("  \"pcon\":%.5f,\n", self.pcon)
   fmt.Printf("  \"pmig\":%.5f,\n", self.pmig)
   fmt.Printf("  \"passmut\":%.5f,\n", self.passmut)
+  fmt.Printf("  \"passmutall\":%t,\n", self.passmutall)
+  fmt.Printf("  \"singdef\":%t,\n", self.singdef)
   fmt.Printf("  \"am\":%t,\n", self.useAM)
   fmt.Printf("  \"mp\":%t,\n", self.useMP)
   fmt.Printf("  \"ncpu\":%d,\n", self.numCpu)

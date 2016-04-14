@@ -23,7 +23,7 @@ const (
  ETA_F = "eta"
  PCON = 0.01 // default probability of tribal conflict
  PCON_F = "pcon"
- SINGLE_DEF = true // whether a tribe is limited to a single defeat per generation
+ SINGLE_DEF = false // whether a tribe is limited to a single defeat per generation
  SINGLE_DEF_F = "singdef"
  PMIG = 0.005 // default probability of migration
  PMIG_F = "pmig"
