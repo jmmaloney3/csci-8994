@@ -221,9 +221,29 @@ func (self *SimEngine) EvolveTribes(nextGen []*Tribe, minPO, maxPO int32) {
   if (self.singdef) {
     // evolve assessment modules and migrate agents
     // -- each loser is only evolved by one winner tribe
-    for loser, winner := range loserToWinner {
-      self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, self.rnGen)
-      self.MigrateAgents(winner, loser, self.rnGen)
+    // -- therefore this can be parllelized
+    // -- unfortunately, current code runs slower than serial code so
+    //    turn it off
+    if (false) { // (self.useMP) {}
+      // create a semaphore
+      numLosers := len(loserToWinner)
+      sem := make(chan int32, numLosers)
+      for loser, winner := range loserToWinner {
+        go func (loser *Tribe, winner *Tribe, rnGen *rand.Rand) {
+          self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, rnGen)
+          self.MigrateAgents(winner, loser, rnGen)
+          sem <- 0
+        } (loser, winner, NewRandNumGen())
+      }
+      // wait for goroutines to finish
+      for i := 0; i < numLosers; i++ {
+        (<-sem)
+      }
+    } else { // not self.useMP
+      for loser, winner := range loserToWinner {
+        self.ShiftAssessMod(winner, loser, self.useAM, minPO, maxPO, self.rnGen)
+        self.MigrateAgents(winner, loser, self.rnGen)
+      }
     }
   } else {
     // sort the map keys based on payouts
