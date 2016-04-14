@@ -229,10 +229,10 @@ func MultiTribeSim() {
   cost := int32(1)
   benefit := int32(3)
 
-  // create parameter map
+  // create parameter map for floats
   var params = make(map[string]float64)
 
-  // populate arg maps
+  // populate arg map for floats
   params[PASSE_F] = float64(passerr)
   params[PACTM_F] = float64(pactmut)
   params[PEXEE_F] = float64(pexeerr)
@@ -242,11 +242,22 @@ func MultiTribeSim() {
   params[PMIG_F]  = pmig
   params[PASSM_F] = float64(passmut)
 
+  singledef := SINGLE_DEF
+  passmutall := PASSMUT_ALL
   useMP := true
   useAM := true
 
+  // create parameter map for booleans
+  var bparams = make(map[string]bool)
+
+  // populate arg map for booleans
+  bparams[SINGLE_DEF_F]  = singledef
+  bparams[PASSMUT_ALL_F] = passmutall
+  bparams[USEAM_F]       = useAM
+  bparams[NOMP_F]        = !useMP
+
   // create the simengine
-  s := NewSimEngine(numTribes, numAgents, params, useAM, useMP)
+  s := NewSimEngine(numTribes, numAgents, params, bparams)
 
   // calculate max and min payouts
   minPO, maxPO := CalcMinMaxTribalPayouts(numAgents, cost, benefit)

@@ -29,10 +29,10 @@ type SimEngine struct {
 }
 
 func NewDefaultSimEngine(numTribes int, numAgents int, useAM bool, useMP bool) *SimEngine {
-  // create parameter map
+  // create parameter map for floats
   var params = make(map[string]float64)
 
-  // populate arg maps
+  // populate arg map for floats
   params[PASSE_F] = PASSERR
   params[PACTM_F] = PACTMUT
   params[PEXEE_F] = PEXEERR
@@ -42,13 +42,22 @@ func NewDefaultSimEngine(numTribes int, numAgents int, useAM bool, useMP bool) *
   params[PMIG_F]  = PMIG
   params[PASSM_F] = PASSMUT
 
+  // create parameter map for booleans
+  var bparams = make(map[string]bool)
+
+  // populate arg map for booleans
+  bparams[SINGLE_DEF_F]  = SINGLE_DEF
+  bparams[PASSMUT_ALL_F] = PASSMUT_ALL
+  bparams[USEAM_F]       = useAM
+  bparams[NOMP_F]        = !useMP
+
   // create simulation engine with default values
-  return NewSimEngine(numTribes, numAgents, params, useAM, useMP)
+  return NewSimEngine(numTribes, numAgents, params, bparams)
 }
 
 // Make a new simulation engine.
-func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useAM, useMP bool) *SimEngine {
-  // get parameters
+func NewSimEngine(numTribes int, numAgents int, params map[string]float64, bparams map[string]bool) *SimEngine {
+  // get float parameters
   passerr, ok := params[PASSE_F]
   if (!ok) { passerr = PASSERR }
   pactmut, ok := params[PACTM_F]
@@ -65,6 +74,17 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useAM
   if (!ok) { pmig = PMIG }
   passmut, ok := params[PASSM_F]
   if (!ok) { passmut = PASSMUT }
+
+  // get boolean parameters
+  singledef, ok := bparams[SINGLE_DEF_F]
+  if (!ok) { singledef = SINGLE_DEF }
+  passmutall, ok := bparams[PASSMUT_ALL_F]
+  if (!ok) { passmutall = PASSMUT_ALL }
+  useAM, ok := bparams[USEAM_F]
+  if (!ok) { passmutall = USEAM }
+  noMP, ok := bparams[NOMP_F]
+  if (!ok) { noMP = NOMP }
+  useMP := !noMP
 
   // create tribes
   tribes := make([]*Tribe, numTribes)
@@ -96,8 +116,8 @@ func NewSimEngine(numTribes int, numAgents int, params map[string]float64, useAM
   return &SimEngine { tribes: tribes, numTribes: numTribes, totalPayouts: 0,
                       pcon: float32(pcon), beta: beta, eta: eta, pmig: float32(pmig),
                       useMP: useMP, numCpu: ncpu, cpuTasks: cpuTasks, cpuRNG: cpuRNG,
-                      rnGen: rnGen, passmut: passmut, passmutall: true, singdef: true,
-                      useAM: useAM }
+                      rnGen: rnGen, passmut: passmut, passmutall: passmutall,
+                      singdef: singledef, useAM: useAM }
 }
 
 // Get the total payouts earned by al tribes in the most recent generation

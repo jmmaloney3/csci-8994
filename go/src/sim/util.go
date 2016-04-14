@@ -39,8 +39,8 @@ const (
  PASSE_F = "passerr"
  PEXEERR = 0.001 // defaul tprobability of execution error
  PEXEE_F = "pexeerr"
- NOAM = false
- NOAM_F = "nam"
+ USEAM = false
+ USEAM_F = "am"
  FNAME = "stats.csv"
  FNAME_F = "f"
  NOMP = false

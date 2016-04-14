@@ -198,7 +198,7 @@ func TestSimMP(u *testing.T) {
 }
 
 func runSimTest(u *testing.T, useAM, useMP bool) {
-  // create parameter map
+  // create parameter map for floats
   var params = make(map[string]float64)
 
   cost := int32(1)
@@ -225,9 +225,18 @@ func runSimTest(u *testing.T, useAM, useMP bool) {
   pactmut := float64(0)
   params[PACTM_F] = float64(pactmut)
 
+  // create parameter map for booleans
+  var bparams = make(map[string]bool)
+
+  // populate arg map for booleans
+  bparams[SINGLE_DEF_F]  = SINGLE_DEF
+  bparams[PASSMUT_ALL_F] = PASSMUT_ALL
+  bparams[USEAM_F]       = useAM
+  bparams[NOMP_F]        = !useMP
+
   numTribes := 2
   numAgents := 2
-  s := NewSimEngine(numTribes, numAgents, params, useAM, useMP)
+  s := NewSimEngine(numTribes, numAgents, params, bparams)
   minPO, maxPO := CalcMinMaxTribalPayouts(numAgents, cost, benefit)
 
   allg := NewAssessModule(GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, GOOD, passerr)

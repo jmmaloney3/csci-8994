@@ -35,11 +35,13 @@ func main() {
   passerr := flag.Float64(sim.PASSE_F, sim.PASSERR, "assessment error probability")
   pexeerr := flag.Float64(sim.PEXEE_F, sim.PEXEERR, "execution error probability")
   fname   := flag.String(sim.FNAME_F, sim.FNAME, "file to collect stats")
+  singledef := flag.Bool(sim.SINGLE_DEF_F, sim.SINGLE_DEF, "each tribe can only be defeated once per generation")
+  passmutall := flag.Bool(sim.PASSMUT_ALL_F, sim.PASSMUT_ALL, "attempt mutation on all assess mod bits")
   noMP    := flag.Bool(sim.NOMP_F, sim.NOMP, "turn off multiprocessing")
-  noAM    := flag.Bool(sim.NOAM_F, sim.NOAM, "turn off adaptive mutation")
+  useAM   := flag.Bool(sim.USEAM_F, sim.USEAM, "use adaptive mutation")
   flag.Parse()
 
-  // create parameter map
+  // create parameter map for floats
   var params = make(map[string]float64)
   params[sim.BETA_F]  = *beta
   params[sim.ETA_F]   = *eta
@@ -49,6 +51,13 @@ func main() {
   params[sim.PACTM_F] = *pactmut
   params[sim.PASSE_F] = *passerr
   params[sim.PEXEE_F] = *pexeerr
+
+  // create parameter map for booleans
+  var bparams = make(map[string]bool)
+  bparams[sim.SINGLE_DEF_F]  = *singledef
+  bparams[sim.PASSMUT_ALL_F] = *passmutall
+  bparams[sim.USEAM_F]       = *useAM
+  bparams[sim.NOMP_F]        = *noMP
 
   // set up the output file
   ofile, err := os.Create(*fname)
@@ -60,7 +69,7 @@ func main() {
   start := time.Now()
 
   // create simulation
-  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, !*noAM, !*noMP)
+  var s *sim.SimEngine = sim.NewSimEngine(*numTribes, *numAgents, params, bparams)
 
   // output simulation parameters
   fmt.Println("[")
