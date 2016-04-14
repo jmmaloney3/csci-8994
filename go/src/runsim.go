@@ -90,8 +90,8 @@ func main() {
     p = s.GetTotalPayouts()
     s.EvolveTribes(nextGen, minPO, maxPO)
     s.Reset()
-    n, a, allc, alld := s.GetStats()
-    WriteStats(writer, g, *numTribes, *numAgents, n, a, allc, alld, p, simMinPO, simMaxPO)
+    n, a := s.GetStats()
+    WriteStats(writer, g, *numTribes, *numAgents, n, a, p, simMinPO, simMaxPO)
   }
   end := time.Now()
 
@@ -102,16 +102,16 @@ func main() {
 }
 
 func WriteHeader(w io.Writer) {
-  fmt.Fprintf(w, "gen,t,a,n0,n1,n2,n3,n4,n5,n6,n7,a0,a1,a2,a3,allc,alld,po,minpo,maxpo\n")
+  fmt.Fprintf(w, "gen,t,a,n0,n1,n2,n3,n4,n5,n6,n7,a00,a01,a02,a03,a04,a05,a06,a07,a08,a09,a10,a11,a12,a13,a14,a15,po,minpo,maxpo\n")
 }
 func WriteStats(w io.Writer, gen int, numTribes int, numAgents int,
-                n [8]int, a [4]int, allcCnt int, alldCnt int,
+                n [8]int, a map[int]int,
                 p int32, min int32, max int32) {
-  fmt.Fprintf(w, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  fmt.Fprintf(w, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
                  gen, numTribes, numAgents,
                  n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7],
-                 a[0], a[1], a[2], a[3],
-                 allcCnt, alldCnt,
+                 a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7],
+                 a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15],
                  p, min, max)
 }
 

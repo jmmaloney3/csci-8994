@@ -288,7 +288,9 @@ func (self *SimEngine) MigrateAgents(from *Tribe, to *Tribe, rnGen *rand.Rand) {
 }
 
 // Collect statistics for the most recently completed generation
-func (self *SimEngine) GetStats() (assessStats [8]int, actionStats [4]int, allcCnt int, alldCnt int) {
+func (self *SimEngine) GetStats() (assessStats [8]int, actionStats map[int]int) {
+  actionStats = make(map[int]int, 16)
+  var amBits int
   for i := 0; i < self.numTribes; i++ {
     // collect statistics on the tribe's assess module
     for j := 0; j < 8; j++ {
@@ -296,18 +298,11 @@ func (self *SimEngine) GetStats() (assessStats [8]int, actionStats [4]int, allcC
     }
     // collect statistics on the agent's action modules
     for k := 0; k < self.tribes[i].numAgents; k++ {
-      for m := 0; m < 4; m++ {
-        actionStats[m] += self.tribes[i].agents[k].actMod.GetBit(m)
-      }
-      // count occurences of ALLD and ALLC
-      if (self.tribes[i].agents[k].actMod.GetBits() == ALLD) {
-        alldCnt++
-      } else if (self.tribes[i].agents[k].actMod.GetBits() == ALLC) {
-        allcCnt++
-      }
+      amBits = self.tribes[i].agents[k].actMod.GetBits()
+      actionStats[amBits] = actionStats[amBits] + 1
     }
   }
-  return assessStats, actionStats, allcCnt, alldCnt
+  return assessStats, actionStats
 }
 
 // Determine the tribe that wins the conflict
