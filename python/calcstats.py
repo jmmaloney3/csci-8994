@@ -93,7 +93,7 @@ def calc_stats(files, periods, allcd_t, ofile, verbose):
     
     # define column names
     assess_columns = ['n0','n1','n2','n3','n4','n5','n6','n7']
-    action_columns = ['a0','a1','a2','a3']
+    action_columns = ['a00','a01','a02','a03','a04','a05','a06','a07','a08','a09','a10','a11','a12','a13','a14','a15']
     
     # write headers to output file
     csv_writer.writerow(assess_columns+action_columns)
@@ -111,10 +111,13 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
         sys.stderr.write('Loading data from %s...\n' % csvfile)
     data = pd.read_csv(csvfile, skipinitialspace=True)
     
+    allc = 'a15'
+    alld = 'a00'
+    
     # get bit column data
     assess_data = data[assess_columns]
     action_data = data[action_columns]
-    allcd_data  = data[['allc', 'alld']]
+    allcd_data  = data[[allc, alld]]
 
     # negative periods argument means use all the data
     if ((periods < 0) or (data.shape[0] < periods)):
@@ -139,18 +142,19 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     
     # check allc/alld threshold
     allcd_percent = allcd_data.sum()/max_action
-    if (allcd_percent['allc'] > allcd_t):
-        sys.stderr.write('  [%s] ALLC prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['allc'], allcd_t))
+    if (allcd_percent[allc] > allcd_t):
+        sys.stderr.write('  [%s] ALLC prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent[allc], allcd_t))
         return
-    if (allcd_percent['alld'] > allcd_t):
-        sys.stderr.write('  [%s] ALLD prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent['alld'], allcd_t))
+    if (allcd_percent[alld] > allcd_t):
+        sys.stderr.write('  [%s] ALLD prevelance (%6.4f) exceeds %4.2f threshold\n' % (path.basename(csvfile), allcd_percent[alld], allcd_t))
         return
 
     # calculate results
     assess_percent = assess_data.sum()/max_assess
     assess_result = [ get_result(p) for p in assess_percent ]
     action_percent = action_data.sum()/max_action
-    action_result = [ get_result(p) for p in action_percent ]
+    # action_result = [ get_result(p) for p in action_percent ]
+    action_result = [ str(p) for p in action_percent ]
     
     # output percentages
     assess_str = ','.join('%4.2f' % n for n in assess_percent)

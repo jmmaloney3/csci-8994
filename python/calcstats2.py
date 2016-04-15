@@ -82,7 +82,7 @@ def get_result(data, column):
 def calc_stats(csvfile, ofile, verbose):    
     # define column names
     assess_columns = ['n0','n1','n2','n3','n4','n5','n6','n7']
-    action_columns = ['a0','a1','a2','a3']
+    #action_columns = ['a00','a01','a02','a03','a04','a05','a06','a07','a08','a09','a10','a11','a12','a13','a14','a15']
 
     # load CSV data
     if (verbose):
@@ -91,11 +91,12 @@ def calc_stats(csvfile, ofile, verbose):
     
     # calculate results
     assess_result = [ get_result(data, column) for column in assess_columns ]
-    action_result = [ get_result(data, column) for column in action_columns ]
+    #action_result = [ get_result(data, column) for column in action_columns ]
     
     # output results
     ofile.write('assess: [%s]' % ','.join(bit for bit in assess_result))
-    ofile.write(' action: [%s]\n' % ','.join(bit for bit in action_result))
+    #ofile.write(' action: [%s]\n' % ','.join(bit for bit in action_result))
+    ofile.write('\n')
 # end process_file
 
 # run main method when this file is run from command line
