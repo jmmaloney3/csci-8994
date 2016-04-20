@@ -18,65 +18,23 @@ GENS=10000
 SIMS=500
 #SIMS=5
 
-# iterate over values for Beta
-
-# beta = 10^5
-#BETA=100000
-#time $BIN/runsim8.sh beta-$BETA $SIMS -g $GENS -beta $BETA
-
-# beta = 10^3
-#BETA=1000
-#time $BIN/runsim8.sh beta-$BETA $SIMS -g $GENS -beta $BETA
-
-# beta = 10^1
-#BETA=10
-#time $BIN/runsim8.sh beta-$BETA $SIMS -g $GENS -beta $BETA
-
-#BETA=1000
-
-# benefit = 5
-#BEN=5
-#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
-
-# benefit = 10
-#BEN=10
-#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
-
-# benefit = 20
-#BEN=20
-#time $BIN/runsim8.sh ben-$BEN $SIMS -g $GENS -b $BEN
-
-# set assessment/perception errors to zero
-#PASSERR=0
+DATE=20160419
 
 BETA=5
-# benefit = 5
-#BEN=5
-#time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
-#tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
-
-# benefit = 10
-#BEN=10
-#time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
-#tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
-
-# benefit = 20
-#BEN=20
-#time $BIN/runsim8.sh ben-$BEN-beta-$BETA-passerr-$PASSERR $SIMS -g $GENS -b $BEN -beta $BETA -passerr $PASSERR
-#tar czf ben-$BEN-beta-$BETA-passerr-$PASSERR.tar.gz ben-$BEN-beta-$BETA-passerr-$PASSERR
-
-BETA=5
-# benefit = 5
 BEN=5
-time $BIN/runsim8.sh bug-fix-ben-$BEN-beta-$BETA $SIMS -g $GENS -b $BEN -beta $BETA
-tar czf bug-fix-ben-$BEN-beta-$BETA.tar.gz bug-fix-ben-$BEN-beta-$BETA
 
-# benefit = 10
-BEN=10
-time $BIN/runsim8.sh bug-fix-ben-$BEN-beta-$BETA $SIMS -g $GENS -b $BEN -beta $BETA
-tar czf bug-fix-ben-$BEN-beta-$BETA.tar.gz bug-fix-ben-$BEN-beta-$BETA
+DIRNAME=$DATE-1
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA
+tar czf $DIRNAME.tar.gz $DIRNAME
 
-# benefit = 20
-BEN=20
-time $BIN/runsim8.sh bug-fix-ben-$BEN-beta-$BETA $SIMS -g $GENS -b $BEN -beta $BETA
-tar czf bug-fix-ben-$BEN-beta-$BETA.tar.gz bug-fix-ben-$BEN-beta-$BETA
+DIRNAME=$DATE-2
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall -useAM
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+DIRNAME=$DATE-3
+time $BIN/runsim8.sh $DIRNAME -g $GENS -b $BEN -beta $BETA -singdef -useAM
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+DIRNAME=$DATE-4
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -useAM
+tar czf $DIRNAME.tar.gz $DIRNAME
