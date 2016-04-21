@@ -14,27 +14,28 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # run several sim jobs
 
 GENS=10000
-#GENS=10
+GENS=10
 SIMS=500
-#SIMS=5
+SIMS=5
 
-DATE=20160419
+DATE=20160420
 
 BETA=5
 BEN=5
 
 DIRNAME=$DATE-1
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall -am
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-2
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall -useAM
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -am
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-3
-time $BIN/runsim8.sh $DIRNAME -g $GENS -b $BEN -beta $BETA -singdef -useAM
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -am
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-4
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -useAM
+BETA=10
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA
 tar czf $DIRNAME.tar.gz $DIRNAME
