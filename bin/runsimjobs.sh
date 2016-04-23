@@ -18,33 +18,36 @@ GENS=10000
 SIMS=500
 #SIMS=5
 
-DATE=20160422
+DATE=20160423
 
 BEN=5
 
 DIRNAME=$DATE-1
-# 10^5
-BETA=100000
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA
-tar czf $DIRNAME.tar.gz $DIRNAME
-
-DIRNAME=$DATE-2
-# 10^0
-BETA=1
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA
-tar czf $DIRNAME.tar.gz $DIRNAME
-
-DIRNAME=$DATE-3
-BETA=1
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
-tar czf $DIRNAME.tar.gz $DIRNAME
-
-DIRNAME=$DATE-4
+# 10^1
 BETA=10
 time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
 tar czf $DIRNAME.tar.gz $DIRNAME
 
-DIRNAME=$DATE-5
+DIRNAME=$DATE-2
+# 10^2
 BETA=100
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+DIRNAME=$DATE-3
+# 10^3
+BETA=1000
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+DIRNAME=$DATE-4
+# 10^4
+BETA=10000
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+DIRNAME=$DATE-5
+# 10^5
+BETA=100000
 time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
 tar czf $DIRNAME.tar.gz $DIRNAME
