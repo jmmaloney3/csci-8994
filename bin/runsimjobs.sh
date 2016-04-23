@@ -22,10 +22,10 @@ DATE=20160423
 
 BEN=5
 
-DIRNAME=$DATE-1
+DIRNAME=$DATE-1b
 # 10^1
 BETA=10
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
+time $BIN/runsim8.sh $DIRNAME 14 -g $GENS -b $BEN -beta $BETA -passmutall
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-2
