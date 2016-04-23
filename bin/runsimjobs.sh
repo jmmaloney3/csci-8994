@@ -36,7 +36,7 @@ tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-3
 BETA=1
-time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -pasmutall
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 DIRNAME=$DATE-4
