@@ -18,14 +18,14 @@ GENS=10000
 SIMS=500
 #SIMS=5
 
-DATE=20160429
+DATE=20160430
 
-BEN=8
+EXP=3
+BETA=$((10**EXP))
 
 COUNT=0
-for EXP in `seq 0 1 5`;
+for BEN in `seq 2 2 20`;
 do
-  BETA=$((10**EXP))
   COUNT=$((COUNT+1))
   DIRNAME=$DATE-$COUNT
   time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
