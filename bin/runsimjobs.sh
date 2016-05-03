@@ -23,14 +23,14 @@ DATE=20160430
 EXP=3
 BETA=$((10**EXP))
 
-COUNT=5
-BEN=10
+COUNT=6
+BEN=12
 DIRNAME=$DATE-$((COUNT))b
-time $BIN/runsim8.sh $DIRNAME 155 -g $GENS -b $BEN -beta $BETA -passmutall
+time $BIN/runsim8.sh $DIRNAME 283 -g $GENS -b $BEN -beta $BETA -passmutall
 tar czf $DIRNAME.tar.gz $DIRNAME
 
 #COUNT=0
-for BEN in `seq 12 2 20`;
+for BEN in `seq 14 2 20`;
 do
   COUNT=$((COUNT+1))
   DIRNAME=$DATE-$COUNT
