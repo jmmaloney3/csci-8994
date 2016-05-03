@@ -18,23 +18,16 @@ GENS=10000
 SIMS=500
 #SIMS=5
 
-DATE=20160430
+DATE=20160503
 
-EXP=3
-BETA=$((10**EXP))
-
-COUNT=6
-BEN=12
-DIRNAME=$DATE-$((COUNT))b
-time $BIN/runsim8.sh $DIRNAME 283 -g $GENS -b $BEN -beta $BETA -passmutall
-tar czf $DIRNAME.tar.gz $DIRNAME
-
-#COUNT=0
-for BEN in `seq 14 2 20`;
+COUNT=0
+BEN=8
+for EXP in `seq 0 1 5`;
 do
   COUNT=$((COUNT+1))
+  BETA=$((10**EXP))
   DIRNAME=$DATE-$COUNT
-  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -passmutall
+  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef
   tar czf $DIRNAME.tar.gz $DIRNAME
 done
 
