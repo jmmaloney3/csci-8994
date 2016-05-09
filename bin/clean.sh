@@ -22,6 +22,14 @@ then
   rm $EXE
 fi
 
+# remove the rungpggsim command
+EXE=$BIN/runsimgpgg
+if [ -e $EXE ];
+then
+  echo "clean $EXE"
+  rm $EXE
+fi
+
 # remove the sim package
 PKG=$BIN/../go/pkg
 if [ -e $PKG ];

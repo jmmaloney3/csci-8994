@@ -18,9 +18,12 @@ export GOPATH=$BIN/../go
 
 # build and install the sim package
 go install sim
+go install simgpgg
 
 # run the tests
 go test sim
+go test simgpgg
 
 # build the runsim command and put it in the bin directory
 go build -o $BIN/runsim $GOPATH/src/runsim.go
+go build -o $BIN/runsimgpgg $GOPATH/src/runsimgpgg.go
