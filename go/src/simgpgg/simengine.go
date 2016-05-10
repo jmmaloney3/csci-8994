@@ -1,6 +1,5 @@
 package simgpgg
 
-import "math"
 import "math/rand"
 import "fmt"
 import "goraph"
@@ -10,6 +9,7 @@ import "goraph"
 type SimEngine struct {
   graph goraph.Graph // the graph that holds the agents
   numAgents int32    // total number of agents being simulated
+  avgdeg int32       // average degree of the graph (z)
   agents []*Agent    // list of agents
   Nc int32           // current number of cooperators
   Nd int32           // current number of defectors
@@ -23,9 +23,9 @@ type SimEngine struct {
 }
 
 // Make a new SimEngine with the specified parameters
-func NewSimEngine(numAgents int32, numGens int32, mult int32, cost int32, W float64,
-                  betae float64, betaa float64) *SimEngine {
-  graph := NewRegularRing(int(numAgents), 6)
+func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
+                  cost int32, W float64, betae float64, betaa float64) *SimEngine {
+  graph := NewRegularRing(numAgents, avgdeg)
   rnGen := NewRandNumGen()
   // create the agents
   agents := make([]*Agent, numAgents)
@@ -42,17 +42,16 @@ func NewSimEngine(numAgents int32, numGens int32, mult int32, cost int32, W floa
     }
   }
 
-  return &SimEngine { numAgents: numAgents, numGens: numGens, mult: mult,
-                      rnGen: rnGen, graph: graph, agents: agents, cost: cost,
-                      Nc: Nc, Nd: Nd, W: W, betae: betae, betaa: betaa }
+  return &SimEngine { numAgents: numAgents, numGens: numGens, avgdeg: avgdeg,
+                      mult: mult, cost: cost, W: W, betae: betae, betaa: betaa,
+                      rnGen: rnGen, graph: graph, agents: agents,
+                      Nc: Nc, Nd: Nd }
 }
 
 func (self *SimEngine) RunSim() {
   // print out simulation parameters
   fmt.Printf("PGG Graph Simulator:\n")
-  fmt.Printf("  Num Agents: %4d\n", self.numAgents)
-  fmt.Printf("  Num Gens:   %4d\n", self.numGens)
-  fmt.Printf("  Mult (r):   %4d\n", self.mult)
+  fmt.Println(self)
 
   // calculate probability that a structure update occurs
   stratUpdProb := float64(1)/(float64(1) + self.W)
@@ -77,7 +76,7 @@ func (self *SimEngine) RunSim() {
     sponsors = append(sponsors, Nx...)
     sponsors = append(sponsors, Ny...)
     sponsors = removeDuplicates(sponsors)
-    // cldar payouts for agents that will play games
+    // clear payouts for agents that will play games
     for i := 0; i < len(sponsors); i++ {
       self.agents[sponsors[i]].payouts = float64(0)
     }
@@ -87,11 +86,8 @@ func (self *SimEngine) RunSim() {
       players := append(self.graph.Neighbors(sponsor), sponsor)
       self.PlayGame(players)
     }
-    // print out payouts
-    //fmt.Printf("Player x: %6.4f\n", self.agents[x].payouts)
-    //fmt.Printf("Player y: %6.4f\n", self.agents[y].payouts)
 
-    if (RandProb(self.rnGen) < stratUpdProb) {
+    if (RandProb(self.rnGen) <= stratUpdProb) {
       // update agent strategy - if appropriate
       self.UpdateStrategy(x, y)
     } else {
@@ -101,14 +97,16 @@ func (self *SimEngine) RunSim() {
     // write out stats
     fmt.Printf("%d,%d,%d\n", g, self.Nc, self.Nd)
   }
+
+  self.DegreeHistogramData()
 }
 
 func (self *SimEngine) SimComplete(genNum int32) bool {
   return (genNum >= self.numGens) || (self.Nc >= self.numAgents) || (self.Nd >= self.numAgents)
 }
 
-// play a public goods game with the specified set of agents
-func (self *SimEngine) PlayGame(players []goraph.Vertex) {
+// calculate the public goods payout for the specified set of players
+func (self *SimEngine) CalcPayouts(players []goraph.Vertex) (Pc, Pd float64) {
   Nc := int32(0)
   Nd := int32(0)
   // count up cooperators and defectors
@@ -120,8 +118,15 @@ func (self *SimEngine) PlayGame(players []goraph.Vertex) {
     }
   }
   // calculate payouts
-  Pd := float64(self.mult*self.cost*Nc)/float64(Nc+Nd)
-  Pc := Pd - float64(self.cost)
+  Pd = float64(self.mult*self.cost*Nc)/float64(Nc+Nd)
+  Pc = Pd - float64(self.cost)
+  return Pc, Pd
+}
+
+// play a public goods game with the specified set of agents
+func (self *SimEngine) PlayGame(players []goraph.Vertex) {
+  // calculate payouts
+  Pc, Pd := self.CalcPayouts(players)
   // distribute payouts
   for i := 0; i < len(players); i++ {
     player := self.agents[players[i]]
@@ -138,9 +143,11 @@ func (self *SimEngine) UpdateStrategy(x goraph.Vertex, y goraph.Vertex) {
   // get the agents
   agentx := self.agents[x]
   agenty := self.agents[y]
+
   // calculate the probability that x's strategy will be updated
-  exp := (-self.betae)*float64(agenty.payouts - agentx.payouts)
-  Pe  := float64(1)/(float64(1) + math.Exp(exp))
+  Pe := Fermi(self.betae, float64(agenty.payouts), float64(agentx.payouts))
+
+  // update x's strategy if appropriate
   if ((RandProb(self.rnGen) < Pe) && (agentx.cooperate != agenty.cooperate)) {
     if (agentx.cooperate) {
       self.Nc -= 1
@@ -158,37 +165,51 @@ func (self *SimEngine) UpdateStructure(x goraph.Vertex, y goraph.Vertex) {
   // check to see if y is a cooperator
   agenty := self.agents[y]
   if (agenty.cooperate) {
-    // no network update required
+    // link to cooperator is satisfactory - no network update required
     return
   }
   agentx := self.agents[x]
 
-  // if y only has one neighbor then a structure update cannot be performed
+  // get the list of y's neighbors minus agent x
   Ny := self.graph.Neighbors(y)
-  if (len(Ny) <= 1) {
+  Ny = RemoveVertexFromSlice(Ny, x)
+
+  // if x is y's last neighbor then structure update cannot be done
+  if (len(Ny) <= 0) {
     return
   }
 
   // calculate the probability that x's link to y will be updated
-  exp := (-self.betaa)*float64(agentx.payouts - agenty.payouts)
-  Pa  := float64(1)/(float64(1) + math.Exp(exp))
-  if (RandProb(self.rnGen) < Pa) {
-    fmt.Printf("x: %v\n", x)
-    fmt.Printf("old Ny: %v\n", Ny)
-    fmt.Printf("y: %v\n", y)
-    fmt.Printf("old Nx: %v\n", self.graph.Neighbors(x))
+  Pa := Fermi(self.betaa, float64(agentx.payouts), float64(agenty.payouts))
 
-    // select new neighbor - make sure its not x - or one of x's neighbors
-    newy := x
-    for ;newy == x; {
+  // switch x's link with y if appropriate
+  if (RandProb(self.rnGen) <= Pa) {
+    // remove all shared neighbors
+    Nx := self.graph.Neighbors(x)
+    Ny = RemoveVerticesFromSlice(Ny, Nx)
+
+    // vx's new neighbor
+    var newy goraph.Vertex
+
+    if (len(Ny) > 0) { // y has some neighbors that are not x's neighbors
+      // select new neighbor from y's neighbors
       newy = Ny[RandInt(self.rnGen, int64(len(Ny)))]
+    } else { // y doesn't have any neighbors that are not also x's neighbors
+      // get all vertices except x, y and x's neighbors
+      // -- Note that Nx includes y
+      available := RemoveVerticesFromSlice(self.graph.Vertices(), append(Nx, x))
+
+      // chose an newy if some vertices are available
+      if (len(available) > 0) { // some nodes are available to choose from
+        newy = available[RandInt(self.rnGen, int64(len(available)))]
+      } else { // no nodes are available to choose from
+        return
+      }
     }
 
+    // replace y with newy
     self.graph.RemoveEdge(x, y)
     self.graph.AddEdge(x, newy)
-    fmt.Printf("new Ny: %v\n", self.graph.Neighbors(y))
-    fmt.Printf("newy: %v\n", newy)
-    fmt.Printf("new Nx: %v\n", self.graph.Neighbors(x))
   }
 }
 
@@ -204,4 +225,34 @@ func removeDuplicates(a []goraph.Vertex) []goraph.Vertex {
 		}
 	}
 	return result
+}
+
+func (self *SimEngine) String() string {
+  s := "{\n"
+  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "ngens", self.numGens)
+  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "nagents", self.numAgents)
+  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "avgdeg", self.avgdeg)
+  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "mult", self.mult)
+  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "cost", self.cost)
+  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\",", s, "betae", self.betae)
+  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\",", s, "betaa", self.betaa)
+  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\"", s, "W", self.W)
+  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\"", s, "W", self.W)
+  s = fmt.Sprintf("%s}", s)
+  return s
+}
+
+func (self *SimEngine) DegreeHistogramData() {
+  // write header
+  fmt.Printf("%s,%d\n", "id", "strategy", "degree")
+  // write data
+  var strat string
+  for _, v := range self.graph.Vertices() {
+    if (self.agents[v].cooperate) {
+      strat = "C"
+    } else {
+      strat = "D"
+    }
+    fmt.Printf("%v,%s,%d\n", v, strat, self.graph.Degree(v))
+  }
 }

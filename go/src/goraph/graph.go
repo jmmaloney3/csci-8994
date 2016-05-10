@@ -6,6 +6,7 @@ package goraph
 
 import (
 	"sort"
+	"fmt"
 )
 
 // Graph is implemented by all of the graph types. All of the graph
@@ -32,6 +33,9 @@ type Graph interface {
 
 	// Neighbours returns a slice of the vertices that neighbour v.
 	Neighbors(v Vertex) []Vertex
+
+	// Returns the degree of the vertex (number of neighbors)
+	Degree(v Vertex) int
 }
 
 var (
@@ -65,7 +69,9 @@ func (g *AdjacencyList) AddVertex() Vertex {
 }
 
 func (g *AdjacencyList) RemoveVertex(v Vertex) {
+	// remove the edges for v
 	delete(g.edges, v)
+	// remove v from other vertices' edges
 	for vtx, vertices := range g.edges {
 		for idx, candidate := range vertices {
 			if candidate == v {
@@ -82,6 +88,15 @@ func (g *AdjacencyList) AddEdge(u, v Vertex) {
 
 func (g *AdjacencyList) addHalfEdge(u, v Vertex) {
 	edges := g.edges[u]
+
+	// check for a duplicate edge
+	for _, candidate := range edges {
+		if candidate == v {
+			msg := fmt.Sprintf("attempt to insert duplicate edge: (%v,%v)", u, v)
+			panic(msg)
+		}
+	}
+
 	g.edges[u] = append(edges, v)
 }
 
@@ -112,6 +127,20 @@ func (p VertexSlice) Len() int           { return len(p) }
 func (p VertexSlice) Less(i, j int) bool { return p[i] < p[j] }
 func (p VertexSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p VertexSlice) Sort()              { sort.Sort(p) }
+func (p VertexSlice) Contains(v Vertex) bool {
+	p.Sort()
+	i := sort.Search(len(p), func(i int) bool { return p[i] >= v })
+	if (i < len(p) && p[i] == v) {
+		return true
+	} else {
+		return false
+	}
+}
+func (p VertexSlice) Copy() VertexSlice {
+	newSlice := make([]Vertex, len(p))
+	copy(newSlice, p)
+	return newSlice
+}
 
 // EdgeSlice is a convenience type for sorting edges by ID.
 type EdgeSlice []Edge
@@ -151,5 +180,18 @@ func (g *AdjacencyList) Edges() []Edge {
 }
 
 func (g *AdjacencyList) Neighbors(v Vertex) []Vertex {
-	return g.edges[v]
+	// make a copy of the neighbors so that changes don't impact the graph
+	return VertexSlice(g.edges[v]).Copy()
+}
+
+func (g *AdjacencyList) Degree(v Vertex) int {
+	return len(g.edges[v])
+}
+
+func (g *AdjacencyList) String() string {
+	s := ""
+	for key, val := range g.edges {
+		s = fmt.Sprintf("%s%v: %v\n", s, key, val)
+	}
+	return s
 }
