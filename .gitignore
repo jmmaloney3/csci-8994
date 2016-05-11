@@ -5,3 +5,7 @@
 **/~$*.xlsx
 go/pkg/*
 pgg/lib/*
+bin/runsim
+bin/runsimgpgg
+bin/manualtests
+bin/runtribesim
