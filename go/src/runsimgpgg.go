@@ -27,6 +27,8 @@ const (
  W_F = "w"      // flag for W parameter
  DNAME = "gpggdata"
  DNAME_F = "d"
+ OWDIR = false
+ OWDIR_F = "f"
 )
 
 /*
@@ -48,13 +50,24 @@ func main() {
   betaa     := flag.Float64(BETAA_F, BETAA, "selection strength for structure updates")
   w         := flag.Float64(W_F, W, "ratio of time scales for strategy and structure updates")
   dname     := flag.String(DNAME_F, DNAME, "directory to write stats")
+  owDir     := flag.Bool(OWDIR_F, OWDIR, "overwrite data if directory exists")
   flag.Parse()
 
   // set up the output files
   var err error
   // -- create directory
   err = os.Mkdir(*dname, os.ModePerm)
-  if (err != nil) { panic (err) }
+  if (err != nil) {
+    if (os.IsExist(err)) {
+      fmt.Printf("ERROR: directory exists: %v\n", *dname)
+      if (!(*owDir)) {
+        // don't overwrite data - exit program
+        return
+      }
+    } else {
+      panic (err)
+    }
+  }
   // -- file for population statistics (strategy percentages)
   var psfile *os.File
   psfname := (*dname) + "/pstat.csv"
