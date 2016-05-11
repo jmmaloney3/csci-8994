@@ -18,16 +18,16 @@ GENS=10000
 SIMS=500
 #SIMS=5
 
-DATE=20160511c
+DATE=20160511d
 
 BETA=100
 BEN=8
 
 COUNT=0
-for ETA in 0.01 0.1 0.2 0.3 0.4 0.5;
+for PCON in 0.001 0.01 0.02 0.03 0.04 0.05;
 do
   COUNT=$((COUNT+1))
   DIRNAME=$DATE-$COUNT
-  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -passmutall -eta $ETA
+  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -passmutall -pcon $PCON
   tar czf $DIRNAME.tar.gz $DIRNAME
 done
