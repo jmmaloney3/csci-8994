@@ -23,8 +23,15 @@ DATE=20160511
 BETA=100
 BEN=8
 
+MUT=0.00001
+
+COUNT=1
+DIRNAME=$DATE-$COUNT
+time $BIN/runsim8.sh $DIRNAME 414 -g $GENS -b $BEN -beta $BETA -singdef -passmutall -passmut $MUT
+tar czf $DIRNAME.tar.gz $DIRNAME
+
 COUNT=0
-for MUT in 0.00001 0.0001 0.001 0.01 0.1;
+for MUT in 0.0001 0.001 0.01 0.1;
 do
   COUNT=$((COUNT+1))
   DIRNAME=$DATE-$COUNT
