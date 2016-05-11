@@ -1,8 +1,9 @@
 package simgpgg
 
 import "math/rand"
-import "fmt"
 import "goraph"
+import "fmt"
+import "io"
 
 // A simulation engine for simulating the public goods games
 // played among agents occupying the nodes of a graph.
@@ -25,6 +26,7 @@ type SimEngine struct {
 // Make a new SimEngine with the specified parameters
 func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
                   cost int32, W float64, betae float64, betaa float64) *SimEngine {
+  // initialize simengine
   graph := NewRegularRing(numAgents, avgdeg)
   rnGen := NewRandNumGen()
   // create the agents
@@ -48,16 +50,12 @@ func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
                       Nc: Nc, Nd: Nd }
 }
 
-func (self *SimEngine) RunSim() {
-  // print out simulation parameters
-  fmt.Printf("PGG Graph Simulator:\n")
-  fmt.Println(self)
+func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) {
+  // write header to population stats files
+  self.WritePStatsHeader(psWriter)
 
   // calculate probability that a structure update occurs
   stratUpdProb := float64(1)/(float64(1) + self.W)
-
-  // write out headers
-  fmt.Printf("%s,%s,%s\n", "g", "Nc", "Nd")
 
   // loop until one strategy is eliminated or the max num of gens is reached
   for g := int32(0); (!self.SimComplete(g)); g++ {
@@ -94,11 +92,11 @@ func (self *SimEngine) RunSim() {
       // update network structure - if appropriate
       self.UpdateStructure(x, y)
     }
-    // write out stats
-    fmt.Printf("%d,%d,%d\n", g, self.Nc, self.Nd)
+    // write out population stats
+    self.WritePStats(psWriter, g)
   }
 
-  self.DegreeHistogramData()
+  self.DegreeHistogramData(dhWriter)
 }
 
 func (self *SimEngine) SimComplete(genNum int32) bool {
@@ -228,23 +226,35 @@ func removeDuplicates(a []goraph.Vertex) []goraph.Vertex {
 }
 
 func (self *SimEngine) String() string {
-  s := "{\n"
-  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "ngens", self.numGens)
-  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "nagents", self.numAgents)
-  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "avgdeg", self.avgdeg)
-  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "mult", self.mult)
-  s = fmt.Sprintf("%s  \"%v\":\"%d\",", s, "cost", self.cost)
-  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\",", s, "betae", self.betae)
-  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\",", s, "betaa", self.betaa)
-  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\"", s, "W", self.W)
-  s = fmt.Sprintf("%s  \"%v\":\"%7.5f\"", s, "W", self.W)
-  s = fmt.Sprintf("%s}", s)
+  s := "{"
+  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "ngens", self.numGens)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "nagents", self.numAgents)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "avgdeg", self.avgdeg)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "mult", self.mult)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "cost", self.cost)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\",", s, "betae", self.betae)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\",", s, "betaa", self.betaa)
+  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\"", s, "W", self.W)
+  s = fmt.Sprintf("%s\n}", s)
   return s
 }
 
-func (self *SimEngine) DegreeHistogramData() {
+// write the header for the population statistics file
+func (self *SimEngine) WritePStatsHeader(w io.Writer) {
+  // write out headers
+  fmt.Fprintf(w, "%s,%s,%s\n", "g", "Nc", "Nd")
+}
+
+// write population statistics for current gen to pstats file
+func (self *SimEngine) WritePStats(w io.Writer, gen int32) {
+  pNc := (float64(self.Nc)/float64(self.numAgents))*float64(100)
+  pNd := (float64(self.Nd)/float64(self.numAgents))*float64(100)
+  fmt.Fprintf(w,"%d,%6.2f,%6.2f\n", gen, pNc, pNd)
+}
+
+func (self *SimEngine) DegreeHistogramData(w io.Writer) {
   // write header
-  fmt.Printf("%s,%d\n", "id", "strategy", "degree")
+  fmt.Fprintf(w, "%s,%s,%s\n", "id", "strategy", "degree")
   // write data
   var strat string
   for _, v := range self.graph.Vertices() {
@@ -253,6 +263,6 @@ func (self *SimEngine) DegreeHistogramData() {
     } else {
       strat = "D"
     }
-    fmt.Printf("%v,%s,%d\n", v, strat, self.graph.Degree(v))
+    fmt.Fprintf(w, "%v,%s,%d\n", v, strat, self.graph.Degree(v))
   }
 }

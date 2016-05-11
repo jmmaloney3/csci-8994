@@ -1,6 +1,10 @@
 package main
 
 import "flag"
+import "time"
+import "os"
+import "bufio"
+import "fmt"
 import "simgpgg"
 
 // default parameter values
@@ -21,6 +25,8 @@ const (
  BETAA_F = "betaa"   // flag for BETAA parameter
  W = 0          // ratio of time scales for strategy and structure updates
  W_F = "w"      // flag for W parameter
+ DNAME = "gpggdata"
+ DNAME_F = "d"
 )
 
 /*
@@ -41,12 +47,49 @@ func main() {
   betae     := flag.Float64(BETAE_F, BETAE, "selection strength for strategy updates")
   betaa     := flag.Float64(BETAA_F, BETAA, "selection strength for structure updates")
   w         := flag.Float64(W_F, W, "ratio of time scales for strategy and structure updates")
+  dname     := flag.String(DNAME_F, DNAME, "directory to write stats")
   flag.Parse()
+
+  // set up the output files
+  var err error
+  // -- create directory
+  err = os.Mkdir(*dname, os.ModePerm)
+  if (err != nil) { panic (err) }
+  // -- file for population statistics (strategy percentages)
+  var psfile *os.File
+  psfname := (*dname) + "/pstat.csv"
+  psfile, err = os.Create(psfname)
+  if (err != nil) { panic (err) }
+  defer psfile.Close()
+  psWriter := bufio.NewWriter(psfile)
+  // -- file for degree histogram
+  var dhfile *os.File
+  dhfname := (*dname) + "/dhist.csv"
+  dhfile, err = os.Create(dhfname)
+  if (err != nil) { panic (err) }
+  defer dhfile.Close()
+  dhWriter := bufio.NewWriter(dhfile)
+
+  start := time.Now()
 
   // create the sim engine
   simeng := simgpgg.NewSimEngine(int32(*numAgents), int32(*numGens), int32(*avgdeg),
                                  int32(*mult), int32(*cost), *w, *betae, *betaa)
 
+  // output simulation parameters to stdout
+  fmt.Println("[")
+  fmt.Printf("%v", simeng)
+  fmt.Println(",")
+
   // run the simulation
-  simeng.RunSim()
+  simeng.RunSim(psWriter, dhWriter)
+
+  end := time.Now()
+
+  psWriter.Flush()
+  dhWriter.Flush()
+
+  // write simulation time to stdout
+  fmt.Println("{\n  \"runtime\":", end.Sub(start), "\n}")
+  fmt.Println("]")
 }
