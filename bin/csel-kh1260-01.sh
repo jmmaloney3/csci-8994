@@ -22,6 +22,7 @@ DATE=20160510
 
 BETA=1000
 
+BEN=2
 COUNT=1
 DIRNAME=$DATE-1b
 time $BIN/runsim8.sh $DIRNAME 306 -g $GENS -b $BEN -beta $BETA -singdef -passmutall
