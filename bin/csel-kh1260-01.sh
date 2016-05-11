@@ -22,8 +22,12 @@ DATE=20160510
 
 BETA=1000
 
-COUNT=0
-for BEN in `seq 2 2 20`;
+COUNT=1
+DIRNAME=$DATE-1b
+time $BIN/runsim8.sh $DIRNAME 306 -g $GENS -b $BEN -beta $BETA -singdef -passmutall
+tar czf $DIRNAME.tar.gz $DIRNAME
+
+for BEN in `seq 4 2 20`;
 do
   COUNT=$((COUNT+1))
   DIRNAME=$DATE-$COUNT
