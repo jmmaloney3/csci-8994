@@ -75,7 +75,12 @@ func (g *AdjacencyList) RemoveVertex(v Vertex) {
 	for vtx, vertices := range g.edges {
 		for idx, candidate := range vertices {
 			if candidate == v {
-				g.edges[vtx] = append(vertices[:idx], vertices[idx+1:len(vertices)]...)
+				if (idx+1 >= len(vertices)) {
+					g.edges[vtx] = make([]Vertex, idx)
+					copy(g.edges[vtx], vertices[:idx])
+				} else {
+					g.edges[vtx] = append(vertices[:idx], vertices[idx+1:len(vertices)]...)
+				}
 			}
 		}
 	}
@@ -114,7 +119,12 @@ func (g *AdjacencyList) removeHalfEdge(u, v Vertex) {
 	for idx, vtx := range vertices {
 		if vtx == v {
 			// Remove the edge
-			g.edges[u] = append(vertices[:idx], vertices[idx+1:len(vertices)]...)
+			if (idx+1 >= len(vertices)) {
+				g.edges[u] = make([]Vertex, idx)
+				copy(g.edges[u], vertices[:idx])
+			} else {
+				g.edges[u] = append(vertices[:idx], vertices[idx+1:len(vertices)]...)
+			}
 			break
 		}
 	}
@@ -155,6 +165,27 @@ func (p EdgeSlice) Less(i, j int) bool {
 }
 func (p EdgeSlice) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 func (p EdgeSlice) Sort()         { sort.Sort(p) }
+func (p EdgeSlice) Remove(idx int) EdgeSlice {
+	var newSlice []Edge
+	if (idx+1 >= len(p)) {
+		newSlice = make([]Edge, idx)
+		copy(newSlice, p[:idx])
+	} else {
+		newSlice = append(p[:idx], p[idx+1:len(p)]...)
+	}
+	return newSlice
+}
+func (p EdgeSlice) Contains(e Edge) bool {
+	// TODO: improve this with biinary search
+	found := false
+	for _, e2 := range p {
+		if ((e2.V == e.V) && (e2.U == e.U)) {
+			found = true
+			break
+		}
+	}
+	return found
+}
 
 func (g *AdjacencyList) Vertices() []Vertex {
 	vertices := make(VertexSlice, len(g.edges))
