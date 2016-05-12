@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # run the experiments for regular graphs with varying z
-# example use: runregz.sh <dir> <numgraphs_per_experiment>
+# example use: runregz.sh <dir> <gtype> <numgraphs_per_experiment>
 
 # find the directory that holds the script
 # - see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
@@ -32,7 +32,11 @@ fi
 # assumption: the go program is in the $BIN directory
 mkdir $RESULTSDIR
 cd $RESULTSDIR
->&2 echo "  writing experiments for regular graphs with varying z results to $RESULTSDIR"
+
+# get the graph type
+GTYPE=$1
+shift # remove the graph type from list of arguments
+>&2 echo "  writing experiments for graph type $GTYPE with varying z results to $RESULTSDIR"
 
 # get the number of experiments to execute
 NUMGRAPHS=$1
@@ -46,11 +50,12 @@ do
   mkdir z`printf %02d $Z`
   cd z`printf %02d $Z`
   # generate series data for current value of z (all values of r)
-  for R in 1 2 3 4 5;
+  for R in 2 3 4 5 6 7 8 9;
   do
     >&2 echo "  executing experiment for r=$R..."
-    $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 10000 -r $R -c 1 -w 0
+    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
   done
+  wait
   cd ..
 done
 
