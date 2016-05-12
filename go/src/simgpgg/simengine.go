@@ -50,7 +50,7 @@ func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
                       Nc: Nc, Nd: Nd }
 }
 
-func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) {
+func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) int32 {
   // write header to population stats files
   self.WritePStatsHeader(psWriter)
 
@@ -58,7 +58,8 @@ func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) {
   stratUpdProb := float64(1)/(float64(1) + self.W)
 
   // loop until one strategy is eliminated or the max num of gens is reached
-  for g := int32(0); (!self.SimComplete(g)); g++ {
+  var g int32
+  for g = int32(0); (!self.SimComplete(g)); g++ {
     // randomly select an agent
     x := goraph.Vertex(RandInt(self.rnGen, int64(self.numAgents)))
     // get the neighbors of x
@@ -71,13 +72,16 @@ func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) {
     sponsors := make([]goraph.Vertex,2)
     sponsors[0] = x
     sponsors[1] = y
-    sponsors = append(sponsors, Nx...)
-    sponsors = append(sponsors, Ny...)
-    sponsors = removeDuplicates(sponsors)
-    // clear payouts for agents that will play games
+    // need accurate payout information for agents x and y
+    // -- set their payouts equal to zro
     for i := 0; i < len(sponsors); i++ {
       self.agents[sponsors[i]].payouts = float64(0)
     }
+    // add neighbors to list of game sponsors
+    // -- don't need accurate payout information for these agents
+    sponsors = append(sponsors, Nx...)
+    sponsors = append(sponsors, Ny...)
+    sponsors = removeDuplicates(sponsors)
     // play the games
     for i := 0; i < len(sponsors); i++ {
       sponsor := sponsors[i]
@@ -97,6 +101,9 @@ func (self *SimEngine) RunSim(psWriter io.Writer, dhWriter io.Writer) {
   }
 
   self.DegreeHistogramData(dhWriter)
+
+  // return number of generations completed
+  return g
 }
 
 func (self *SimEngine) SimComplete(genNum int32) bool {
@@ -160,6 +167,7 @@ func (self *SimEngine) UpdateStrategy(x goraph.Vertex, y goraph.Vertex) {
 
 // update the structure of the network based on the payouts
 func (self *SimEngine) UpdateStructure(x goraph.Vertex, y goraph.Vertex) {
+  fmt.Println("UPDATING STRUCTURE")
   // check to see if y is a cooperator
   agenty := self.agents[y]
   if (agenty.cooperate) {
@@ -226,23 +234,23 @@ func removeDuplicates(a []goraph.Vertex) []goraph.Vertex {
 }
 
 func (self *SimEngine) String() string {
-  s := "{"
-  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "ngens", self.numGens)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "nagents", self.numAgents)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "avgdeg", self.avgdeg)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "mult", self.mult)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%d\",", s, "cost", self.cost)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\",", s, "betae", self.betae)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\",", s, "betaa", self.betaa)
-  s = fmt.Sprintf("%s\n  \"%v\":\"%7.5f\"", s, "W", self.W)
-  s = fmt.Sprintf("%s\n}", s)
+  s := "  {"
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "ngens", self.numGens)
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "nagents", self.numAgents)
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "z", self.avgdeg)
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "r", self.mult)
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "cost", self.cost)
+  s = fmt.Sprintf("%s\n  \"%v\":%.5f,", s, "betae", self.betae)
+  s = fmt.Sprintf("%s\n  \"%v\":%.5f,", s, "betaa", self.betaa)
+  s = fmt.Sprintf("%s\n  \"%v\":%.5f", s, "W", self.W)
+  s = fmt.Sprintf("%s\n  }", s)
   return s
 }
 
 // write the header for the population statistics file
 func (self *SimEngine) WritePStatsHeader(w io.Writer) {
   // write out headers
-  fmt.Fprintf(w, "%s,%s,%s\n", "g", "Nc", "Nd")
+  fmt.Fprintf(w, "%s,%s,%s\n", "g", "Pc", "Pd")
 }
 
 // write population statistics for current gen to pstats file
@@ -254,7 +262,7 @@ func (self *SimEngine) WritePStats(w io.Writer, gen int32) {
 
 func (self *SimEngine) DegreeHistogramData(w io.Writer) {
   // write header
-  fmt.Fprintf(w, "%s,%s,%s\n", "id", "strategy", "degree")
+  fmt.Fprintf(w, "%s,%s,%s\n", "id", "S", "K")
   // write data
   var strat string
   for _, v := range self.graph.Vertices() {
