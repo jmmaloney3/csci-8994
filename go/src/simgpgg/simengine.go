@@ -255,9 +255,9 @@ func (self *SimEngine) WritePStatsHeader(w io.Writer) {
 
 // write population statistics for current gen to pstats file
 func (self *SimEngine) WritePStats(w io.Writer, gen int32) {
-  pNc := (float64(self.Nc)/float64(self.numAgents))*float64(100)
-  pNd := (float64(self.Nd)/float64(self.numAgents))*float64(100)
-  fmt.Fprintf(w,"%d,%6.2f,%6.2f\n", gen, pNc, pNd)
+  pNc := (float64(self.Nc)/float64(self.numAgents))
+  pNd := (float64(self.Nd)/float64(self.numAgents))
+  fmt.Fprintf(w,"%d,%5.3f,%5.3f\n", gen, pNc, pNd)
 }
 
 func (self *SimEngine) DegreeHistogramData(w io.Writer) {
