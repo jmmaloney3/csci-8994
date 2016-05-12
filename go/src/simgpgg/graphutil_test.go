@@ -65,3 +65,23 @@ func TestRemoveVertexFromSlice(u *testing.T) {
     goraph.AssertVertexEqual(u, vertices[3], 13)
   }
 }
+
+func TestRemoveEdgeFromSlice(u *testing.T) {
+  graph := NewRegularRing(4,2)
+
+  edges := graph.Edges()
+
+  remEdge := edges[3]
+
+
+  edges = goraph.EdgeSlice(edges).Remove(3)
+
+  found := goraph.EdgeSlice(edges).Contains(remEdge)
+  testutil.AssertFalse(u, found)
+}
+
+func TestGraphGen(u *testing.T) {
+  // TODO: actually test that these graphs are correctly constructed
+  NewRegularRing(12,4)
+  NewHomoRandom(12,4, NewRandNumGen())
+}
