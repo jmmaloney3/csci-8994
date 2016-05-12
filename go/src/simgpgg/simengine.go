@@ -11,6 +11,7 @@ type SimEngine struct {
   graph goraph.Graph // the graph that holds the agents
   numAgents int32    // total number of agents being simulated
   avgdeg int32       // average degree of the graph (z)
+  gtype int32        // the type of graph
   agents []*Agent    // list of agents
   Nc int32           // current number of cooperators
   Nd int32           // current number of defectors
@@ -24,11 +25,18 @@ type SimEngine struct {
 }
 
 // Make a new SimEngine with the specified parameters
-func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
+func NewSimEngine(numAgents int32, numGens int32, gtype int32, avgdeg int32, mult int32,
                   cost int32, W float64, betae float64, betaa float64) *SimEngine {
   // initialize simengine
-  graph := NewRegularRing(numAgents, avgdeg)
   rnGen := NewRandNumGen()
+  // initialize graphtype
+  var graph goraph.Graph
+  switch gtype {
+  case 0:
+    graph = NewRegularRing(numAgents, avgdeg)
+  case 1:
+    graph = NewHomoRandom(numAgents, avgdeg, rnGen)
+  }
   // create the agents
   agents := make([]*Agent, numAgents)
   // create agents
@@ -46,7 +54,7 @@ func NewSimEngine(numAgents int32, numGens int32, avgdeg int32, mult int32,
 
   return &SimEngine { numAgents: numAgents, numGens: numGens, avgdeg: avgdeg,
                       mult: mult, cost: cost, W: W, betae: betae, betaa: betaa,
-                      rnGen: rnGen, graph: graph, agents: agents,
+                      rnGen: rnGen, graph: graph, gtype: gtype, agents: agents,
                       Nc: Nc, Nd: Nd }
 }
 
@@ -237,6 +245,7 @@ func (self *SimEngine) String() string {
   s := "  {"
   s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "ngens", self.numGens)
   s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "nagents", self.numAgents)
+  s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "gtype", self.gtype)
   s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "z", self.avgdeg)
   s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "r", self.mult)
   s = fmt.Sprintf("%s\n  \"%v\":%d,", s, "cost", self.cost)

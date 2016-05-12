@@ -7,6 +7,7 @@ import "math"
 
 func NewTestSimEngine() *SimEngine {
   numAgents := int32(7)
+  gtype := int32(0)
   avgdeg := int32(4)
   numGens := int32(5)
   mult := int32(3)
@@ -14,7 +15,7 @@ func NewTestSimEngine() *SimEngine {
   W := float64(0)
   betae := math.Inf(+1)
   betaa := math.Inf(+1)
-  return NewSimEngine(numAgents, numGens, avgdeg, mult, cost, W, betae, betaa)
+  return NewSimEngine(numAgents, numGens, gtype, avgdeg, mult, cost, W, betae, betaa)
 }
 
 func TestPlayGame(u *testing.T) {
