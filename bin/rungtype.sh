@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# run the experiments for regular graphs with varying z
-# example use: runregz.sh <dir> <gtype> <numgraphs_per_experiment>
+# run the experiments for specified graph type with varying z
+# example use: rungtype.sh <dir> <gtype> <numgraphs_per_experiment> <num_sims_per_graph>
 
 # find the directory that holds the script
 # - see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
@@ -43,6 +43,15 @@ NUMGRAPHS=$1
 >&2 echo "  using $NUMGRAPHS graph instances for each experiment"
 shift # remove the number of graphs from list of arguments
 
+# get the number of simulations to execute per graph
+NUMSIMS=$1
+>&2 echo "  using $NUMSIMS for each graph"
+shift # remove the number of sims from list of arguments
+
+# Constants
+NGENS=101000
+N=10000
+
 for Z in 4 8 16 32 64;
 do
   >&2 echo "  executing experiments for z=$Z..."
@@ -50,29 +59,10 @@ do
   mkdir z`printf %02d $Z`
   cd z`printf %02d $Z`
   # generate series data for current value of z (all values of r)
-#for R in 2 3 4 5 6 7 8 9;
-  for R in 2 3;
+  for R in 2 3 4 5 6 7 8 9;
   do
     >&2 echo "  executing experiment for r=$R..."
-    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
-  done
-  wait
-  for R in 4 5;
-  do
-    >&2 echo "  executing experiment for r=$R..."
-    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
-  done
-  wait
-  for R in 6 7;
-  do
-    >&2 echo "  executing experiment for r=$R..."
-    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
-  done
-  wait
-  for R in 8 9;
-  do
-    >&2 echo "  executing experiment for r=$R..."
-    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
+    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -s $NUMSIMS -a $N -z $Z -g $NGENS -r $R -c 1 -w 0 -gtype $GTYPE &
   done
   wait
   cd ..

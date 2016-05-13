@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # run the simulations required for an experiment for graph PGG
+# example use: runexpgpgg.sh <dir> <num_graphs> <simengine_params>
 
 # find the directory that holds the script
 # - see http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
