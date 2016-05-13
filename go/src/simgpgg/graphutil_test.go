@@ -86,6 +86,7 @@ func TestGraphGen(u *testing.T) {
   NewRegularRing(64,4)
   NewHomoRandom(64,4, rnGen)
   NewScaleFreeNet(64, 4, 4, rnGen)
+  NewUniScaleFreeNet(64, 4, 4, rnGen)
   NewSmallWorldNet(64, 4, float64(0), rnGen)
   NewSmallWorldNet(64, 4, float64(0.5), rnGen)
   NewSmallWorldNet(64, 4, float64(1.0), rnGen)
