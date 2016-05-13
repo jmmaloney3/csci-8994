@@ -27,15 +27,15 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 #   4: scale free (with uniform atachment)
 #   5: small world (Watts-Strogatz w/ p=0.1)
 #   6: small world (Watts-Strogatz w/ p=0.4)
-for GTYPE in 2 3 4 0 1 5 6;
-do
-  DIR=gtype$GTYPE
-  time $BIN/rungtype.sh $DIR $GTYPE 2 5
-done
+#for GTYPE in 2 3 4 0 1 5 6;
+#do
+#  DIR=gtype$GTYPE
+#  time $BIN/rungtype.sh $DIR $GTYPE 2 5
+#done
 
 # reputation simulations
 for Z in 10 20 30 40;
 do
   DIR=z$Z
-  echo time $BIN/runrepsim.sh $DIR $Z 2 5
+  time $BIN/runrepsim.sh $DIR $Z 2 5
 done
