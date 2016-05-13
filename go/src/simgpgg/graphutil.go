@@ -87,35 +87,33 @@ func NewRegularRing(N, K int32) *goraph.AdjacencyList {
 func NewHomoRandom(N, K int32, rnGen *rand.Rand) *goraph.AdjacencyList {
   // create a regular ring
   graph := NewRegularRing(N, K)
-  // swapped he edges randomly
-  edges := graph.Edges()
-  var i,j int
-  var ei, ej goraph.Edge
-  var neiu, neju goraph.VertexSlice
-  for ;len(edges)>0; {
-    i = int(RandInt(rnGen, int64(len(edges))))
-    j = int(RandInt(rnGen, int64(len(edges))))
-    if (i != j) {
-      ei = edges[i]
-      ej = edges[j]
-      // make sure circular links are not created
-      if ((ei.U != ej.V) && (ej.U != ei.V)) {
-        // make sure a duplicate edge will not be inserted
-        neiu = graph.Neighbors(ei.U)
-        neiu = graph.Neighbors(ej.U)
-        if (!neiu.Contains(ej.V) && !neju.Contains(ei.V)) {
-          // remove ei and ej
-          graph.RemoveEdge(ei.U, ei.V)
-          graph.RemoveEdge(ej.U, ej.V)
-          // add swapped edges
-          graph.AddEdge(ei.U, ej.V)
-          graph.AddEdge(ej.U, ei.V)
+  // swapped the edges randomly
+  nedges := N*K
+  for k:=int32(0); k<nedges; k++ {
+    // select two vertices at random
+    v11 := goraph.Vertex(int(RandInt(rnGen, int64(N))))
+    v21 := goraph.Vertex(int(RandInt(rnGen, int64(N))))
+    if (v11 != v21) {
+      // select two neighborsat random
+      Nv11 := goraph.VertexSlice(graph.Neighbors(v11))
+      v12 := goraph.Vertex(Nv11[int(RandInt(rnGen, int64(graph.Degree(v11))))])
+      Nv21 := goraph.VertexSlice(graph.Neighbors(v21))
+      v22 := goraph.Vertex(Nv21[int(RandInt(rnGen, int64(graph.Degree(v21))))])
+      if (v12 != v22) {
+        // make sure circular links are not created
+        if ((v11 != v22) && (v21 != v12)) {
+          // make sure a duplicate edge will not be inserted
+          if (!Nv11.Contains(v22) && !Nv21.Contains(v12)) {
+            // remove existing edges
+            graph.RemoveEdge(v11, v12)
+            graph.RemoveEdge(v21, v22)
+            // add swapped edges
+            graph.AddEdge(v11, v22)
+            graph.AddEdge(v21, v12)
+          }
         }
       }
     }
-    // remove the edges from the list since they have been swapped
-    edges = goraph.EdgeSlice(edges).Remove(i)
-    edges = goraph.EdgeSlice(edges).Remove(j)
   }
   // return the resulting graph with randomized edges
   return graph
