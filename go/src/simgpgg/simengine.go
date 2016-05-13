@@ -36,6 +36,14 @@ func NewSimEngine(numAgents int32, numGens int32, gtype int32, avgdeg int32, mul
     graph = NewRegularRing(numAgents, avgdeg)
   case 1:
     graph = NewHomoRandom(numAgents, avgdeg, rnGen)
+  case 2:
+    graph = NewSmallWorldNet(numAgents, avgdeg, 1, rnGen)
+  case 3:
+    // M0 = M = Z/2
+    graph = NewScaleFreeNet(numAgents, avgdeg/2, avgdeg/2, rnGen)
+  case 4:
+    // M0 = M = Z/2
+    graph = NewUniScaleFreeNet(numAgents, avgdeg/2, avgdeg/2, rnGen)
   }
   // create the agents
   agents := make([]*Agent, numAgents)
