@@ -83,6 +83,7 @@ func NewRegularRing(N, K int32) *goraph.AdjacencyList {
   return graph
 }
 
+// Create a homogeneous random graph by rewiring the edges of a regular ring
 func NewHomoRandom(N, K int32, rnGen *rand.Rand) *goraph.AdjacencyList {
   // create a regular ring
   graph := NewRegularRing(N, K)
@@ -120,6 +121,7 @@ func NewHomoRandom(N, K int32, rnGen *rand.Rand) *goraph.AdjacencyList {
   return graph
 }
 
+// Create a scale free network using the Barabasi-Albert algorithm
 func NewScaleFreeNet(N, M0, M int32, rnGen *rand.Rand) *goraph.AdjacencyList {
   // M must be less than M0
   if (M0 < M) {
@@ -185,5 +187,39 @@ func NewScaleFreeNet(N, M0, M int32, rnGen *rand.Rand) *goraph.AdjacencyList {
     }
   }
 
+  return graph
+}
+
+// Create a Watts-Strogatz small world net
+func NewSmallWorldNet(N, K int32, p float64, rnGen *rand.Rand) *goraph.AdjacencyList {
+  // create a regular ring
+  graph := NewRegularRing(N, K)
+  // rewire the edges
+  ub := float64(K)/float64(2)
+  div := float64(N) - float64(1) - ub
+  for i := int32(0); i < N; i++ {
+    for j := i+1; j < N; j++ {
+      diff := math.Abs(float64(i-j))
+      mod := math.Mod(diff, div)
+      if ((0 < mod) && (mod <= ub)) {
+        // with probability p rewite the edge between Vertex(i) and Vertex(j)
+        if (RandProb(rnGen) <= p) {
+          // randomly select a replacement for Vertex(j)
+          replace := RandInt(rnGen, int64(N))
+          // make sure the proposed new edge will not be circular
+          if (replace != int64(i)) {
+            // make sure the proposed new edge is not a duplicate
+            ni := goraph.VertexSlice(graph.Neighbors(goraph.Vertex(i)))
+            if (!ni.Contains(goraph.Vertex(replace))) {
+              // remove current edge
+              graph.RemoveEdge(goraph.Vertex(i), goraph.Vertex(j))
+              // add the new edge
+              graph.AddEdge(goraph.Vertex(i), goraph.Vertex(replace))
+            }
+          }
+        }
+      }
+    }
+  }
   return graph
 }
