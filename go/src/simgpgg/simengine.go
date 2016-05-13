@@ -187,7 +187,6 @@ func (self *SimEngine) UpdateStrategy(x goraph.Vertex, y goraph.Vertex) {
 
 // update the structure of the network based on the payouts
 func (self *SimEngine) UpdateStructure(x goraph.Vertex, y goraph.Vertex) {
-  fmt.Println("UPDATING STRUCTURE")
   // check to see if y is a cooperator
   agenty := self.agents[y]
   if (agenty.cooperate) {
