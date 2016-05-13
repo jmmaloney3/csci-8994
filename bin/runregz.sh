@@ -50,7 +50,26 @@ do
   mkdir z`printf %02d $Z`
   cd z`printf %02d $Z`
   # generate series data for current value of z (all values of r)
-  for R in 2 3 4 5 6 7 8 9;
+#for R in 2 3 4 5 6 7 8 9;
+  for R in 2 3;
+  do
+    >&2 echo "  executing experiment for r=$R..."
+    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
+  done
+  wait
+  for R in 4 5;
+  do
+    >&2 echo "  executing experiment for r=$R..."
+    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
+  done
+  wait
+  for R in 6 7;
+  do
+    >&2 echo "  executing experiment for r=$R..."
+    time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
+  done
+  wait
+  for R in 8 9;
   do
     >&2 echo "  executing experiment for r=$R..."
     time $BIN/runexpgpgg.sh r$R $NUMGRAPHS -a 10000 -z $Z -g 1000000 -r $R -c 1 -w 0 -gtype $GTYPE &
