@@ -81,7 +81,9 @@ func TestRemoveEdgeFromSlice(u *testing.T) {
 }
 
 func TestGraphGen(u *testing.T) {
+  rnGen := NewRandNumGen()
   // TODO: actually test that these graphs are correctly constructed
-  NewRegularRing(12,4)
-  NewHomoRandom(12,4, NewRandNumGen())
+  NewRegularRing(64,4)
+  NewHomoRandom(64,4, rnGen)
+  NewScaleFreeNet(64, 4, 4, rnGen)
 }

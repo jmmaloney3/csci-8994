@@ -119,3 +119,71 @@ func NewHomoRandom(N, K int32, rnGen *rand.Rand) *goraph.AdjacencyList {
   // return the resulting graph with randomized edges
   return graph
 }
+
+func NewScaleFreeNet(N, M0, M int32, rnGen *rand.Rand) *goraph.AdjacencyList {
+  // M must be less than M0
+  if (M0 < M) {
+    panic("M0 is less than M")
+  }
+  // create an array that represents the roulette wheel
+  // -- initial length is M0
+  // -- capacity is M0 + (N - M0)*M
+  wheel := make([]goraph.Vertex, M0 + 2*(N - M0)*M)
+  wheelSize := 0
+
+  // create M0 nodes to initially populate the graph
+  graph := goraph.NewAdjacencyList()
+  for i := int32(0); i < M0; i++ {
+    // create node and give it a spot on the wheel
+    wheel[wheelSize] = graph.AddVertex()
+    wheelSize++
+  }
+
+  // add nodes to the graph until it contains N nodes
+  // - when a node is added it is connected to M existing nodes
+  // - nodes are selected randomly proportional to degree
+  // - since the initial M0 nodes have zero degree to begin without, they were
+  //   given a free spot on the whell above
+
+  // create a slice to hold the randomly selected vertices
+  selected := goraph.VertexSlice(make([]goraph.Vertex, 0, M))
+
+  for i := M0; i < N; i++ {
+    // add new node to the graph
+    newNode := graph.AddVertex()
+
+    // "clear" the list of selected nodes
+    selected = selected[:0]
+
+    // select M nodes without duplicates
+    var v goraph.Vertex
+    var found bool
+    for j := int32(0); j < M; j++ {
+      // randomly choose a vertex that isn't a duplicate
+      for found = false; !found; {
+        // spin the wheel to select a vertex proportional to its degree
+        v = wheel[RandInt(rnGen, int64(wheelSize))]
+        // check if v has already been selected
+        found = !selected.Contains(v)
+      }
+      // grow the selected list
+      selected = selected[:j+1]
+      // add the selected vertex to the list
+      selected[j] = v
+    }
+
+    // link newNode with the selected vertices
+    // -- update the wheel to represent new node degrees
+    for _, v := range selected {
+      graph.AddEdge(newNode, v)
+      // add newNode to wheel
+      wheel[wheelSize] = newNode
+      wheelSize++
+      // add v to the wheel again
+      wheel[wheelSize] = v
+      wheelSize++
+    }
+  }
+
+  return graph
+}
