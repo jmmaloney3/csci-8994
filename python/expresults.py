@@ -25,7 +25,7 @@ import itertools
 def main():
     desc = 'Produce results for a series of experiments'
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('dname', help='directory that holds the series of experiments')
+    parser.add_argument('serdirs', type=str, nargs='+', help='list of directories that hold the series for the chart')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation', default=1000)
     parser.add_argument('-o', type=str, help='output file', default=None)
     parser.add_argument('-x', type=str, help='sim param that is x value', default="r")
@@ -33,10 +33,10 @@ def main():
     parser.add_argument('-v', action='store_true')
     
     args = parser.parse_args()
-    #print args.csvfile
-    #print args
+    print args.senddirs
+    print args
     
-    run_script(args.dname, args.s, args.x, args.p, args.v)
+    run_script(args.serdirs, args.s, args.x, args.p, args.v)
 # end main
 
 # get the pstat.csv files and a JSON log file for a single experiment
