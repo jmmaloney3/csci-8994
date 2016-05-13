@@ -52,7 +52,8 @@ shift # remove the number of sims from list of arguments
 NGENS=101000
 N=10000
 
-for Z in 4 8 16 32 64;
+#for Z in 4 8 16 32 64;
+for Z in 2 4 6 8 10;
 do
   >&2 echo "  executing experiments for z=$Z..."
   # create directory to hold results for current value of z
