@@ -224,6 +224,7 @@ def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
             sys.stderr.write('  %s: %s\n' % (ylabel, yvals))
         # plot the series
         plt.plot(xvals, yvals, linewidth=0.5, aa=True, marker=m)
+        plt.ylim([0,1])
     
     # set the axis labels
     plt.ylabel(ylabel)
@@ -239,7 +240,8 @@ def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
     #                 box.width, box.height*0.25])
     #plt.legend(slabels, loc='upper center', bbox_to_anchor=(0.5, -0.3),
     #           ncol=len(slabels), prop=fontP, frameon=False)
-    plt.legend(slabels, loc='upper left', frameon=False, prop=fontP)
+    #plt.legend(slabels, loc='upper left', frameon=False, prop=fontP)
+    plt.legend(slabels, loc='best', frameon=False, prop=fontP)
     
     # write the plot to a file
     plt.savefig(ofile, bbox_inches='tight');
