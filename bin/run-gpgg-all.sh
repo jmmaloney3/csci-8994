@@ -30,12 +30,12 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 for GTYPE in 0 1 2 3 4 5 6;
 do
   DIR=gtype$GTYPE
-  time $BIN/rungtype.sh $DIR $GTYPE 2 5
+#time $BIN/rungtype.sh $DIR $GTYPE 2 5
 done
 
 # reputation simulations
-for Z in 10 20 30 40;
+for Z in 2 4 6 8 10;
 do
   DIR=z$Z
-#  time $BIN/runrepsim.sh $DIR $Z 2 5
+  time $BIN/runrepsim.sh $DIR $Z 2 5
 done
