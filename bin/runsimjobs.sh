@@ -22,12 +22,16 @@ DATE=20160510
 
 BETA=1000
 
-COUNT=1
+BEN=20
+COUNT=10
+DIRNAME=$DATE-$COUNT
+time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -passmutall
+tar czf $DIRNAME.tar.gz $DIRNAME
 
-for BEN in `seq 4 2 20`;
-do
-  COUNT=$((COUNT+1))
-  DIRNAME=$DATE-$COUNT
-  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -passmutall
-  tar czf $DIRNAME.tar.gz $DIRNAME
-done
+#for BEN in `seq 4 2 20`;
+#do
+#  COUNT=$((COUNT+1))
+#  DIRNAME=$DATE-$COUNT
+#  time $BIN/runsim8.sh $DIRNAME $SIMS -g $GENS -b $BEN -beta $BETA -singdef -passmutall
+#  tar czf $DIRNAME.tar.gz $DIRNAME
+#done
