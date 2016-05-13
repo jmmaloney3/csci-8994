@@ -27,16 +27,17 @@ def main():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('serdirs', type=str, nargs='+', help='list of directories that hold the series for the chart')
     parser.add_argument('-p', type=int, help='number of periods to include in the calculation', default=1000)
-    parser.add_argument('-o', type=str, help='output file', default=None)
+    parser.add_argument('-o', type=str, help='output file', default='fig.png')
     parser.add_argument('-x', type=str, help='sim param that is x value', default="r")
     parser.add_argument('-s', type=str, help='sim param that is series value', default="z")
+    parser.add_argument('-t', type=str, help='chart title')
     parser.add_argument('-v', action='store_true')
     
     args = parser.parse_args()
     #print args.serdirs
     #print args
 
-    run_script(args.serdirs, args.s, args.x, args.p, args.v)
+    run_script(args.serdirs, args.t, args.s, args.x, args.p, args.o, args.v)
 # end main
 
 # get the pstat.csv files and a JSON log file for a single experiment
@@ -199,7 +200,7 @@ def get_chart_series(serdirs, sparam, xparam, periods, verbose):
     
     return series
 
-def make_plot(series, sparam, xlabel, ylabel, verbose):
+def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
 
     # set the font for the legend
     matplotlib.rcParams.update({'font.size': 8})
@@ -207,10 +208,9 @@ def make_plot(series, sparam, xlabel, ylabel, verbose):
     fontP.set_size(8)
 
     # clear the plot
-    #plt.figure(figsize=(8,3))
-    plt.figure(figsize=(5,8))
+    plt.figure(figsize=(3,3))
     plt.clf()
-    
+
     # plot the series
     slabels = []
     for s, m in zip(series, itertools.cycle('8s^x,*')):
@@ -229,33 +229,30 @@ def make_plot(series, sparam, xlabel, ylabel, verbose):
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     
+    # set the chart tittle
+    plt.title(title)
+    
     # create the legend
-    ax = plt.subplot(111)
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0 + box.height * 0.5,
-                     box.width, box.height*0.25])
-    plt.legend(slabels, loc='upper center', bbox_to_anchor=(0.5, -0.3),
-               ncol=len(slabels), prop=fontP, frameon=False)
-
-    # get file name for plot
-    #idx = csvfile.find('.csv')
-    #if (idx >= 0):
-    #    pngfile = csvfile[0:idx] + '.png'
-    #else:
-    #    pngfile = csvfile + '.png'
-
+    #ax = plt.subplot(111)
+    #box = ax.get_position()
+    #ax.set_position([box.x0, box.y0 + box.height * 0.5,
+    #                 box.width, box.height*0.25])
+    #plt.legend(slabels, loc='upper center', bbox_to_anchor=(0.5, -0.3),
+    #           ncol=len(slabels), prop=fontP, frameon=False)
+    plt.legend(slabels, loc='upper left', frameon=False, prop=fontP)
+    
     # write the plot to a file
-    #plt.savefig(pngfile, bbox_inches='tight');
+    plt.savefig(ofile, bbox_inches='tight');
 
-    plt.show()
+    #plt.show()
 
-def run_script(serdirs, sparam, xparam, periods, verbose):
+def run_script(serdirs, title, sparam, xparam, periods, ofile, verbose):
     # get the results for the series
     series = get_chart_series(serdirs, sparam, xparam, periods, verbose)
     
     # generate the plot
     ylabel="frequency of cooperators"
-    make_plot(series, sparam, xparam, ylabel, verbose)
+    make_plot(series, title, sparam, xparam, ylabel, ofile, verbose)
 # end run_script
 
 # run main method when this file is run from command line
