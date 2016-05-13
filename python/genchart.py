@@ -33,9 +33,9 @@ def main():
     parser.add_argument('-v', action='store_true')
     
     args = parser.parse_args()
-    print args.senddirs
-    print args
-    
+    #print args.serdirs
+    #print args
+
     run_script(args.serdirs, args.s, args.x, args.p, args.v)
 # end main
 

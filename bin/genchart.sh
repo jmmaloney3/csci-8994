@@ -17,4 +17,4 @@ PYT=$BIN/../python
 
 # run the Python script to plot the data
 # assumption: the Python program is in the $PYT directory
-python $PYT/calcstats.py "$@"
+python $PYT/genchart.py "$@"
