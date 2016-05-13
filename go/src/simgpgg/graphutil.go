@@ -263,19 +263,24 @@ func NewSmallWorldNet(N, K int32, p float64, rnGen *rand.Rand) *goraph.Adjacency
       diff := math.Abs(float64(i-j))
       mod := math.Mod(diff, div)
       if ((0 < mod) && (mod <= ub)) {
-        // with probability p rewite the edge between Vertex(i) and Vertex(j)
-        if (RandProb(rnGen) <= p) {
-          // randomly select a replacement for Vertex(j)
-          replace := RandInt(rnGen, int64(N))
-          // make sure the proposed new edge will not be circular
-          if (replace != int64(i)) {
-            // make sure the proposed new edge is not a duplicate
-            ni := goraph.VertexSlice(graph.Neighbors(goraph.Vertex(i)))
-            if (!ni.Contains(goraph.Vertex(replace))) {
-              // remove current edge
-              graph.RemoveEdge(goraph.Vertex(i), goraph.Vertex(j))
-              // add the new edge
-              graph.AddEdge(goraph.Vertex(i), goraph.Vertex(replace))
+        // make sure that i and j are neighbors
+        // and that i is not j's only neighbor (graph must remain connected)
+        Ny := goraph.VertexSlice(graph.Neighbors(goraph.Vertex(j)))
+        if (Ny.Contains(goraph.Vertex(i)) && (len(Ny) > 1)) {
+          // with probability p rewite the edge between Vertex(i) and Vertex(j)
+          if (RandProb(rnGen) <= p) {
+            // randomly select a replacement for Vertex(j)
+            replace := RandInt(rnGen, int64(N))
+            // make sure the proposed new edge will not be circular
+            if (replace != int64(i)) {
+              // make sure the proposed new edge is not a duplicate
+              ni := goraph.VertexSlice(graph.Neighbors(goraph.Vertex(i)))
+              if (!ni.Contains(goraph.Vertex(replace))) {
+                // remove current edge
+                graph.RemoveEdge(goraph.Vertex(i), goraph.Vertex(j))
+                // add the new edge
+                graph.AddEdge(goraph.Vertex(i), goraph.Vertex(replace))
+              }
             }
           }
         }
