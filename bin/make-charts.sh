@@ -48,7 +48,7 @@ TITLE="Heterogeneous Random"
 GTYPE=2
 OFILE=$GRAPH_REP_DIR/heterand.png
 echo "generating chart: Heterogeneous Random ($GTYPE)"
-$BIN/genchart.sh $GPGG_RESULTS/gtype$GTYPE/* -t "Heterogeneous Random" -s "z" -o $OFILE
+$BIN/genchart.sh $GPGG_RESULTS/gtype$GTYPE/* -t "Small World (p=1.0)" -s "z" -o $OFILE
 
 # generate chart for scale free
 GTYPE=3
@@ -74,17 +74,79 @@ OFILE=$GRAPH_REP_DIR/sw04.png
 echo "generating chart: Small World (p=0.4) ($GTYPE)"
 $BIN/genchart.sh $GPGG_RESULTS/gtype$GTYPE/* -t "Small World (p=0.4)" -s "z" -o $OFILE
 
+# generate one chart for z=4 with all small world graph types
+SERIES=$GPGG_RESULTS/gtype5/z04
+SERIES="$SERIES $GPGG_RESULTS/gtype6/z04"
+SERIES="$SERIES $GPGG_RESULTS/gtype2/z04"
+
+OFILE=$GRAPH_REP_DIR/smallworld.png
+echo "generating chart: small world"
+$BIN/genchart.sh $SERIES -t "Small World Networks (z=4)" -s "gtype" -o $OFILE
+
+# generate one chart for z=4 with all scale free graph types
+SERIES=$GPGG_RESULTS/gtype3/z04
+SERIES="$SERIES $GPGG_RESULTS/gtype4/z04"
+
+OFILE=$GRAPH_REP_DIR/scalefreeall.png
+echo "generating chart: all scale free"
+$BIN/genchart.sh $SERIES -t "Scale Free Networks (z=4)" -s "gtype" -o $OFILE
+
 # generate one chart for z=4 with all graph types
 # x-axis - r
 # line label - g
 SERIES=$GPGG_RESULTS/gtype0/z04
 SERIES="$SERIES $GPGG_RESULTS/gtype1/z04"
+SERIES="$SERIES $GPGG_RESULTS/gtype5/z04"
+SERIES="$SERIES $GPGG_RESULTS/gtype6/z04"
 SERIES="$SERIES $GPGG_RESULTS/gtype2/z04"
 SERIES="$SERIES $GPGG_RESULTS/gtype3/z04"
 SERIES="$SERIES $GPGG_RESULTS/gtype4/z04"
-SERIES="$SERIES $GPGG_RESULTS/gtype5/z04"
-SERIES="$SERIES $GPGG_RESULTS/gtype6/z04"
 
 OFILE=$GRAPH_REP_DIR/z4all.png
 echo "generating chart: z=4"
 $BIN/genchart.sh $SERIES -t "z = 4" -s "gtype" -o $OFILE
+
+# generate one chart for z=6 with all graph types
+# x-axis - r
+# line label - g
+SERIES=$GPGG_RESULTS/gtype0/z06
+SERIES="$SERIES $GPGG_RESULTS/gtype1/z06"
+SERIES="$SERIES $GPGG_RESULTS/gtype5/z06"
+SERIES="$SERIES $GPGG_RESULTS/gtype6/z06"
+SERIES="$SERIES $GPGG_RESULTS/gtype2/z06"
+SERIES="$SERIES $GPGG_RESULTS/gtype3/z06"
+SERIES="$SERIES $GPGG_RESULTS/gtype4/z06"
+
+OFILE=$GRAPH_REP_DIR/z6all.png
+echo "generating chart: z=6"
+$BIN/genchart.sh $SERIES -t "z = 6" -s "gtype" -o $OFILE
+
+# generate one chart for z=8 with all graph types
+# x-axis - r
+# line label - g
+SERIES=$GPGG_RESULTS/gtype0/z08
+SERIES="$SERIES $GPGG_RESULTS/gtype1/z08"
+SERIES="$SERIES $GPGG_RESULTS/gtype5/z08"
+SERIES="$SERIES $GPGG_RESULTS/gtype6/z08"
+SERIES="$SERIES $GPGG_RESULTS/gtype2/z08"
+SERIES="$SERIES $GPGG_RESULTS/gtype3/z08"
+SERIES="$SERIES $GPGG_RESULTS/gtype4/z08"
+
+OFILE=$GRAPH_REP_DIR/z8all.png
+echo "generating chart: z=8"
+$BIN/genchart.sh $SERIES -t "z = 8" -s "gtype" -o $OFILE
+
+# generate one chart for z=10 with all graph types
+# x-axis - r
+# line label - g
+SERIES=$GPGG_RESULTS/gtype0/z10
+SERIES="$SERIES $GPGG_RESULTS/gtype1/z10"
+SERIES="$SERIES $GPGG_RESULTS/gtype5/z10"
+SERIES="$SERIES $GPGG_RESULTS/gtype6/z10"
+SERIES="$SERIES $GPGG_RESULTS/gtype2/z10"
+SERIES="$SERIES $GPGG_RESULTS/gtype3/z10"
+SERIES="$SERIES $GPGG_RESULTS/gtype4/z10"
+
+OFILE=$GRAPH_REP_DIR/z10all.png
+echo "generating chart: z=10"
+$BIN/genchart.sh $SERIES -t "z = 10" -s "gtype" -o $OFILE
