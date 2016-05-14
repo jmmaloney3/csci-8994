@@ -36,7 +36,7 @@ GPGG_RESULTS=$BIN/../gpgg-results
 PSWI_RESULTS=$BIN/../pswitch-results
 
 # graph report figures dir
-GRAPH_REP_DIR=$BIN/../graph-structure/fig
+GRAPH_REP_DIR=$BIN/../graph-structure/fig/dynamic
 
 # generate charts for partner switching
 # x-axis - r

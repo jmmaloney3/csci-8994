@@ -25,7 +25,7 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 GPGG_RESULTS=$BIN/../gpgg-results
 
 # graph report figures dir
-GRAPH_REP_DIR=$BIN/../graph-structure/fig
+GRAPH_REP_DIR=$BIN/../graph-structure/fig/fixed
 
 # generate one chart for each graph type
 # x-axis - r
