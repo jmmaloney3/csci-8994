@@ -200,6 +200,15 @@ def get_chart_series(serdirs, sparam, xparam, periods, verbose):
     
     return series
 
+gtype_names = {0 : "regular",
+               1 : "homo rand",
+               2 : "sw (p=1.0)",
+               3 : "scale free",
+               4 : "uni scale free",
+               5 : "sw (p=0.1)",
+               6 : "sw (p=0.4)",
+               99: "dynamic"}
+    
 def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
 
     # set the font for the legend
@@ -214,7 +223,11 @@ def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
     # plot the series
     slabels = []
     for s, m in zip(series, itertools.cycle('8s^x,*')):
-        slabel = '%s = %d' % (sparam, s[0])
+        if (sparam == 'gtype'):
+            # special handling for graph type labels
+            slabel = gtype_names[s[0]]
+        else:            
+            slabel = '%s = %d' % (sparam, s[0])
         slabels.append(slabel)
         xvals = s[1]
         yvals = s[2]
@@ -241,7 +254,11 @@ def make_plot(series, title, sparam, xlabel, ylabel, ofile, verbose):
     #plt.legend(slabels, loc='upper center', bbox_to_anchor=(0.5, -0.3),
     #           ncol=len(slabels), prop=fontP, frameon=False)
     #plt.legend(slabels, loc='upper left', frameon=False, prop=fontP)
-    plt.legend(slabels, loc='best', frameon=False, prop=fontP)
+    if (sparam == 'gtype'):
+        legloc = 'upper left'
+    else:
+        legloc = 'best'
+    plt.legend(slabels, loc=legloc, frameon=False, prop=fontP)
     
     # write the plot to a file
     plt.savefig(ofile, bbox_inches='tight');
