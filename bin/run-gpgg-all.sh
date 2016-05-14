@@ -27,16 +27,16 @@ BIN="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 #   4: scale free (with uniform atachment)
 #   5: small world (Watts-Strogatz w/ p=0.1)
 #   6: small world (Watts-Strogatz w/ p=0.4)
-for GTYPE in 0 1 2 3 4 5 6;
+#for GTYPE in 0 1 2 3 4 5 6;
+for GTYPE in 1;
 do
   DIR=gtype$GTYPE
-#time $BIN/rungtype.sh $DIR $GTYPE 5 10
+  time $BIN/rungtype.sh $DIR $GTYPE 5 10
 done
 
 # reputation simulations
-#for Z in 2 4 6 8 10;
-for Z in 10;
+for Z in 2 4 6 8 10;
 do
   DIR=z$Z
-  time $BIN/runrepsim.sh $DIR $Z 5 10
+#time $BIN/runrepsim.sh $DIR $Z 5 10
 done
