@@ -94,6 +94,7 @@ def calc_stats(files, periods, allcd_t, ofile, verbose):
     # define column names
     assess_columns = ['n0','n1','n2','n3','n4','n5','n6','n7']
     action_columns = ['a00','a01','a02','a03','a04','a05','a06','a07','a08','a09','a10','a11','a12','a13','a14','a15']
+    po_columns     = ['po', 'minpo', 'maxpo']
     
     # write headers to output file
     csv_writer.writerow(assess_columns+action_columns)
@@ -102,10 +103,10 @@ def calc_stats(files, periods, allcd_t, ofile, verbose):
     for ifile in files:
         fname, fext = os.path.splitext(ifile)
         if (fext == '.csv'):
-            process_file(ifile, periods, csv_writer, assess_columns, action_columns, allcd_t, verbose)
+            process_file(ifile, periods, csv_writer, assess_columns, action_columns, po_columns, allcd_t, verbose)
 # end calc_stats
 
-def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, allcd_t, verbose):    
+def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, po_columns, allcd_t, verbose):    
     # load CSV data
     if (verbose):
         sys.stderr.write('Loading data from %s...\n' % csvfile)
@@ -117,6 +118,7 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     # get bit column data
     assess_data = data[assess_columns]
     action_data = data[action_columns]
+    po_data     = data[po_columns]
     allcd_data  = data[[allc, alld]]
 
     # negative periods argument means use all the data
@@ -130,6 +132,7 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
         start_idx = data.shape[0] - periods
         assess_data = assess_data[start_idx:]
         action_data = action_data[start_idx:]
+        po_data     = po_data[start_idx]
         allcd_data  = allcd_data[start_idx:]
 
     # get number of tribes and agents
@@ -155,6 +158,9 @@ def process_file(csvfile, periods, csv_writer, assess_columns, action_columns, a
     action_percent = action_data.sum()/max_action
     # action_result = [ get_result(p) for p in action_percent ]
     action_result = [ str(p) for p in action_percent ]
+    
+    # calculate payout percent of maximum possible payout
+    po_percent = data['po']/data['pomax']
     
     # output percentages
     assess_str = ','.join('%4.2f' % n for n in assess_percent)
