@@ -26,20 +26,18 @@
     
     \begin{table}[h!]
       \begin{center}
-        \caption{The Prisoners Dilemma Game}
-        \label{tab:pdgame}
-        \begin{tabular}{l|l|c|c}
-          \toprule
-          \multicolumn{2}{c|}{\multirow{2}{*}{}} & \multicolumn{2}{c|}{\textbf{Other Player}}\\
-          \multicolumn{2}{c|}{} & \textbf{Cooperate} & \textbf{Defect}\\
-          \midrule
-          \multirow{2}{*}{Player} & \textbf{Cooperate} & \textbf{R} & \textbf{S}\\
-            & \textbf{Defect} & \textbf{T} & \textbf{P}
-          \bottomrule
-        \end{tabular}
-      \end{center}
+      \begin{tabular}{cccc}
+    	\toprule
+    		&	&	\multicolumn{2}{c}{Player 2} \\
+    		&   & 	Cooperate & Defect  \\ \midrule
+    	\multirow{2}{*}{Player 1}
+    		& Cooperate   & R  & S  \\
+    		& Defect  	  & T  & P \\ \bottomrule
+      \end{tabular}
+      \caption{The Prisoners Dilemma Game}
+	  \end{center}
     \end{table}
-    
+
     \paragraph{}The payouts are constrained as follows in order to create a social dilemma:
     
     \begin{equation}
@@ -56,7 +54,7 @@
     \begin{align}
     	R&=1\\
     	T-b&>R\\
-    	P=S&=0
+    	P&=S=0
     \end{align}
 
     \paragraph{}Given this structure for the payouts, b is the sole parameter and represents the temptation to defect.  In [8], the authors broaden the range of payouts considered for the prisoner’s dilemma game to include values for S between zero and -1.  However, in what follows only results presented in [8] for payouts that are compatible with the structure presented above as considered.
