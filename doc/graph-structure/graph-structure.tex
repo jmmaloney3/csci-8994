@@ -7,6 +7,8 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{amsmath}
+\usepackage{tabu}
+\usepackage{array}
 
 \begin{document}
 
@@ -26,10 +28,10 @@
     
     \begin{table}[h!]
       \begin{center}
-      \begin{tabular}{cccc}
+      \begin{tabular}{llcc}
     	\toprule
-    		&	&	\multicolumn{2}{c}{Player 2} \\
-    		&   & 	Cooperate & Defect  \\ \midrule
+		&	&	\multicolumn{2}{c}{Player 2} \\ \cmidrule{3-4}
+		&   & 	Cooperate & Defect  \\ \midrule
     	\multirow{2}{*}{Player 1}
     		& Cooperate   & R  & S  \\
     		& Defect  	  & T  & P \\ \bottomrule
@@ -47,8 +49,8 @@
     \paragraph{}Given the order of the payouts, if the players only play the game once, regardless of the action chosen by the other player, the highest payout is always achieved by defecting.  Therefore, two rational players engaged in the game will both choose to defect and therefore receive the second lowest possible payout.  However, if both players choose to cooperate, they both receive a higher payout.  Thus, a social dilemma exists.
     \paragraph{}Rather than focusing on determining the optimal strategy to be played when two players meet in a single round of the game, evolutionary game theory considers which strategies will be most successful when the game is played during multiple interactions between agents following different strategies.  The fitness of a strategy is evaluated in terms of the payouts earned by agents that follow that strategy and is used to determine how many offspring in the next generation will follow that strategy.  In this case, evolutionary game theory tries to determine which strategies will be most evolutionarily successfully rather than which strategy is the most rational.
 
-    \subsection{Impact of Network Topology on Evolution of Cooperation}
-    \paragraph{}In this section, studies are reviewed that demonstrate the sensitivity of cooperation to the topology of the network occupied by the agents.  In the cases considered here, the network topology remains fixed during the simulation.  Although some of the studies reviewed consider the impact on cooperation in games other than the prisoner's dilemma, this review focuses on the results reported for the prisoner's dilemma.
+    \subsection{Impact of Network Topology on Evolution of Cooperation} \label{impact-net-topology}
+    In this section, studies are reviewed that demonstrate the sensitivity of cooperation to the topology of the network occupied by the agents.  In the cases considered here, the network topology remains fixed during the simulation.  Although some of the studies reviewed consider the impact on cooperation in games other than the prisoner's dilemma, this review focuses on the results reported for the prisoner's dilemma.
     \paragraph{}All studies, except \cite{Santos2006c}, use the following payout structure that was originally used in \cite{Nowak1992}:
 
     \begin{align}
@@ -198,6 +200,40 @@
 	\paragraph{}Given the definition of the payouts earned by the selected agents, the detailed procedure for conducting strategy and networks updates is identical to that defined in [11] and [12].
 
 	\section{Results}
+	This section presents the results of the simulations for both the case when the network topology is fixed and the case when the agents are able to modify the network structure.
+
+	\subsection{Results for Fixed Network Structure}
+	For the studies reviewed in section \ref{impact-net-topology}, the authors performed a large number of simulations in order to validate that their results were robust to fluctuations in the starting conditions.  The parameters used for those studies are shown in the table below.
+	\paragraph{}For this study, preliminary analysis indicated that evolution in the public goods game often does not reach a steady state after $10^4$ generations.  Therefore, the number of generations was increased by an order of magnitude.  To compensate for the increased time required to run simulations with significantly more generations, the number of graph instances used and the number of simulations per graph instance were reduced.  The parameters used for this study are also shown in the table below.
+
+	\begin{table}[h!]
+		\begin{center}
+		\begin{tabu} to \textwidth {X[0.66,l,m]X[0.17,c,m]X[0.17,c,m]}
+		\toprule
+		Parameter&Value Used in Previous Studies&Value Used in This Study\\
+		\midrule
+		Number of agents ($N$)&$10^4$&$10^4$\\
+		Number of generations per simulation&$10^4$&$10^5$\\
+		Number of graph instantiations&$10$&$5$\\
+		Number of simulations per graph instantiation&$10$&$5$\\
+		\bottomrule
+		\end{tabu}
+		\caption{Parameter Values for Fixed Network Simulations}
+		\end{center}
+	\end{table}
+
+	\paragraph{}Experiments were performed on the following 7 different graph types:
+	\begin{itemize}
+		\item \textbf{Regular}: a regular ring lattice
+		\item \textbf{Homogeneous random}: a graph produced by randomly swapping the ends of the edges in a regular ring lattice
+		\item \textbf{Heterogeneous random}: a graph produced using the Watts-Strogatz algorithm [14] with $p = 1.0$
+		\item \textbf{Small world network with a high clustering coefficient}: a graph produced using the Watts-Strogatz algorithm with $p = 0.1$
+		\item \textbf{Small world network with a low clustering coefficient}: a graph produced using the Watts-Strogatz algorithm with $p = 0.4$
+		\item \textbf{Scale free network}: a graph produced using the Barab\'{a}si-Albert algorithm [15]
+		\item \textbf{Uniform scale free network}: a graph produced using a modification of the Barab\'{a}si-Albert algorithm that uses uniform attachment instead of preferential attachment
+	\end{itemize}
+
+	\paragraph{}Experiments were conducted for each graph type for several different values of average degree $z$ and multiplicative factor $r$.  Strong selection was used with $\beta_e=10$.  The results are presented in the following sections.
 
     \section{Temporary Citations}
     Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
