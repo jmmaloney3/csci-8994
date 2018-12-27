@@ -13,13 +13,13 @@
   \maketitle
 
   \section{Introduction}
-  \paragraph{}Both evolutionary processes as well as economic marketplaces are driven by competition between individuals. It would appear that only selfish behavior would be rewarded.  However, cooperation and altruistic behavior is witnessed throughout the natural world and in human societies.  Explaining the existence of these cooperative and altruistic behaviors is a challenge for both evolutionary biology and economics.  If the cooperators are closely related, altruistic cooperation can be seen as benefiting reproduction of the shared gene set.  However, cooperation also occurs among unrelated individuals and this reciprocity-based cooperation is harder to explain.  
+  Both evolutionary processes as well as economic marketplaces are driven by competition between individuals. It would appear that only selfish behavior would be rewarded.  However, cooperation and altruistic behavior is witnessed throughout the natural world and in human societies.  Explaining the existence of these cooperative and altruistic behaviors is a challenge for both evolutionary biology and economics.  If the cooperators are closely related, altruistic cooperation can be seen as benefiting reproduction of the shared gene set.  However, cooperation also occurs among unrelated individuals and this reciprocity-based cooperation is harder to explain.
   \paragraph{}Lacking the ability to manipulate natural and economic systems in order to conduct experiments that could confirm or deny theories about the evolution of cooperation, scientists use mathematical modeling and simulation to test their hypotheses.  The game theoretic constructs known as the prisoner's dilemma game and the donor-recipient game are often used as the basis for these investigations.
   \paragraph{}In \cite{Maloney2015a}, the eight social norms used to promote cooperation in the donor-recipient game \cite{Ohtsuki2006} were applied to the public goods game.  Those results showed that none of the social norms is evolutionary stable.  In this study, experiments are conducted to analyze the impact that population structure has on the evolution of cooperation in public goods games.
   \paragraph{}The rest of this paper is structured as follows:  section 2 covers related work on the impact of network topology on the evolution of cooperation in the prisoner's dilemma, section 3 presents an extension of the models and methodologies presented in section 2 to the public goods game, section 4 presents the experimental results, section 5 concludes the paper and presents ideas for future work.
   
     \section{Population Structure in the Prisoner's Dilemma Game}
-    \paragraph{}This section provides an overview of related work that analyzes the impact of population structure on the evolution of cooperation in the repeated 2-person prisoner's dilemma game.  First, a brief description of the repeated 2-person prisoner's dilemma game is provided.  Next, studies that consider the case of a fixed network topology are reviewed.  Finally, studies that consider the case in which agents can modify the network topology are reviewed.
+    This section provides an overview of related work that analyzes the impact of population structure on the evolution of cooperation in the repeated 2-person prisoner's dilemma game.  First, a brief description of the repeated 2-person prisoner's dilemma game is provided.  Next, studies that consider the case of a fixed network topology are reviewed.  Finally, studies that consider the case in which agents can modify the network topology are reviewed.
     
     \subsection{Prisoner's Dilemma Game}
     \paragraph{}In the two-player prisoner's dilemma game, each player can take one of two actions: cooperate or defect.  After each player chooses an action, the players receive payouts based on the following table:
@@ -161,8 +161,46 @@
 
 	\paragraph{}Where $\delta\in[0,1]$ is the discount rate that diminishes the value of earlier good deeds over time.  When $\delta=0$ the agent's last action alone determines its reputation while when $\delta=1$ the original model is restored.  The authors find that if the frequency of partner switching is high enough (approximately $W>0.02$), smaller values of $\delta$ make it easier for cooperators to dominate.  In this case, when agents react immediately to defection, it makes it harder for defectors to maintain links that allow them to exploit cooperators.
 	
+	\section{Population Structure in the Public Goods Game}
+	The previous section considered the impact of network topology on the evolution of cooperation among agents playing the prisoner's dilemma game.  In this section, focus is shifted to the public goods game by extending the models and methodologies presented in the previous sections to the public goods game.
+
+	\subsection{N-Person Prisoner's Dilemma}
+	The evolution of cooperation in public goods games is often analyzed using the framework of an $n$-person prisoner's dilemma game.  In this game, $n$ players are grouped together and given the opportunity to contribute to a common pool whose contents will be multiplied by a factor $r$ and distributed evenly among all $n$ players.  Each player can choose to cooperate by contributing $c$ to the common pool or to defect and incur zero cost.  The payouts paid to the participants depend on the number of cooperators.  Given $n_c$ cooperators, the payouts are the following:
+
+	\begin{equation}
+	P_D=\frac{r\cdot c\cdot n_c}{n}
+	\end{equation}
+	\begin{equation}
+	P_C=\frac{r\cdot c\cdot n_c}{n}-c
+	\end{equation}
+
+	\paragraph{}Where $P_D$ is the payout earned by defectors and $P_C$ is the payout earned by cooperators.
+	\paragraph{}When played as a single-shot game, the rational choice is to defect.  However, when played as a repeated game, it is possible for cooperative strategies to achieve higher average payouts than unconditional defection [22][23][24][25].
+	\paragraph{}Given a large well-mixed population of agents, in the repeated $n$-person prisoner's dilemma game, $n$ agents are selected randomly from the population and given the opportunity to play a one-shot $n$-person prisoner's dilemma game.  This process is repeated until the specified stopping criteria are satisfied.
+
+	\subsection{Public Goods Game Played on Networks}
+	In this section, the methodology used to evaluate the impact of network topology on the evolution of cooperation in the iterated two-person prisoner's dilemma is extended to the pubic goods game.
+	\paragraph{}Agents are allocated to the nodes of a graph with a fixed number of nodes equal to the number of agents $n$.  The graph has a fixed number of edges giving the graph a fixed average connectivity $z$.  The agents follow one of two strategies: unconditional cooperation or unconditional defection.
+	\paragraph{}Following [11] and [12], the evolutionary dynamics defined here support updates to both agent strategies and the network topology.  As defined in those two studies, the two parameters $\tau_e$ and $\tau_a$ define the time scales at which strategy updates and network updates occur and the ratio  specifies how frequently structure updates occur relative to strategy updates.  The probability $p$ that a strategy update occurs during any time step is given by the following formula:
+
+	\begin{equation}
+	p=\frac{1}{1+W}=\frac{\tau_a}{\tau_a+\tau_e}	
+	\end{equation}
+
+	\paragraph{}Given this, a structure update occurs with probability $(1-p)$.  If the experiment being conducted does not include network structure updates then $\tau_e=0$, $\tau_a=\infty$ and $W$ is undefined.  In this case, the probability $p$ that a strategy update occurs is set equal to one.
+	\paragraph{}The fitness scores earned by the agents are used to update both the agent strategies and the network structure.  Each agent's fitness score depends on the payouts it earns from public goods games in which it participates.  Following [26], each agent can sponsor a public goods game in which its linked neighbors participate.  Therefore, the number of public goods games that agent $x$ participates in is equal to $(k_x+1)$ where $k_x$ is the degree of the node that it occupies.  The payout earned by each agent is the sum of the payouts earned from each public goods game in which it participates.  Let $p_x(y)$ be the payout earned by agent $x$ in a game sponsored by agent $y$ and let $N_x$ be the neighbors of agent $x$ then the payout $P_x$ earned by agent $x$ during a single simulation step is given by the following equation:
+
+	\begin{equation}
+	P_x=p_x(x)+\sum_{y \in N_x} p_x(y)
+	\end{equation}
+
+	\paragraph{}For both types of updates, an agent $x$ is chosen at random and another agent $y$ is chosen at random from agent $x$'s neighbors.  The two agents participate in a public goods game sponsored by themselves and their immediate neighbors and earn fitness scores $P_x$ and $P_y$ respectively.
+	\paragraph{}Given the definition of the payouts earned by the selected agents, the detailed procedure for conducting strategy and networks updates is identical to that defined in [11] and [12].
+
+	\section{Results}
+
     \section{Temporary Citations}
-    \paragraph{}Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
+    Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
     
 %    \section{References}
     \bibliography{../references}
