@@ -9,6 +9,8 @@
 \usepackage{amsmath}
 \usepackage{tabu}
 \usepackage{array}
+\usepackage{graphicx}
+\usepackage{subcaption}
 
 \begin{document}
 
@@ -24,9 +26,9 @@
     This section provides an overview of related work that analyzes the impact of population structure on the evolution of cooperation in the repeated 2-person prisoner's dilemma game.  First, a brief description of the repeated 2-person prisoner's dilemma game is provided.  Next, studies that consider the case of a fixed network topology are reviewed.  Finally, studies that consider the case in which agents can modify the network topology are reviewed.
     
     \subsection{Prisoner's Dilemma Game}
-    \paragraph{}In the two-player prisoner's dilemma game, each player can take one of two actions: cooperate or defect.  After each player chooses an action, the players receive payouts based on the following table:
+    \paragraph{}In the two-player prisoner's dilemma game, each player can take one of two actions: cooperate or defect.  After each player chooses an action, the players receive the payouts shown in table \ref{table:pdpayouts}.
     
-    \begin{table}[h!]
+    \begin{table}[h]
       \begin{center}
       \begin{tabular}{llcc}
     	\toprule
@@ -37,11 +39,12 @@
     		& Defect  	  & T  & P \\ \bottomrule
       \end{tabular}
       \caption{The Prisoners Dilemma Game}
+      \label{table:pdpayouts}
 	  \end{center}
     \end{table}
 
     \paragraph{}The payouts are constrained as follows in order to create a social dilemma:
-    
+
     \begin{equation}
     	T > R > P > S
     \end{equation}
@@ -235,8 +238,107 @@
 
 	\paragraph{}Experiments were conducted for each graph type for several different values of average degree $z$ and multiplicative factor $r$.  Strong selection was used with $\beta_e=10$.  The results are presented in the following sections.
 
+	\subsubsection{Homogeneous Graphs}
+	The results for two types of homogeneous graphs are shown in figure \ref{fig:homographs}.
+
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/regular.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/homorand.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Results for Homogeneous Graphs}
+		\label{fig:homographs}
+	\end{figure}
+
+	\paragraph{}As with the prisoner’s dilemma, increasing the average degree $z$ makes is more difficult for cooperators to succeed.  However, the multiplicative factor $r$ does not have the same impact on cooperation in the public goods game as the temptation to defect $b$ has in the prisoner's dilemma.  While increasing $b$ makes it more difficult for cooperators to succeed in the prisoner's dilemma, increasing $r$ makes it easier for cooperators to succeed in the public goods game.
+	\paragraph{}In the prisoner's dilemma case, cooperators benefit from the correlations that exist between nodes in a regular graph.  This allows the cooperators to form tight clusters that resist invasion by defectors.  However, in the case of the public good game, cooperators perform better on the random graph than on the regular graph suggesting that clustering might be disadvantageous to cooperation in the public goods game.
+
+	\subsubsection{Heterogeneous Graphs}
+    The results for three types of moderately heterogeneous small world graphs are shown in figure \ref{fig:hetergraphs}.
+
+    \begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/sw01.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/sw04.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/heterand.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/smallworld.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Results for Heterogeneous Graphs}
+		\label{fig:hetergraphs}
+	\end{figure}
+
+	\paragraph{}Ignoring the reversed correlation between benefit ($r$ or $b$) and level of cooperation, the results shown here are similar to the results obtained for the prisoner's dilemma.  Cooperators perform slightly better on small world networks with $p=1.0$ compared to small world networks with $p=0.4$ while their performance when $p=0.1$ is significantly worse than either of the other two cases.  As $p$ increases, the clustering coefficient decreases and heterogeneity increases.  As with the prisoner's dilemma, the results show that heterogeneity may play a more significant role in promoting cooperation than the formation of tight clusters.
+
+	\subsubsection{Scale Free Networks}
+	The results for two types of scale free graphs are shown in figure \ref{fig:sfreenets}.
+
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/sfree.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/usfree.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/scalefreeall.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Results for Scale Free Networks}
+		\label{fig:sfreenets}
+	\end{figure}
+
+	\paragraph{}The results show that as average degree $z$ increases, cooperators face similar challenges to those faced by cooperators on other network types.  This is different from the result obtained for the prisoner's dilemma on scale free networks, where increasing average degree $z$ promotes cooperation.
+
+	\paragraph{}In the prisoner’s dilemma, removing age correlation from the network connections had a detrimental impact on cooperation especially for large values of the temptation to defect $b$.  However, in the public goods game, the impact of age correlation appears to be mixed.  The advantage of age correlation for small values of $r$ is significant.  However, as $r$ increases, the benefits of age correlation decrease until $r=6$ at which point cooperators perform better on a uniform scale free network.
+
+	\subsubsection{Comparison of Network Types}
+	Figure \ref{fig:compfixed} present the results in a way that allows the performance of cooperators on different graph types to be directly compared.
+
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/z4all.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/z6all.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/z8all.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/fixed/z10all.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Results for Heterogeneous Graphs}
+		\label{fig:compfixed}
+	\end{figure}
+
+	\paragraph{}It is clear that the performance of cooperators is best on scale free networks up to a critical point $r^*$.  For $r>r^*$, cooperators are able to perform better on other networks.  The benefits of increased $r$ appear to level off for cooperators on scale free networks while cooperators on other networks continue to benefit from increased $r$.  The critical point occurs at $r=5$ for $z=4$ and $r=7$ for $z=6$.  Another critical point appears to occur at $r=9$ for $z=8$ and extrapolating the curves for $z=10$ indicates that another critical point exists for some value of $r>9$.
+
     \section{Temporary Citations}
-    Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
+    Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\\\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
     
 %    \section{References}
     \bibliography{../references}
