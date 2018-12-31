@@ -114,7 +114,7 @@
 	\paragraph{}The authors of \cite{Santos2006a} find that the minimal model provides modest gains to cooperation beyond those provided by both networks generated according to the standard Barab\'{a}si-Albert model and broad-scale networks especially for large values of $b$.  This result reinforces the finding that a highly heterogeneous degree distribution leading to the formation of hubs and vertex correlations enabling the formation of tight clusters of cooperators provides a fertile environment for cooperation.
 	\paragraph{}The studies reviewed in the previous sections assume that the network topology remains immutable throughout the evolutionary process.  However, this begs the question both of how the network acquired it s topology as well as how a mutable network topology impacts the evolution of cooperation.  The following section reviews studies that consider cases in which the network topology is mutable.
 	
-	\subsection{Evolution of Network Topology}
+	\subsection{Evolution of Network Topology} \label{evo-net-topology}
 	The authors of \cite{Eguiluz2005} consider the scenario in which n agents occupy the nodes of a graph.  Initially, $z\frac{n}{2}$ edges are inserted between randomly selected pairs of nodes giving the graph an average degree of $z$.
 	\paragraph{}As in the previous section, the agents follow one of two fixed strategies: unconditional cooperation or unconditional defection.  In each generation, each agent plays the prisoner's dilemma game with each of its neighbors using the payouts specified in \cite{Nowak1992} and achieving a fitness score equal to the sum of the payouts earned form each game.
 	\paragraph{}After all games for a generation have been played, synchronous updating is used to evolve both agent strategies and the network topology.  Following \cite{Nowak1992}, after all games for a generation have been played, the strategy of each agent is replaced with the strategy of the fittest agent among itself and its neighbors.  In addition, if an agent imitates a neighbor that is a defector then, with probability $p$, the link between the agent an the imitated defector is replaced with a link between the agent and an agent selected randomly from among all agents in the network.
@@ -207,7 +207,7 @@
 
 	\subsection{Results for Fixed Network Structure}
 	For the studies reviewed in section \ref{impact-net-topology}, the authors performed a large number of simulations in order to validate that their results were robust to fluctuations in the starting conditions.  The parameters used for those studies are shown in the table below.
-	\paragraph{}For this study, preliminary analysis indicated that evolution in the public goods game often does not reach a steady state after $10^4$ generations.  Therefore, the number of generations was increased by an order of magnitude.  To compensate for the increased time required to run simulations with significantly more generations, the number of graph instances used and the number of simulations per graph instance were reduced.  The parameters used for this study are also shown in the table below.
+	\paragraph{}For this study, preliminary analysis indicated that evolution in the public goods game often does not reach a steady state after $10^4$ generations.  Therefore, the number of generations was increased by an order of magnitude.  To compensate for the increased time required to run simulations with significantly more generations, the number of graph instances used and the number of simulations per graph instance were reduced.  The parameters used for this study are also shown in table \ref{table:param-values-fixed-net-sim}.
 
 	\begin{table}[h!]
 		\begin{center}
@@ -222,6 +222,7 @@
 		\bottomrule
 		\end{tabu}
 		\caption{Parameter Values for Fixed Network Simulations}
+		\label{table:param-values-fixed-net-sim}
 		\end{center}
 	\end{table}
 
@@ -331,11 +332,85 @@
 			\includegraphics[width=\textwidth]{fig/fixed/z10all.png}
 			\caption{}
 		\end{subfigure}
-		\caption{Results for Heterogeneous Graphs}
+		\caption{Comparison of Results for Fixed Network Types}
 		\label{fig:compfixed}
 	\end{figure}
 
 	\paragraph{}It is clear that the performance of cooperators is best on scale free networks up to a critical point $r^*$.  For $r>r^*$, cooperators are able to perform better on other networks.  The benefits of increased $r$ appear to level off for cooperators on scale free networks while cooperators on other networks continue to benefit from increased $r$.  The critical point occurs at $r=5$ for $z=4$ and $r=7$ for $z=6$.  Another critical point appears to occur at $r=9$ for $z=8$ and extrapolating the curves for $z=10$ indicates that another critical point exists for some value of $r>9$.
+
+	\subsection{Results for Dynamic Network Structure}
+	As with the case of experiments performed for fixed network structure, the authors of the studies reviewed in section \ref{evo-net-topology} performed a large number of simulations in order to validate that their results were robust to fluctuations in the starting conditions.  The parameters used for those studies are shown in table \ref{table:param-values-dynamic-net-sim}.
+	\paragraph{}The results presented in this paper were generated using a smaller number of generations and fewer simulations.  In the future, additional simulations can be performed to validate the robustness of the results.  A comparison of the parameters used in this study and those used in the reviewed literature is provided in table \ref{table:param-values-dynamic-net-sim}.
+
+	\begin{table}[h!]
+		\begin{center}
+		\begin{tabu} to \textwidth {X[0.66,l,m]X[0.17,c,m]X[0.17,c,m]}
+		\toprule
+		Parameter&Value Used in Previous Studies&Value Used in This Study\\
+		\midrule
+		Number of agents ($N$)&$10^3$&$10^3$\\
+		Number of generations per simulation&$10^8$&$10^5$\\
+		Number of graph instantiations&$10$&$5$\\
+		Number of simulations per graph instantiation&$10$&$5$\\
+		\bottomrule
+		\end{tabu}
+		\caption{Parameter Values for Dynamic Network Simulations}
+		\label{table:param-values-dynamic-net-sim}
+		\end{center}
+	\end{table}
+
+	\paragraph{}In this study, reputation-based partner switching as described in [12] was not incorporated in to the experiments.  Experiments were conducted for several different values of the average degree $z$ and the time scales ratio $W$.  In these experiments, strong selection is used with $\beta_e=\beta_a=10$ while the studies cited earlier use weak selection with $\beta_e=\beta_a=0.005$.  The following section reviews the results.
+	\paragraph{} The results for of the experiments are presented in figure \ref{fig:dynamicnets}.
+
+		\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/pswitch-z4.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/pswitch-z6.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/pswitch-z8.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/pswitch-z10.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Results for Dynamic Networks}
+		\label{fig:dynamicnets}
+	\end{figure}
+
+	\paragraph{}As expected, increasing the average degree $z$ has an adverse impact on cooperation.  In general, increasing $W$ benefits cooperation.  However, for $z=4$ and $z=6$, setting $W=1$ produces results that are better than expected.
+	\paragraph{}Figure \ref{fig:compdynamicfixed} compares the performance of cooperators when they inhabit a dynamic network to their performance on the three fixed networks that provided the largest boost to cooperation.  In each case, the dynamic network results presented are for $W=9$.
+
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/z4dynfix.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/z6dynfix.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/z8dynfix.png}
+			\caption{}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.4\textwidth}
+			\includegraphics[width=\textwidth]{fig/dynamic/z10dynfix.png}
+			\caption{}
+		\end{subfigure}
+		\caption{Comparison of Results for Fixed and Dynamic Networks}
+		\label{fig:compdynamicfixed}
+	\end{figure}
+
+	\paragraph{}The results are mixed.  The dynamic network provides more support for cooperation when $r$ is large except for the cases when $z=4$.  However, for smaller values of $r$, the scale free network provides more benefits to cooperators.
+	\paragraph{}When $z=4$, the homogeneous random network is able to provide better results than the dynamic network for $r=9$.  This is surprising since the links in the random network are created randomly while the links in the dynamic network are created following a heuristic that should result in a network that promotes cooperation.
 
     \section{Temporary Citations}
     Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\\\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
