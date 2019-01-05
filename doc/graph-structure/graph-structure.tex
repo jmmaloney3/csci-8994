@@ -256,7 +256,7 @@
 		\label{fig:homographs}
 	\end{figure}
 
-	\paragraph{}As with the prisoner’s dilemma, increasing the average degree $z$ makes is more difficult for cooperators to succeed.  However, the multiplicative factor $r$ does not have the same impact on cooperation in the public goods game as the temptation to defect $b$ has in the prisoner's dilemma.  While increasing $b$ makes it more difficult for cooperators to succeed in the prisoner's dilemma, increasing $r$ makes it easier for cooperators to succeed in the public goods game.
+	\paragraph{}As with the prisoner's dilemma, increasing the average degree $z$ makes is more difficult for cooperators to succeed.  However, the multiplicative factor $r$ does not have the same impact on cooperation in the public goods game as the temptation to defect $b$ has in the prisoner's dilemma.  While increasing $b$ makes it more difficult for cooperators to succeed in the prisoner's dilemma, increasing $r$ makes it easier for cooperators to succeed in the public goods game.
 	\paragraph{}In the prisoner's dilemma case, cooperators benefit from the correlations that exist between nodes in a regular graph.  This allows the cooperators to form tight clusters that resist invasion by defectors.  However, in the case of the public good game, cooperators perform better on the random graph than on the regular graph suggesting that clustering might be disadvantageous to cooperation in the public goods game.
 
 	\subsubsection{Heterogeneous Graphs}
@@ -309,7 +309,7 @@
 
 	\paragraph{}The results show that as average degree $z$ increases, cooperators face similar challenges to those faced by cooperators on other network types.  This is different from the result obtained for the prisoner's dilemma on scale free networks, where increasing average degree $z$ promotes cooperation.
 
-	\paragraph{}In the prisoner’s dilemma, removing age correlation from the network connections had a detrimental impact on cooperation especially for large values of the temptation to defect $b$.  However, in the public goods game, the impact of age correlation appears to be mixed.  The advantage of age correlation for small values of $r$ is significant.  However, as $r$ increases, the benefits of age correlation decrease until $r=6$ at which point cooperators perform better on a uniform scale free network.
+	\paragraph{}In the prisoner's dilemma, removing age correlation from the network connections had a detrimental impact on cooperation especially for large values of the temptation to defect $b$.  However, in the public goods game, the impact of age correlation appears to be mixed.  The advantage of age correlation for small values of $r$ is significant.  However, as $r$ increases, the benefits of age correlation decrease until $r=6$ at which point cooperators perform better on a uniform scale free network.
 
 	\subsubsection{Comparison of Network Types}
 	Figure \ref{fig:compfixed} present the results in a way that allows the performance of cooperators on different graph types to be directly compared.
@@ -412,10 +412,26 @@
 	\paragraph{}The results are mixed.  The dynamic network provides more support for cooperation when $r$ is large except for the cases when $z=4$.  However, for smaller values of $r$, the scale free network provides more benefits to cooperators.
 	\paragraph{}When $z=4$, the homogeneous random network is able to provide better results than the dynamic network for $r=9$.  This is surprising since the links in the random network are created randomly while the links in the dynamic network are created following a heuristic that should result in a network that promotes cooperation.
 
-    \section{Temporary Citations}
-    Here are some citations: \cite{Axelrod1981}\cite{Nowak1992}\cite{Hauert2004}\cite{Pacheco2005}\cite{Santos2006b}\cite{Santos2006a}\cite{Santos2005a}\cite{Santos2006c}\cite{Santos2005b}\cite{Eguiluz2005}\cite{Santos2006d}\cite{Fu2008}\cite{Traulsen2006}\cite{Watts1998}\cite{Barabasi1999}\cite{Amaral2000}\cite{Molloy1995}\\\cite{Maslov2002}\cite{Dorogovtsev2003}\cite{Dorogovtsev2001}\cite{Nowak1998}\cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}\cite{Li2014}\cite{Maloney2015a}\cite{Ohtsuki2006}\cite{Macy1991}.
-    
-%    \section{References}
+	\section{Conclusion and Future Work}
+	While there are some similarities between the impact of network topology on the emergence of cooperation in the prisoner's dilemma and public goods games, there are several differences that warrant further investigation.
+
+	\begin{itemize}
+		\item In the prisoner's dilemma, the level of cooperation is reduced as the temptation to defect $b$ increases while in the public goods game cooperation improves as the multiplier $r$ increases.
+		\item In the prisoner's dilemma, cooperators fare worse on a homogeneous random graph than on a regular graph.  The reason given for this observation is that random graphs reduce the ability of cooperators to form tight clusters that can resist invasion by defectors.  In the public goods game, cooperators are able to perform significantly better on a homogeneous random graph than on a regular graph.  This begs the question how cooperators can fare so well in an environment that doesn't appear to promote the formation of tight clusters.
+		\item In the prisoner's dilemma, when the game is played on a scale free network, the level of cooperation increases as the average degree increases.  This sets scale free networks apart from other network types where increasing z make it harder for cooperation to emerge.  In the public goods game, scale free networks provide no such immunity from increasing average degree.
+		\item In the prisoner's dilemma, the introduction of age correlation due to preferential attachment provided a significant boost to cooperation.  In the public goods game, the impact of age correlations is mixed.
+	\end{itemize}
+
+	\paragraph{}The items listed above suggest that the promotion of cooperation in public goods games may require different features in social networks than those required by the prisoner's dilemma.  This is not surprising given the differences between the two games:
+
+	\begin{itemize}
+		\item In the prisoner's dilemma game, any increase in $b$ goes directly to defectors.  Cooperators do not benefit at all from an increase in $b$.  In the public goods game, both cooperators and defectors benefit from an increase in $r$.  Defectors receive more benefit because they do not pay a cost to participate.  However, since the cost is fixed, the percentage difference between the payouts for the two types of agents decreases as $r$ increases thus reducing the fitness advantage defectors have over cooperators.
+		\item The prisoner's dilemma is played between two agents.  Therefore, an agent's performance only depends on the strategies followed by its direct neighbors.  In the public goods game, an agent's performance depends not only on its neighbor's strategy but also on its neighbor's neighbors' strategies.  Therefore, even if a cluster of friendly cooperators surrounds an agent, it can still be negatively impacted if its neighbors are not so lucky.
+	\end{itemize}
+
+	\paragraph{} A potential fruitful avenue for future research is gaining a better understanding of the features of networks that provide benefits to cooperators in the public goods game.
+	\paragraph{}In this study, only a preliminary investigation into the impact of dynamic networks on public goods game was performed.  To align with other studies, future work should include conducting experiments using weak selection with smaller values for $\beta$.  In addition, the use of reputation to drive the linking process should be incorporated in order to evaluate the benefits of using reputation as a guide to selecting partners.  A social norm driven reputation mechanism like the one used in [27] could be used to evaluate the reputations of potential partners.  Finally, a reinforcement learning approach like the one used in [29] should be investigate to see if it can explain the emergence of cooperation in public goods games.
+
     \bibliography{../references}
     \bibliographystyle{ieeetr}
 \end{document}
