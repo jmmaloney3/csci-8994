@@ -180,27 +180,27 @@
 	\end{equation}
 
 	\paragraph{}Where $P_D$ is the payout earned by defectors and $P_C$ is the payout earned by cooperators.
-	\paragraph{}When played as a single-shot game, the rational choice is to defect.  However, when played as a repeated game, it is possible for cooperative strategies to achieve higher average payouts than unconditional defection [22][23][24][25].
+	\paragraph{}When played as a single-shot game, the rational choice is to defect.  However, when played as a repeated game, it is possible for cooperative strategies to achieve higher average payouts than unconditional defection \cite{Boyd1988}\cite{Boyd1992}\cite{Hauert2002}\cite{Hauert2007}.
 	\paragraph{}Given a large well-mixed population of agents, in the repeated $n$-person prisoner's dilemma game, $n$ agents are selected randomly from the population and given the opportunity to play a one-shot $n$-person prisoner's dilemma game.  This process is repeated until the specified stopping criteria are satisfied.
 
 	\subsection{Public Goods Game Played on Networks}
 	In this section, the methodology used to evaluate the impact of network topology on the evolution of cooperation in the iterated two-person prisoner's dilemma is extended to the pubic goods game.
 	\paragraph{}Agents are allocated to the nodes of a graph with a fixed number of nodes equal to the number of agents $n$.  The graph has a fixed number of edges giving the graph a fixed average connectivity $z$.  The agents follow one of two strategies: unconditional cooperation or unconditional defection.
-	\paragraph{}Following [11] and [12], the evolutionary dynamics defined here support updates to both agent strategies and the network topology.  As defined in those two studies, the two parameters $\tau_e$ and $\tau_a$ define the time scales at which strategy updates and network updates occur and the ratio  specifies how frequently structure updates occur relative to strategy updates.  The probability $p$ that a strategy update occurs during any time step is given by the following formula:
+	\paragraph{}Following \cite{Santos2006d} and \cite{Fu2008}, the evolutionary dynamics defined here support updates to both agent strategies and the network topology.  As defined in those two studies, the two parameters $\tau_e$ and $\tau_a$ define the time scales at which strategy updates and network updates occur and the ratio  specifies how frequently structure updates occur relative to strategy updates.  The probability $p$ that a strategy update occurs during any time step is given by the following formula:
 
 	\begin{equation}
 	p=\frac{1}{1+W}=\frac{\tau_a}{\tau_a+\tau_e}	
 	\end{equation}
 
 	\paragraph{}Given this, a structure update occurs with probability $(1-p)$.  If the experiment being conducted does not include network structure updates then $\tau_e=0$, $\tau_a=\infty$ and $W$ is undefined.  In this case, the probability $p$ that a strategy update occurs is set equal to one.
-	\paragraph{}The fitness scores earned by the agents are used to update both the agent strategies and the network structure.  Each agent's fitness score depends on the payouts it earns from public goods games in which it participates.  Following [26], each agent can sponsor a public goods game in which its linked neighbors participate.  Therefore, the number of public goods games that agent $x$ participates in is equal to $(k_x+1)$ where $k_x$ is the degree of the node that it occupies.  The payout earned by each agent is the sum of the payouts earned from each public goods game in which it participates.  Let $p_x(y)$ be the payout earned by agent $x$ in a game sponsored by agent $y$ and let $N_x$ be the neighbors of agent $x$ then the payout $P_x$ earned by agent $x$ during a single simulation step is given by the following equation:
+	\paragraph{}The fitness scores earned by the agents are used to update both the agent strategies and the network structure.  Each agent's fitness score depends on the payouts it earns from public goods games in which it participates.  Following \cite{Li2014}, each agent can sponsor a public goods game in which its linked neighbors participate.  Therefore, the number of public goods games that agent $x$ participates in is equal to $(k_x+1)$ where $k_x$ is the degree of the node that it occupies.  The payout earned by each agent is the sum of the payouts earned from each public goods game in which it participates.  Let $p_x(y)$ be the payout earned by agent $x$ in a game sponsored by agent $y$ and let $N_x$ be the neighbors of agent $x$ then the payout $P_x$ earned by agent $x$ during a single simulation step is given by the following equation:
 
 	\begin{equation}
 	P_x=p_x(x)+\sum_{y \in N_x} p_x(y)
 	\end{equation}
 
 	\paragraph{}For both types of updates, an agent $x$ is chosen at random and another agent $y$ is chosen at random from agent $x$'s neighbors.  The two agents participate in a public goods game sponsored by themselves and their immediate neighbors and earn fitness scores $P_x$ and $P_y$ respectively.
-	\paragraph{}Given the definition of the payouts earned by the selected agents, the detailed procedure for conducting strategy and networks updates is identical to that defined in [11] and [12].
+	\paragraph{}Given the definition of the payouts earned by the selected agents, the detailed procedure for conducting strategy and networks updates is identical to that defined in \cite{Santos2006d} and \cite{Fu2008}.
 
 	\section{Results}
 	This section presents the results of the simulations for both the case when the network topology is fixed and the case when the agents are able to modify the network structure.
@@ -230,10 +230,10 @@
 	\begin{itemize}
 		\item \textbf{Regular}: a regular ring lattice
 		\item \textbf{Homogeneous random}: a graph produced by randomly swapping the ends of the edges in a regular ring lattice
-		\item \textbf{Heterogeneous random}: a graph produced using the Watts-Strogatz algorithm [14] with $p = 1.0$
+		\item \textbf{Heterogeneous random}: a graph produced using the Watts-Strogatz algorithm \cite{Watts1998} with $p = 1.0$
 		\item \textbf{Small world network with a high clustering coefficient}: a graph produced using the Watts-Strogatz algorithm with $p = 0.1$
 		\item \textbf{Small world network with a low clustering coefficient}: a graph produced using the Watts-Strogatz algorithm with $p = 0.4$
-		\item \textbf{Scale free network}: a graph produced using the Barab\'{a}si-Albert algorithm [15]
+		\item \textbf{Scale free network}: a graph produced using the Barab\'{a}si-Albert algorithm \cite{Barabasi1999}
 		\item \textbf{Uniform scale free network}: a graph produced using a modification of the Barab\'{a}si-Albert algorithm that uses uniform attachment instead of preferential attachment
 	\end{itemize}
 
@@ -359,7 +359,7 @@
 		\end{center}
 	\end{table}
 
-	\paragraph{}In this study, reputation-based partner switching as described in [12] was not incorporated in to the experiments.  Experiments were conducted for several different values of the average degree $z$ and the time scales ratio $W$.  In these experiments, strong selection is used with $\beta_e=\beta_a=10$ while the studies cited earlier use weak selection with $\beta_e=\beta_a=0.005$.  The following section reviews the results.
+	\paragraph{}In this study, reputation-based partner switching as described in \cite{Fu2008} was not incorporated in to the experiments.  Experiments were conducted for several different values of the average degree $z$ and the time scales ratio $W$.  In these experiments, strong selection is used with $\beta_e=\beta_a=10$ while the studies cited earlier use weak selection with $\beta_e=\beta_a=0.005$.  The following section reviews the results.
 	\paragraph{} The results for of the experiments are presented in figure \ref{fig:dynamicnets}.
 
 		\begin{figure}[h]
@@ -430,7 +430,7 @@
 	\end{itemize}
 
 	\paragraph{} A potential fruitful avenue for future research is gaining a better understanding of the features of networks that provide benefits to cooperators in the public goods game.
-	\paragraph{}In this study, only a preliminary investigation into the impact of dynamic networks on public goods game was performed.  To align with other studies, future work should include conducting experiments using weak selection with smaller values for $\beta$.  In addition, the use of reputation to drive the linking process should be incorporated in order to evaluate the benefits of using reputation as a guide to selecting partners.  A social norm driven reputation mechanism like the one used in [27] could be used to evaluate the reputations of potential partners.  Finally, a reinforcement learning approach like the one used in [29] should be investigate to see if it can explain the emergence of cooperation in public goods games.
+	\paragraph{}In this study, only a preliminary investigation into the impact of dynamic networks on public goods game was performed.  To align with other studies, future work should include conducting experiments using weak selection with smaller values for $\beta$.  In addition, the use of reputation to drive the linking process should be incorporated in order to evaluate the benefits of using reputation as a guide to selecting partners.  A social norm driven reputation mechanism like the one used in \cite{Maloney2015a} could be used to evaluate the reputations of potential partners.  Finally, a reinforcement learning approach like the one used in \cite{Macy1991} should be investigate to see if it can explain the emergence of cooperation in public goods games.
 
     \bibliography{../references}
     \bibliographystyle{ieeetr}
